@@ -18,7 +18,8 @@ dependencies {
     testImplementation(kotlin("test"))
 
     kspTest(project(":kimmer-ksp"))
-    dokkaHtmlPlugin("org.jetbrains.dokka:dokka-base:1.6.10")
+
+    dokkaHtmlPlugin("org.jetbrains.dokka:dokka-base:1.6.0")
 }
 
 kotlin {
