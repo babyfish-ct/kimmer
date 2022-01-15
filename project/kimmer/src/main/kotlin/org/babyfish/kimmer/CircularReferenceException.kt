@@ -1,3 +1,3 @@
-package org.babyfish.kimmer.runtime
+package org.babyfish.kimmer
 
 class CircularReferenceException: RuntimeException()

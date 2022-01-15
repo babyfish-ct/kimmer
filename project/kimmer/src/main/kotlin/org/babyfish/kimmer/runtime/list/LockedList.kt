@@ -1,6 +1,6 @@
 package org.babyfish.kimmer.runtime.list
 
-open class LockedList<E>(
+internal open class LockedList<E>(
     protected val target: MutableList<E>,
     private val mutext: Any
 ): MutableList<E> {

@@ -13,12 +13,6 @@ class DraftTypeTest {
         expect(immutableType) {
             ImmutableType.fromDraftType(NodeDraft::class)
         }
-        expect(immutableType) {
-            ImmutableType.fromDraftType(NodeDraft.Sync::class)
-        }
-        expect(immutableType) {
-            ImmutableType.fromDraftType(NodeDraft.Async::class)
-        }
     }
 
     @Test

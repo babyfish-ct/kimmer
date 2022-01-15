@@ -1,10 +1,10 @@
 package org.babyfish.kimmer.runtime.asm
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.babyfish.kimmer.CircularReferenceException
 import org.babyfish.kimmer.Draft
 import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.meta.ImmutableType
-import org.babyfish.kimmer.runtime.*
 import org.babyfish.kimmer.runtime.AsyncDraftContext
 import org.babyfish.kimmer.runtime.DraftContext
 import org.babyfish.kimmer.runtime.DraftSpi

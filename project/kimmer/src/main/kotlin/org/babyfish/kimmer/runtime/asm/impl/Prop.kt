@@ -1,7 +1,7 @@
 package org.babyfish.kimmer.runtime.asm.impl
 
 import org.babyfish.kimmer.meta.ImmutableProp
-import org.babyfish.kimmer.runtime.UnloadedException
+import org.babyfish.kimmer.UnloadedException
 import org.babyfish.kimmer.runtime.asm.*
 import org.springframework.asm.ClassVisitor
 import org.springframework.asm.Opcodes

@@ -1,4 +1,4 @@
-package org.babyfish.kimmer.runtime
+package org.babyfish.kimmer
 
 import java.lang.RuntimeException
 

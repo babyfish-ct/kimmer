@@ -7,6 +7,7 @@ import org.babyfish.kimmer.Abstract
 import org.babyfish.kimmer.Immutable
 import java.math.BigDecimal
 
+@Abstract
 interface Node: Immutable {
     val id: String
 }

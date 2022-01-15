@@ -247,6 +247,7 @@ class DraftGenerator(
                     if (isAsync) {
                         modifiers += KModifier.SUSPEND
                     }
+                    modifiers += KModifier.INLINE
                     receiver(
                         ClassName(KIMMER_PACKAGE, "${mode}${draftName}Creator")
                             .parameterizedBy(
@@ -271,7 +272,8 @@ class DraftGenerator(
                                 .asClassName { "${it}Draft.$mode" },
                             emptyList(),
                             ClassName("kotlin", "Unit")
-                        ).copy(suspending = isAsync)
+                        ).copy(suspending = isAsync),
+                        KModifier.NOINLINE
                     )
                     if (forDraft) {
                         returns(

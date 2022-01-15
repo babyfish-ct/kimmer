@@ -5,7 +5,7 @@ import org.babyfish.kimmer.runtime.asm.asyncDraftImplInternalName
 import org.babyfish.kimmer.runtime.asm.draftImplInternalName
 import org.springframework.asm.Type
 
-data class GeneratorArgs(
+internal data class GeneratorArgs(
     val immutableType: ImmutableType
 ) {
     val internalName = asyncDraftImplInternalName(immutableType)

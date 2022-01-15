@@ -7,8 +7,6 @@ import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.jackson.immutableObjectMapper
 import org.babyfish.kimmer.new
 import org.babyfish.kimmer.newAsync
-import org.babyfish.kimmer.runtime.CircularReferenceException
-import org.babyfish.kimmer.runtime.UnloadedException
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.expect

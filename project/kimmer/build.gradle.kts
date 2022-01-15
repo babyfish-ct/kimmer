@@ -1,17 +1,9 @@
 plugins {
-    kotlin("jvm") version "1.6.10"
     id("com.google.devtools.ksp") version "1.6.10-1.0.2"
-}
-
-group = "org.babyfish.kimmer"
-version = "0.0.0-SNAPSHOT"
-
-repositories {
-    mavenCentral()
+    id("org.jetbrains.dokka") version "1.6.10"
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
@@ -25,10 +17,15 @@ dependencies {
     testImplementation(kotlin("test"))
 
     kspTest(project(":kimmer-ksp"))
+    dokkaHtmlPlugin("org.jetbrains.dokka:dokka-base:1.6.10")
 }
 
 kotlin {
     sourceSets.test {
         kotlin.srcDir("build/generated/ksp/test/kotlin")
     }
+}
+
+java {
+    withSourcesJar()
 }
