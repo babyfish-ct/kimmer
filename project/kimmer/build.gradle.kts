@@ -1,6 +1,7 @@
 plugins {
     id("com.google.devtools.ksp") version "1.6.10-1.0.2"
     id("org.jetbrains.dokka") version "1.6.10"
+    `java-library`
 }
 
 dependencies {
@@ -28,4 +29,17 @@ kotlin {
 
 java {
     withSourcesJar()
+    withJavadocJar()
 }
+
+tasks {
+    withType(Jar::class) {
+        if (archiveClassifier.get() == "javadoc") {
+            dependsOn(dokkaHtml)
+            from("build/dokka/html")
+        }
+    }
+}
+
+
+
