@@ -36,7 +36,7 @@ Please click [here](doc/get-started.md) to view the guide
 
 ## Characteristic
 
-#### Dyamic facade
+### 1. Dyamic facade
 
 Kimmer is designed for server-side development, so dynamism is important.
 
@@ -52,6 +52,7 @@ interface TreeNode: Immutable {
 val treeNode = new(TreeNode::class).by {
     name = "RootNode"
 }
+```
 Here
 1. The user assigned value to name, so name is a loaded field
 2. The user did not assign any value to childNodes, so childNodes is an unloaded field
@@ -60,7 +61,7 @@ The behaviors of unloaded property
 1. If you try to access unloaded property of object, exception will be thrown *(Just like the classic org.hibernate.LazyIntializationException)*.
 2. However, the unloaded properties will not cause exception during json serialization, they will be automatically ignored.
 
-#### Static implementation
+### 2. Static implementation
 
 This framework requires dynamic generation of JVM bytecode, but does not use JDK proxy or CGLIB. Instead generate bytecode directly.
 
