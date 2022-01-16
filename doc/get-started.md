@@ -41,7 +41,7 @@ interface Author: Immutable {
 }
 ```
 
-## 4. Execute ksp
+## 4. Execute ksp to generate mutable data model
 ![image](./ksp.jpeg)
 
 Then you will see an new file "ModelDraft.kt" is generated under "build/generated/ksp/main/kptlin", this is mutable data model.
@@ -56,6 +56,7 @@ kotlin {
 }
 ```
 Then click the refresh icon of gradle window.
+
 ![image](./gradle-refresh.jpeg)
 
 After this step, "build/generated/ksp/main/kotlin" will be considered as another source folder.
