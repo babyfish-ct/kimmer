@@ -70,7 +70,7 @@ This framework requires dynamic generation of JVM bytecode, but does not use JDK
 In order to make it as efficient as hand-hardcoding and as clean as hand-hardcoding, it uses ASM to generate bytecode directly.
 
 1. Avoid reflection, avoid hash map, keep the performance that a static language should have
-2. Avoid complex data structures of data and keep the IDE's debugger simple and clean
+2. Avoid complex data structures to keep the IDE's debugger simple and clean
 
 ![image](doc/clean_debugger.jpeg)
 
