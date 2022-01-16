@@ -79,8 +79,6 @@ fun main(args: Array<String>) {
             name = "child-2"
         }
     }
-    println("Old object is")
-    println(book)
 
     val book2 = new(Book::class).by(book) {
         name += "!"
@@ -89,6 +87,9 @@ fun main(args: Array<String>) {
             author.name += "!"
         }
     }
+
+    println("Old object is")
+    println(book)
     println("New object is")
     println(book2)
 }
