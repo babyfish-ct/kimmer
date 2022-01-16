@@ -65,7 +65,7 @@ The behaviors of unloaded property
 
 This framework requires dynamic generation of JVM bytecode, but does not use JDK proxy or CGLIB. Instead generate bytecode directly.
 
-1. Avoid reflection and maintain the performance that a static language should have
+1. Avoid reflection, avoid hash map, keep the performance that a static language should have
 2. Avoid complex data structures of data and keep the IDE's debugger simple and clean
 
 ![image](doc/clean_debugger.jpeg)
