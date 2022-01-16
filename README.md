@@ -41,7 +41,7 @@ Goto there: [step by step guide](doc/get-started.md)
 Kimmer is designed for server-side development, so dynamism is important.
 
 1. Take GraphQL as example, its data shape is inherently dynamic.
-2. Take ORM as example, not all properties(especially associated properties) is always be queried.
+2. Take ORM as example, not all properties(especially associated properties) always need to be queried.
 
 To support this dynamism, kimmer introduced the concept of "unload property", e.g.
 ```
