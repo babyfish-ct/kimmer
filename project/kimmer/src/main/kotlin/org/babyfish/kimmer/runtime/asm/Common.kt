@@ -6,17 +6,23 @@ import org.springframework.asm.*
 import java.lang.StringBuilder
 import kotlin.reflect.KClass
 
+internal inline fun factoryInternalName(immutableType: ImmutableType): String =
+    internalName(immutableType, "Factory")
+
 internal inline fun implInternalName(immutableType: ImmutableType): String =
-    "${Type.getInternalName(immutableType.kotlinType.java)}{Implementation}"
+    internalName(immutableType, "Implementation")
 
 internal inline fun draftImplInternalName(immutableType: ImmutableType): String =
-    "${Type.getInternalName(immutableType.kotlinType.java)}{DraftImplementation}"
+    internalName(immutableType, "DraftImplementation")
 
 internal inline fun syncDraftImplInternalName(immutableType: ImmutableType): String =
-    "${Type.getInternalName(immutableType.kotlinType.java)}{SyncDraftImplementation}"
+    internalName(immutableType, "SyncDraftImplementation")
 
 internal inline fun asyncDraftImplInternalName(immutableType: ImmutableType): String =
-    "${Type.getInternalName(immutableType.kotlinType.java)}{AsyncDraftImplementation}"
+    internalName(immutableType, "AsyncDraftImplementation")
+
+private inline fun internalName(immutableType: ImmutableType, suffix: String): String =
+    "org/babyfish/kimmer/runtime/asm/${immutableType.simpleName}{$suffix}${immutableType.qualifiedName.hashCode()}"
 
 internal inline fun loadedName(type: ImmutableProp): String =
     "${type.name}{Loaded}"
@@ -35,18 +41,6 @@ internal inline fun rawDraftName(): String =
 
 internal inline fun resolvingName(): String =
     "resolving"
-
-internal fun ClassLoader.defineClass(bytecode: ByteArray): Class<*> =
-    DEFINE_CLASS.invoke(this, bytecode, 0, bytecode.size) as Class<*>
-
-private val DEFINE_CLASS = ClassLoader::class.java.getDeclaredMethod(
-    "defineClass",
-    ByteArray::class.java,
-    Int::class.javaPrimitiveType,
-    Int::class.javaPrimitiveType,
-).also {
-    it.isAccessible = true
-}
 
 internal const val BYTECODE_VERSION = Opcodes.V1_8
 

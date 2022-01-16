@@ -1,5 +1,7 @@
 package org.babyfish.kimmer.ksp
 
+import com.google.devtools.ksp.isPrivate
+import com.google.devtools.ksp.isProtected
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
@@ -41,6 +43,9 @@ class DraftProcessor(
                     sysTypes.immutableType.isAssignableFrom(classDeclaration.asStarProjectedType()) &&
                     !sysTypes.draftType.isAssignableFrom(classDeclaration.asStarProjectedType())
                 ) {
+                    if (classDeclaration.isPrivate() || classDeclaration.isProtected()) {
+                        throw GeneratorException("The immutable interface '${classDeclaration.qualifiedName!!.asString()} cannot be private or protected'")
+                    }
                     modelMap.computeIfAbsent(file) {
                         mutableListOf()
                     } += classDeclaration

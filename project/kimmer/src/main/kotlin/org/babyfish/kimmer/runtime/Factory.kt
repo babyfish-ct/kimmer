@@ -1,9 +1,7 @@
 package org.babyfish.kimmer.runtime
 
-import org.babyfish.kimmer.AsyncDraft
 import org.babyfish.kimmer.Draft
 import org.babyfish.kimmer.Immutable
-import org.babyfish.kimmer.SyncDraft
 import org.babyfish.kimmer.meta.ImmutableType
 import org.babyfish.kimmer.runtime.asm.*
 import org.babyfish.kimmer.runtime.asm.BYTECODE_VERSION
@@ -72,7 +70,7 @@ private fun createFactoryImplType(
             visit(
                 BYTECODE_VERSION,
                 Opcodes.ACC_PUBLIC,
-                "${Type.getInternalName(immutableType.kotlinType.java)}{Factory}",
+                factoryInternalName(immutableType),
                 null,
                 "java/lang/Object",
                 arrayOf(Type.getInternalName(Factory::class.java))
@@ -84,9 +82,7 @@ private fun createFactoryImplType(
             visitEnd()
         }
         .toByteArray()
-        .let {
-            immutableType.kotlinType.java.classLoader.defineClass(it)
-        }
+        .defineClass()
 
 private fun ClassVisitor.writeConstructor() {
     writeMethod(

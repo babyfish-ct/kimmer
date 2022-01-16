@@ -66,6 +66,4 @@ private fun createImplementation(type: ImmutableType): Class<*> =
             writeType(type)
         }
         .toByteArray()
-        .let {
-            type.kotlinType.java.classLoader.defineClass(it)
-        } as Class<out Immutable>
+        .defineClass() as Class<out Immutable>

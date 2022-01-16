@@ -30,7 +30,5 @@ internal fun createAsyncDraftImplementation(
 ): Class<out AsyncDraft<*>> {
     return ClassWriter(ClassWriter.COMPUTE_MAXS or ClassWriter.COMPUTE_FRAMES).apply {
         writeType(ImmutableType.of(modelType))
-    }.toByteArray().let {
-        modelType.classLoader.defineClass(it)
-    } as Class<out AsyncDraft<*>>
+    }.toByteArray().defineClass() as Class<out AsyncDraft<*>>
 }

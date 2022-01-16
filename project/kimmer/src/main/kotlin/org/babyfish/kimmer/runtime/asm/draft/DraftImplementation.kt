@@ -76,7 +76,5 @@ private fun createDraftImplementation(immutableType: ImmutableType): Class<out D
             writeType(GeneratorArgs(immutableType))
         }
         .toByteArray()
-        .let {
-            immutableType.kotlinType.java.classLoader.defineClass(it)
-        } as Class<out Draft<*>>
+        .defineClass() as Class<out Draft<*>>
 }
