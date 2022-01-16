@@ -73,7 +73,7 @@ The behaviors of unloaded property
 
 This framework requires dynamic generation of JVM bytecode, but does not use JDK proxy or CGLIB. 
 
-In order to make it as efficient as hand-hardcoding and as clean as hand-hardcoding, it uses ASM to generate bytecode directly.
+In order to make it as efficient as hand-hardcoding and as clean as hand-hardcoding, it uses [ASM](https://asm.ow2.io/) to generate bytecode directly.
 
 1. Avoid reflection, avoid hash map, keep the performance that a static language should have
 2. Avoid complex data structures to keep the IDE's debugger simple and clean
