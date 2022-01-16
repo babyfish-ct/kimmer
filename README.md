@@ -81,17 +81,3 @@ In order to make it as efficient as hand-hardcoding and as clean as hand-hardcod
 ![image](doc/clean_debugger.jpeg)
 
 As you can see from the picture, the debugger is very clean
-
-
-## 5. Note
-If yout get
-```
-java.lang.reflect.InaccessibleObjectException: Unable to make protected final java.lang.Class java.lang.ClassLoader.defineClass(byte[],int,int) throws java.lang.ClassFormatError accessible: module java.base does not "opens java.lang" to unnamed module 
-```
-please add 
-```
---illegal-access=permit
-```
-to JVM arguments
-
-> This problem can be resolved by https://github.com/jboss-javassist/javassist/blob/master/src/main/javassist/util/proxy/DefineClassHelper.java perfectly, I will use some of its code to fix this problem on next version 0.0.1
