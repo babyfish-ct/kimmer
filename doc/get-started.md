@@ -2,7 +2,7 @@
 
 ## 1. Create project
 
-Use Intellij to create an project, choose kotlin/jvm and kotlin dsl
+Use Intellij to create a project, choose kotlin/jvm and kotlin dsl
 ![image](./create-project.jpeg)
 
 ## 2. Edit the build.gradle.kts 
@@ -16,6 +16,7 @@ implementation("org.babyfish.kimmer:kimmer:0.0.0")
 ksp("org.babyfish.kimmer:kimmer-ksp:0.0.0")
 ```
 Then click the refresh icon of gradle window.
+
 ![image](./gradle-refresh.jpeg)
 
 ## 3. Define your immutable data interfaces
@@ -107,3 +108,7 @@ Old object is
 New object is
 {"authors":[{"name":"child-1!"},{"name":"child-2!"}],"name":"book!","store":{"name":"parent!"}}
 ```
+
+-----------
+
+[Back to home](https://github.com/babyfish-ct/kimmer)
