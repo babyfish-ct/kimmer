@@ -3,7 +3,7 @@
 ## 1. Create project
 
 Use Intellij to create an project, choose kotlin/jvm and kotlin dsl
-[image](./create-project.jpeg)
+![image](./create-project.jpeg)
 
 ##. 2. Edit the build.gradle.kts 
 a. Add this section into *plugin{}*
@@ -16,7 +16,7 @@ implementation("org.babyfish.kimmer:kimmer:0.0.0")
 ksp("org.babyfish.kimmer:kimmer-ksp:0.0.0")
 ```
 Then click the refresh icon of gradle window.
-[image](./gradle-refresh.jpeg)
+![image](./gradle-refresh.jpeg)
 
 ## 3. Define your immutable data interfaces
 Create a new file "Model.kt" under src/main/kotlin
@@ -41,7 +41,7 @@ interface Author: Immutable {
 ```
 
 ## 4. Execute ksp
-[image](./ksp.jpeg)
+![image](./ksp.jpeg)
 Then you will see an new file "ModelDraft.kt" is generated under "build/generated/ksp/main/kptlin", this is mutable data model.
 
 ## 5. Add generated source code
@@ -54,7 +54,7 @@ kotlin {
 }
 ```
 Then click the refresh icon of gradle window.
-[image](./gradle-refresh.jpeg)
+![image](./gradle-refresh.jpeg)
 After this step, "build/generated/ksp/main/kotlin" will be considered as another source folder.
 
 ## 6. Add main function
@@ -98,7 +98,7 @@ In order to resolve this problem, please add
 --illegal-access=permit
 ```
 to JVM arguments
-[image](./vm-args.jpeg)
+![image](./vm-args.jpeg)
 
 The result is
 ```
