@@ -14,8 +14,8 @@ id("com.google.devtools.ksp") version "1.6.10-1.0.2"
 ```
 b. Add this section into *dependencies{}*
 ```kts
-implementation("org.babyfish.kimmer:kimmer:0.0.0")
-ksp("org.babyfish.kimmer:kimmer-ksp:0.0.0")
+implementation("org.babyfish.kimmer:kimmer:0.0.1")
+ksp("org.babyfish.kimmer:kimmer-ksp:0.0.1")
 ```
 Then click the refresh icon of gradle window.
 
@@ -103,19 +103,6 @@ Old object is
 New object is
 {"authors":[{"name":"child-1!"},{"name":"child-2!"}],"name":"book!","store":{"name":"parent!"}}
 ```
-
-If you get
-```
-java.lang.reflect.InaccessibleObjectException: Unable to make protected final java.lang.Class java.lang.ClassLoader.defineClass(byte[],int,int) throws java.lang.ClassFormatError accessible: module java.base does not "opens java.lang" to unnamed module 
-```
-please add 
-```
---illegal-access=permit
-```
-to JVM arguments
-![image](./vm-args.jpeg)
-
-> This problem can be resolved by https://github.com/jboss-javassist/javassist/blob/master/src/main/javassist/util/proxy/DefineClassHelper.java perfectly, I will use some of its code to fix this problem on 0.0.1
 
 -----------
 
