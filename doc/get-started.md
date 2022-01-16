@@ -2,10 +2,12 @@
 
 ## 1. Create project
 
-Use Intellij to create a project, choose kotlin/jvm and kotlin dsl
+Use Intellij to create a **gradle** project, choose **kotlin/jvm** and **kotlin dsl**
 ![image](./create-project.jpeg)
 
-## 2. Edit the build.gradle.kts 
+## 2. Add plugins and dependencies
+
+Edit the "build.gradle.kts" 
 a. Add this section into *plugin{}*
 ```kts
 id("com.google.devtools.ksp") version "1.6.10-1.0.2"
@@ -44,11 +46,11 @@ interface Author: Immutable {
 ## 4. Execute ksp to generate mutable data model
 ![image](./ksp.jpeg)
 
-Then you will see an new file "ModelDraft.kt" is generated under "build/generated/ksp/main/kptlin", this is mutable data model.
+Then you will see a new file "ModelDraft.kt" is generated under "build/generated/ksp/main/kotlin", this is mutable data model.
 
-## 5. Add generated source code
+## 5. Consider generated file as source code
 Append this section to build.gradle.kts
-```
+```kts
 kotlin {
     sourceSets.main {
         kotlin.srcDir("build/generated/ksp/main/kotlin")
@@ -59,7 +61,7 @@ Then click the refresh icon of gradle window.
 
 ![image](./gradle-refresh.jpeg)
 
-After this step, "build/generated/ksp/main/kotlin" will be considered as another source folder.
+After this step, "build/generated/ksp/main/kotlin" will be considered as a new source folder.
 
 ## 6. Add main function
 Create a new file "App.kt" under src/main/kotlin
