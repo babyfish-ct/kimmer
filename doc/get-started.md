@@ -43,6 +43,7 @@ interface Author: Immutable {
 
 ## 4. Execute ksp
 ![image](./ksp.jpeg)
+
 Then you will see an new file "ModelDraft.kt" is generated under "build/generated/ksp/main/kptlin", this is mutable data model.
 
 ## 5. Add generated source code
@@ -56,6 +57,7 @@ kotlin {
 ```
 Then click the refresh icon of gradle window.
 ![image](./gradle-refresh.jpeg)
+
 After this step, "build/generated/ksp/main/kotlin" will be considered as another source folder.
 
 ## 6. Add main function
@@ -101,7 +103,7 @@ In order to resolve this problem, please add
 to JVM arguments
 ![image](./vm-args.jpeg)
 
-The result is
+**Finally, the output is**
 ```
 Old object is
 {"authors":[{"name":"child-1"},{"name":"child-2"}],"name":"book","store":{"name":"parent"}}
