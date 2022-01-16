@@ -46,9 +46,9 @@ interface Author: Immutable {
 
 Then you will see a new file "ModelDraft.kt" is generated under "build/generated/ksp/main/kotlin", this is mutable data model.
 
-## 5. Add generated source code
+## 5. Consider generated file as source code
 Append this section to build.gradle.kts
-```
+```kts
 kotlin {
     sourceSets.main {
         kotlin.srcDir("build/generated/ksp/main/kotlin")
@@ -59,7 +59,7 @@ Then click the refresh icon of gradle window.
 
 ![image](./gradle-refresh.jpeg)
 
-After this step, "build/generated/ksp/main/kotlin" will be considered as another source folder.
+After this step, "build/generated/ksp/main/kotlin" will be considered as a new source folder.
 
 ## 6. Add main function
 Create a new file "App.kt" under src/main/kotlin
