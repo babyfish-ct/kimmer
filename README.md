@@ -38,7 +38,7 @@ val book2 = new(Book::class).by(book) {
 > For the modification, it looks like the copy-on-write strategy of linux "fork", unchaged parts are always shared and reused.
 
 ## 3. Step by step guide
-Goto there: [step by step guide](doc/get-started.md)
+Here it is: [step by step guide](doc/get-started.md)
 
 ## 4. Characteristic
 
