@@ -44,7 +44,7 @@ Kimmer is designed for server-side development, so dynamism is important.
 2. Take ORM as example, not all properties(especially associated properties) always need to be queried.
 
 To support this dynamism, kimmer introduced the concept of "unload property", e.g.
-```
+```kt
 interface TreeNode: Immutable {
     val name: String
     val childNodes: List<TreeNode>
