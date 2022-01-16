@@ -4,9 +4,11 @@ Port [https://github.com/immerjs/immer](https://github.com/immerjs/immer) for ko
 
 > *Immer is the winner of the "Breakthrough of the year" React open source award and "Most impactful contribution" JavaScript open source award in 2019.*
 > 
-> *It's simple and powerful, so I bring its design pattern for kotlin/jvm.*
+> *It's simple and powerful, so I bring its design pattern for kotlin/jvm. *
 
-Create the next immutable state tree by simply modifying the current tree.
+**Create the next immutable state tree by simply modifying the current tree.**
+
+*If data tree is shallow, kotlin data class's copy function is very simple, but if the data tree is deep, copy function is no longer convenient and kimmer can help you.*
 
 ## 2. Usage
 
