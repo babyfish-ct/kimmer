@@ -1,5 +1,8 @@
 # kimmer
-Port "https://github.com/immerjs/immer" for kotlin/jvm
+
+Port "https://github.com/immerjs/immer" for kotlin/jvm.
+
+Create the next immutable state tree by simply modifying the current tree
 
 ## Usage
 
