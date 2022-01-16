@@ -2,7 +2,7 @@
 
 ## 1. Create project
 
-Use Intellij to create a project, choose kotlin/jvm and kotlin dsl
+Use Intellij to create a **gradle** project, choose **kotlin/jvm** and **kotlin dsl**
 ![image](./create-project.jpeg)
 
 ## 2. Edit the build.gradle.kts 
