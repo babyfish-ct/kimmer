@@ -94,4 +94,4 @@ In order to resolve this problem, please add
 ```
 to JVM arguments
 
-> This problem can be resolved by https://github.com/jboss-javassist/javassist/blob/master/src/main/javassist/util/proxy/DefineClassHelper.java perfectly, I will fix it on 0.0.1
+> This problem can be resolved by https://github.com/jboss-javassist/javassist/blob/master/src/main/javassist/util/proxy/DefineClassHelper.java perfectly, I will use some of its code to fix this problem on 0.0.1
