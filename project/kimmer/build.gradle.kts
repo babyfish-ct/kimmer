@@ -19,7 +19,7 @@ dependencies {
 
     testImplementation(kotlin("test"))
 
-    kspTest("org.babyfish.kimmer:kimmer-ksp:0.0.0")
+    kspTest(project(":kimmer-ksp"))
 
     dokkaHtmlPlugin("org.jetbrains.dokka:dokka-base:1.6.0")
 }
@@ -57,9 +57,9 @@ publishing {
             }
             name = "MavenCentral"
             url = if (project.version.toString().endsWith("-SNAPSHOT")) {
-                uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
+                uri("https://oss.sonatype.org/content/repositories/snapshots")
             } else {
-                uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
             }
         }
     }
