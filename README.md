@@ -28,6 +28,9 @@ val book2 = new(Book::class).by(book) {
 }
 ```
 
+## Step by step guide
+Please click [here](doc/get-started.md) to view the guide
+
 ## Note
 If your JVM version >= 16, you will get an exception
 ```
@@ -39,5 +42,3 @@ In order to resolve this problem, please add
 ```
 to JVM arguments
 
-# Step by step guide
-Please click [here](doc/get-started.md) to view the guide
