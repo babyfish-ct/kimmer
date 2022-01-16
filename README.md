@@ -1,10 +1,10 @@
-# kimmer
+# 1. kimmer
 
 Port "https://github.com/immerjs/immer" for kotlin/jvm.
 
 Create the next immutable state tree by simply modifying the current tree
 
-## Usage
+## 2. Usage
 
 1. Create immutable object from scratch
 ```kt
@@ -31,12 +31,12 @@ val book2 = new(Book::class).by(book) {
 }
 ```
 
-## Step by step guide
-Please click [here](doc/get-started.md) to view the guide
+## 3. Step by step guide
+Goto there: [step by step guide](doc/get-started.md)
 
-## Characteristic
+## 4. Characteristic
 
-### 1. Dyamic facade
+### 4.1. Dyamic facade
 
 Kimmer is designed for server-side development, so dynamism is important.
 
@@ -61,7 +61,7 @@ The behaviors of unloaded property
 1. If you try to access unloaded property of object, exception will be thrown *(Just like the classic org.hibernate.LazyIntializationException)*.
 2. However, the unloaded properties will not cause exception during json serialization, they will be automatically ignored.
 
-### 2. Static implementation
+### 4.2. Static implementation
 
 This framework requires dynamic generation of JVM bytecode, but does not use JDK proxy or CGLIB. Instead generate bytecode directly.
 
@@ -73,7 +73,7 @@ This framework requires dynamic generation of JVM bytecode, but does not use JDK
 As you can see from the picture, the debugger is very clean
 
 
-## Note
+## 5. Note
 If your JVM version >= 16, you will get an exception
 ```
 java.lang.reflect.InaccessibleObjectException: Unable to make protected final java.lang.Class java.lang.ClassLoader.defineClass(byte[],int,int) throws java.lang.ClassFormatError accessible: module java.base does not "opens java.lang" to unnamed module 
