@@ -102,6 +102,7 @@ Old object is
 {"authors":[{"name":"child-1"},{"name":"child-2"}],"name":"book","store":{"name":"parent"}}
 New object is
 {"authors":[{"name":"child-1!"},{"name":"child-2!"}],"name":"book!","store":{"name":"parent!"}}
+```
 
 If you get
 ```
@@ -115,8 +116,6 @@ to JVM arguments
 ![image](./vm-args.jpeg)
 
 > This problem can be resolved by https://github.com/jboss-javassist/javassist/blob/master/src/main/javassist/util/proxy/DefineClassHelper.java perfectly, I will use some of its code to fix this problem on 0.0.1
-
-```
 
 -----------
 
