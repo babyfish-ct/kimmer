@@ -78,7 +78,7 @@ As you can see from the picture, the debugger is very clean
 
 
 ## 5. Note
-If your JVM version >= 16, you will get an exception
+If your JVM's version >= 16, you will get an exception
 ```
 java.lang.reflect.InaccessibleObjectException: Unable to make protected final java.lang.Class java.lang.ClassLoader.defineClass(byte[],int,int) throws java.lang.ClassFormatError accessible: module java.base does not "opens java.lang" to unnamed module 
 ```
@@ -87,3 +87,5 @@ In order to resolve this problem, please add
 --illegal-access=permit
 ```
 to JVM arguments
+
+> Many frameworks meet this problem and now I'm learning how to resolve it
