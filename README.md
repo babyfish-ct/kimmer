@@ -17,7 +17,7 @@ val book = new(Book::class).by {
 }
 ```
 
-3. Create immutable object based on old immutable object(loos like modification)
+3. Create immutable object based on old immutable object(it looks like modification, it's the core value of this framework)
 ```kt
 val book2 = new(Book::class).by(book) {
     name += "!"
