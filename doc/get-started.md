@@ -5,7 +5,9 @@
 Use Intellij to create a **gradle** project, choose **kotlin/jvm** and **kotlin dsl**
 ![image](./create-project.jpeg)
 
-## 2. Edit the build.gradle.kts 
+## 2. Add plugins and dependencies
+
+Edit the "build.gradle.kts" 
 a. Add this section into *plugin{}*
 ```kts
 id("com.google.devtools.ksp") version "1.6.10-1.0.2"
