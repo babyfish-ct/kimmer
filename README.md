@@ -2,7 +2,8 @@
 
 Port [https://github.com/immerjs/immer] for kotlin/jvm *(requires kotlin 1.5+)*.
 
-> *Immer is the winner of the "Breakthrough of the year" React open source award and "Most impactful contribution" JavaScript open source award in 2019*
+> *Immer is the winner of the "Breakthrough of the year" React open source award and "Most impactful contribution" JavaScript open source award in 2019.*
+> 
 > *It's simple and powerful, so I bring its design pattern for kotlin/jvm.*
 
 Create the next immutable state tree by simply modifying the current tree.
