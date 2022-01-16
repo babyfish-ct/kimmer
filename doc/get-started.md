@@ -95,16 +95,6 @@ fun main(args: Array<String>) {
 ```
 
 ## 7. Run the app
-If your JVM version >= 16, you will get an exception
-```
-java.lang.reflect.InaccessibleObjectException: Unable to make protected final java.lang.Class java.lang.ClassLoader.defineClass(byte[],int,int) throws java.lang.ClassFormatError accessible: module java.base does not "opens java.lang" to unnamed module 
-```
-In order to resolve this problem, please add 
-```
---illegal-access=permit
-```
-to JVM arguments
-![image](./vm-args.jpeg)
 
 **Finally, the output is**
 ```
@@ -112,6 +102,20 @@ Old object is
 {"authors":[{"name":"child-1"},{"name":"child-2"}],"name":"book","store":{"name":"parent"}}
 New object is
 {"authors":[{"name":"child-1!"},{"name":"child-2!"}],"name":"book!","store":{"name":"parent!"}}
+
+If you get
+```
+java.lang.reflect.InaccessibleObjectException: Unable to make protected final java.lang.Class java.lang.ClassLoader.defineClass(byte[],int,int) throws java.lang.ClassFormatError accessible: module java.base does not "opens java.lang" to unnamed module 
+```
+please add 
+```
+--illegal-access=permit
+```
+to JVM arguments
+![image](./vm-args.jpeg)
+
+> This problem can be resolved by https://github.com/jboss-javassist/javassist/blob/master/src/main/javassist/util/proxy/DefineClassHelper.java perfectly, I will use some of its code to fix this problem on 0.0.1
+
 ```
 
 -----------
