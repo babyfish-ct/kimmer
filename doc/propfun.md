@@ -38,5 +38,34 @@ Apart from the obvious that properties can be modified and functions can only ta
 |Collection Type| List | MutableList |
 |Element/Reference Type|Immutable|Draft|
 
+### Should I use draft property or a draft function?
 
+1. If you want to replace the entire association, please use the draft property
+```kt
+val book = new(Book::class).by {
+    authors = listOf(
+        new(Author::class).by { 
+            name = "Autor1"
+        },
+        new(Author::class).by { 
+            name = "Autor2"
+        }
+    )
+}
+```
 
+2. If you want to modify an existing association, please use the draft function
+```
+val book = new(Book::class).by {
+    authors() += new(Author::class).by { 
+        name = "Autor1"
+    }
+    authors() += new(Author::class).by { 
+        name = "Autor2"
+    }
+}
+```
+
+---------------------------------
+
+[< Previous: Dynamics & unlodead properties](./dynamic.md) | [Next: Jackson >]
