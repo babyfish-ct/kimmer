@@ -69,4 +69,4 @@ val book = new(Book::class).by {
 
 ---------------------------------
 
-[< Previous: Dynamics & unlodead properties](./dynamic.md) | [Next: Jackson >]
+[< Previous: Dynamics & unlodead properties](./dynamic.md) | [Back to document](./README.md) | [Next: Jackson >](.jackson.md)
