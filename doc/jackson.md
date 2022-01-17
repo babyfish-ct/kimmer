@@ -81,4 +81,4 @@ interface Otter: Animal {
 
 -------------------
 
-[< Previous: Draft property vs Draft function](propfun.md) | [Back to document](./README.md) | [Next: Abstract.md >](./abstract.md)
+[< Previous: Draft property vs Draft function](propfun.md) | [Back to document](./README.md) | [Next: Abstract >](./abstract.md)
