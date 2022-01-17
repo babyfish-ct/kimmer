@@ -1,4 +1,4 @@
-# 1. kimmer
+# kimmer
 
 Port [https://github.com/immerjs/immer](https://github.com/immerjs/immer) for kotlin/jvm *(requires kotlin 1.5+)*.
 
@@ -10,7 +10,7 @@ Port [https://github.com/immerjs/immer](https://github.com/immerjs/immer) for ko
 
 *If data tree is shallow, kotlin data class's copy function is very simple, but if the data tree is deep, copy function is no longer convenient and kimmer can help you.*
 
-## 2. Usage
+## 1. Usage
 
 1. Create immutable object from scratch
 ```kt
@@ -39,16 +39,16 @@ val book2 = new(Book::class).by(book) {
 
 > For the modification, it looks like the copy-on-write strategy of linux "fork", **unchaged parts are always shared and reused**.
 
-## 3. Step by step guide
-### Here it is: [step by step guide](doc/get-started.md)
+## 2. Step by step guide
+Here it is: [step by step guide](doc/get-started.md)
 
-## 4. Documentation
+## 3. Documentation
 
 WILL COME SOON!
 
-## 5. Characteristic
+## 4. Characteristic
 
-### 5.1. Dynamic facade
+### 4.1. Dynamic facade
 
 Kimmer is designed for server-side development, so dynamics is important.
 
@@ -73,7 +73,7 @@ The behaviors of unloaded property
 1. If you try to access unloaded property of object, exception will be thrown *(Just like the classic org.hibernate.LazyIntializationException)*.
 2. However, the unloaded properties will not cause exception during json serialization, they will be automatically ignored.
 
-### 5.2. Static implementation
+### 4.2. Static implementation
 
 This framework requires dynamic generation of JVM bytecode, but does not use JDK proxy or CGLIB. 
 
