@@ -21,7 +21,10 @@ val newNode = node.copy(name = "Hello")
 ```
 
 2. Change the name of a first-level object to "Hello"
+   
+   Breadcrumbs condition as follows
    1. first-level object position: pos1
+   
 ```kt
 val newNode = node.copy(
     childNodes = node
@@ -33,8 +36,11 @@ val newNode = node.copy(
 ```
 
 3. Change the name of a second-level object to "Hello"
+
+   Breadcrumbs condition as follows
    1. first-level object position: pos1
    2. second-level object position: pos2
+
 ```kt
 val newNode = node.copy(
     childNodes = node
@@ -53,6 +59,8 @@ val newNode = node.copy(
 ```
 
 4. Change the name of a third-level object to "Hello"
+
+   Breadcrumbs condition as follows
    1. first-level object position: pos1
    2. second-level object position: pos2
    3. second-level object position: pos3
