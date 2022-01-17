@@ -17,11 +17,11 @@ interface BookDraft<T : Book> : Book, Draft<T> {
 
     override var name: String 
 
-    override var store: BookStore?
-    fun store(): BookStoreDraft<out BookStore>
+    override var store: BookStore? // Draft property
+    fun store(): BookStoreDraft<out BookStore> // Draft function
 
-    override var authors: List<Author>
-    fun authors(): MutableList<AuthorDraft<out Author>>
+    override var authors: List<Author> // Draft property
+    fun authors(): MutableList<AuthorDraft<out Author>> // Draft function
 }
 ```
 
@@ -34,7 +34,7 @@ Apart from the obvious that properties can be modified and functions can only ta
 |     |Draft property Getter | Draft function |
 |-----|------|-----|
 |Behavior| Get | Get or Create |
-|Nullity| Allow null | forbid null |
+|Nullity| Allow Null | Forbid null |
 |Collection Type| List | MutableList |
 |Element/Reference Type|Immutable|Draft|
 
