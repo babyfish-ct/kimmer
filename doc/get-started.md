@@ -3,7 +3,7 @@
 ## 1. Create project
 
 Use Intellij to create a **gradle** project, choose **kotlin/jvm** and **kotlin dsl**
-![image](./create-project.jpeg)
+![image](./images/create-project.jpeg)
 
 ## 2. Add plugins and dependencies
 
@@ -19,7 +19,7 @@ ksp("org.babyfish.kimmer:kimmer-ksp:0.0.1")
 ```
 Then click the refresh icon of gradle window.
 
-![image](./gradle-refresh.jpeg)
+![image](./images/gradle-refresh.jpeg)
 
 ## 3. Define your immutable data interfaces
 Create a new file "Model.kt" under src/main/kotlin
@@ -44,7 +44,7 @@ interface Author: Immutable {
 ```
 
 ## 4. Execute ksp to generate mutable data model
-![image](./ksp.jpeg)
+![image](./images/ksp.jpeg)
 
 Then you will see a new file "ModelDraft.kt" is generated under "build/generated/ksp/main/kotlin", this is mutable data model.
 
@@ -59,7 +59,7 @@ kotlin {
 ```
 Then click the refresh icon of gradle window.
 
-![image](./gradle-refresh.jpeg)
+![image](./images/gradle-refresh.jpeg)
 
 After this step, "build/generated/ksp/main/kotlin" will be considered as a new source folder.
 
