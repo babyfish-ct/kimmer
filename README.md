@@ -50,7 +50,7 @@ WILL COME SOON!
 
 ### 5.1. Dynamic facade
 
-Kimmer is designed for server-side development, so dynamism is important.
+Kimmer is designed for server-side development, so dynamics is important.
 
 1. Take GraphQL as example, its data shape is inherently dynamic.
 2. Take ORM as example, not all properties(especially associated properties) always need to be queried.
