@@ -99,3 +99,7 @@ true
 false
 {"name":"RootNode"}
 ```
+
+---------------
+
+[<Previous: Get started](./get-started.md) | [Back to document](./README.md) | [Next: Draft property vs Draft function >](propfun.md)
