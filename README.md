@@ -8,7 +8,9 @@ Port [https://github.com/immerjs/immer](https://github.com/immerjs/immer) for ko
 
 **Create the next immutable state tree by simply modifying the current tree.**
 
-*If data tree is shallow, kotlin data class's copy function is very simple, but if the data tree is deep, copy function is no longer convenient and kimmer can help you.*
+> *If data tree is shallow, kotlin data class's copy function is very simple, but if the data tree is deep, copy function is no longer convenient and kimmer can help you.* 
+> 
+> *please view [here](./doc/value.md) to known why* 
 
 ## 1. Usage
 
