@@ -32,7 +32,7 @@ In addition, we can also find that Draft generates functions for association pro
 Apart from the obvious that properties can be modified and functions can only take values, what is the difference between Getters of Draft properties and Draft functions?
 
 |     |Draft property Getter | Draft function |
-|-----|------|-----｜
+|-----|------|-----|
 |Behavior| Get | Get or Create |
 |Nullity| Allow null | forbid null |
 |Collection Type| List | MutableList |
