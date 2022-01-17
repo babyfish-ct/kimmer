@@ -51,9 +51,51 @@ println(treeNode)
 ```
 The output is
 ```
-{"name": "RootNode"}
+{"name":"RootNode"}
+```
+
+### Check if properties are loaded
+```
+val treeNode = new(TreeNode::class).by {
+    name = "RootNode"
+}
+println(Immutable.isLoaded(treeNode, TreeNode::name))
+println(Immutable.isLoaded(treeNode, TreeNode::childNodes))
+```
+The output is
+```
+true
+false
 ```
 
 ### Unload properties manually
 
-What we saw earlier is that when an object is created, all properties are initially unloaded, and properties automatically become loaded when they are assigned a value.
+What we saw earlier is that when an object is created, all properties are initially unloaded, and properties automatically become loaded when they are assigned.
+
+However, we can do the reverse manually, using function "Draft.unload" to turn a loaded property back into an unloaded property.
+
+```
+val treeNode = new(TreeNode::class).by {
+    name = "RootNode"
+    childNodes = emptyList()
+}
+val treeNode2 = new(TreeNode::class).by(treeNode) {
+    Draft.unload(treeNode2, TreeNode::childNodes)
+}
+println(Immutable.isLoaded(treeNode, TreeNode::name))
+println(Immutable.isLoaded(treeNode, TreeNode::childNodes))
+println(treeNode)
+println(Immutable.isLoaded(treeNode2, TreeNode::name))
+println(Immutable.isLoaded(treeNode2, TreeNode::childNodes))
+println(treeNode2)
+```
+
+The output is
+```
+true
+true
+{"name":"RootNode",childNodes:[]}
+true
+false
+{"name":"RootNode"}
+```
