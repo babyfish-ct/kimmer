@@ -34,7 +34,8 @@ Apart from the obvious that properties can be modified and functions can only ta
 |     |Draft property Getter | Draft function |
 |-----|------|-----|
 |Behavior| Get | Get or Create |
-|Nullity| Allow Null | Forbid null |
+|Nullity| May return null | Never return null |
+|UnloadedException| May throw exception | Never throw exception |
 |Collection Type| List | MutableList |
 |Element/Reference Type|Immutable|Draft|
 
