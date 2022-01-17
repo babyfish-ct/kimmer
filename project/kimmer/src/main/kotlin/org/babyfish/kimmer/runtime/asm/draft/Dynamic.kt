@@ -73,6 +73,7 @@ internal fun ClassVisitor.writeUnload(args: GeneratorArgs) {
                 loadedName(prop),
                 "Z"
             )
+            visitInsn(Opcodes.RETURN)
         }
         visitInsn(Opcodes.RETURN)
     }

@@ -9,7 +9,7 @@ interface BookStore: Immutable {
 
 interface Book: Immutable {
     val name: String
-    val store: BookStore
+    val store: BookStore?
     val authors: List<Author>
 }
 

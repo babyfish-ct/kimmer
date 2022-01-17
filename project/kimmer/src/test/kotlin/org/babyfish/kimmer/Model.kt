@@ -3,8 +3,6 @@ package org.babyfish.kimmer
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
-import org.babyfish.kimmer.Abstract
-import org.babyfish.kimmer.Immutable
 import java.math.BigDecimal
 
 @Abstract

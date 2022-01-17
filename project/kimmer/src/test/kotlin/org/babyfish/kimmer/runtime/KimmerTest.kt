@@ -300,4 +300,55 @@ class KimmerTest {
             }
         }
     }
+
+    @Test
+    fun testLoadState() {
+
+        val book = new(Book::class).by {
+            name = "The book"
+            store().name = "Store"
+            authors() += new(Author::class).by {
+                name = "Author1"
+            }
+            authors() += new(Author::class).by {
+                name = "Author2"
+            }
+        }
+        expect(true) { Immutable.isLoaded(book, Book::name) }
+        expect(true) { Immutable.isLoaded(book, Book::store) }
+        expect(true) { Immutable.isLoaded(book, Book::authors) }
+        expect("""{"authors":[{"name":"Author1"},{"name":"Author2"}],"name":"The book","store":{"name":"Store"}}""") {
+            book.toString()
+        }
+
+        val book2 = new(Book::class).by(book) {
+            Draft.unload(this, Book::name)
+        }
+        expect(false) { Immutable.isLoaded(book2, Book::name) }
+        expect(true) { Immutable.isLoaded(book2, Book::store) }
+        expect(true) { Immutable.isLoaded(book2, Book::authors) }
+        expect("""{"authors":[{"name":"Author1"},{"name":"Author2"}],"store":{"name":"Store"}}""") {
+            book2.toString()
+        }
+
+        val book3 = new(Book::class).by(book2) {
+            Draft.unload(this, Book::store)
+        }
+        expect(false) { Immutable.isLoaded(book3, Book::name) }
+        expect(false) { Immutable.isLoaded(book3, Book::store) }
+        expect(true) { Immutable.isLoaded(book3, Book::authors) }
+        expect("""{"authors":[{"name":"Author1"},{"name":"Author2"}]}""") {
+            book3.toString()
+        }
+
+        val book4 = new(Book::class).by(book3) {
+            Draft.unload(this, Book::authors)
+        }
+        expect(false) { Immutable.isLoaded(book4, Book::name) }
+        expect(false) { Immutable.isLoaded(book4, Book::store) }
+        expect(false) { Immutable.isLoaded(book4, Book::authors) }
+        expect("{}") {
+            book4.toString()
+        }
+    }
 }
