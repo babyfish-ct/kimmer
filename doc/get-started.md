@@ -1,4 +1,4 @@
-# Step by step guid
+# [kimmer](https://github.com/babyfish-ct/kimmer)/[documentation](./README.md)/Get started
 
 ## 1. Create project
 
