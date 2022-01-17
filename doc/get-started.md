@@ -107,4 +107,4 @@ New object is
 
 -----------
 
-[Back to home](https://github.com/babyfish-ct/kimmer)
+[Back to home](https://github.com/babyfish-ct/kimmer) | [Back to document](./README.md)
