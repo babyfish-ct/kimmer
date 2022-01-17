@@ -40,11 +40,15 @@ val book2 = new(Book::class).by(book) {
 > For the modification, it looks like the copy-on-write strategy of linux "fork", **unchaged parts are always shared and reused**.
 
 ## 3. Step by step guide
-Here it is: [step by step guide](doc/get-started.md)
+### Here it is: [step by step guide](doc/get-started.md)
 
-## 4. Characteristic
+## 4. Documentation
 
-### 4.1. Dyamic facade
+WILL COME SOON!
+
+## 5. Characteristic
+
+### 5.1. Dyamic facade
 
 Kimmer is designed for server-side development, so dynamism is important.
 
@@ -69,11 +73,11 @@ The behaviors of unloaded property
 1. If you try to access unloaded property of object, exception will be thrown *(Just like the classic org.hibernate.LazyIntializationException)*.
 2. However, the unloaded properties will not cause exception during json serialization, they will be automatically ignored.
 
-### 4.2. Static implementation
+### 5.2. Static implementation
 
 This framework requires dynamic generation of JVM bytecode, but does not use JDK proxy or CGLIB. 
 
-In order to make it as efficient as hand-hardcoding and as clean as hand-hardcoding, it uses ASM to generate bytecode directly.
+In order to make it as efficient as hand-hardcoding and as clean as hand-hardcoding, it uses [ASM](https://asm.ow2.io/) to generate bytecode directly.
 
 1. Avoid reflection, avoid hash map, keep the performance that a static language should have
 2. Avoid complex data structures to keep the IDE's debugger simple and clean
