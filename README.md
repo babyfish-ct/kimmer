@@ -44,7 +44,7 @@ Here it is: [step by step guide](doc/get-started.md)
 
 ## 3. Documentation
 
-WILL COME SOON!
+Here it is: [documentation](doc/README.md)
 
 ## 4. Characteristic
 
