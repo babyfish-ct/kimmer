@@ -6,7 +6,7 @@
 
 ### 1. Implicit serialization/Deserialization
 
-```
+```kt
 val book = new(Book::class).by(oldBook) {...omit...}
 val json = book.toString()
 val deserializedBook = Immutable.fromString(json, Book::class)
@@ -27,7 +27,7 @@ true
 
 Kimmer uses "org.babyfish.kimmer.immutableObjectMapper()" to create ObjectMapper for immutable objects.
 
-```
+```kt
 val book = new(Book::class).by(oldBook) {...omit...}
 
 val mapper = immutableObjectMapper()
