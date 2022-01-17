@@ -2,7 +2,7 @@
 
 > Notes
 > 
-> Unloaded properties will be ignored in JSON serialization, which has been discussed in Dynamics & unloaded properties, and will not be repeated in this article.
+> Unloaded properties will be ignored in JSON serialization, which has been discussed in [Dynamics & unloaded properties](./dynamic.md), and will not be repeated in this article.
 
 ### 1. Implicit serialization/Deserialization
 
