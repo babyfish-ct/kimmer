@@ -27,7 +27,7 @@ interface BookDraft<T : Book> : Book, Draft<T> {
 
 As we can see, "BookDraft" overrides all read-only properties in Book with writable properties. 
 
-In addition, we can also find that Draft generates functions for association properties.
+In addition, we can also find that not only properties but also functions are generated.
 
 Apart from the obvious that properties can be modified and functions can only take values, what is the difference between Getters of Draft properties and Draft functions?
 
