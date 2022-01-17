@@ -80,7 +80,7 @@ val newNode = node.copy(
     )
 ```
 
-## 2.Why are read-only objects so hard to modify?
+## 2.Why are immutable objects so hard to "modify"?
 
 If the subordinate object changes, the superior object must change too. 
 
