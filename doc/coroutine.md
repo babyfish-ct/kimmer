@@ -20,6 +20,8 @@ Kimmer supports the "newAsync" function, the usage is the same as above, the onl
 
 ```kt
 suspend fun executeAsync() {
+
+    // org.babyfish.kimmer.newAsync
     val book2 = newAsync(Book::class).by(book) {
  
         delay(100)
@@ -29,6 +31,8 @@ suspend fun executeAsync() {
              author.name += "!"
              delay(100)
         }
+
+        // org.babyfish.kimmer.AsyncDraft.newAsync
         store = newAsync(BookStore::class).by {
             delay(100)
             name = "New store"
