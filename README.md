@@ -42,9 +42,13 @@ val book2 = new(Book::class).by(book) {
 ## 3. Step by step guide
 ### Here it is: [step by step guide](doc/get-started.md)
 
-## 4. Characteristic
+## 4. Documentation
 
-### 4.1. Dyamic facade
+WILL COME SOON!
+
+## 5. Characteristic
+
+### 5.1. Dyamic facade
 
 Kimmer is designed for server-side development, so dynamism is important.
 
@@ -69,7 +73,7 @@ The behaviors of unloaded property
 1. If you try to access unloaded property of object, exception will be thrown *(Just like the classic org.hibernate.LazyIntializationException)*.
 2. However, the unloaded properties will not cause exception during json serialization, they will be automatically ignored.
 
-### 4.2. Static implementation
+### 5.2. Static implementation
 
 This framework requires dynamic generation of JVM bytecode, but does not use JDK proxy or CGLIB. 
 
