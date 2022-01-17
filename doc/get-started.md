@@ -14,8 +14,8 @@ id("com.google.devtools.ksp") version "1.6.10-1.0.2"
 ```
 b. Add this section into *dependencies{}*
 ```kts
-implementation("org.babyfish.kimmer:kimmer:0.0.1")
-ksp("org.babyfish.kimmer:kimmer-ksp:0.0.1")
+implementation("org.babyfish.kimmer:kimmer:0.0.2")
+ksp("org.babyfish.kimmer:kimmer-ksp:0.0.2")
 ```
 Then click the refresh icon of gradle window.
 
@@ -107,4 +107,4 @@ New object is
 
 -----------
 
-[Back to home](https://github.com/babyfish-ct/kimmer) | [Back to document](./README.md) | [Next: Dynamics & Unloaded properties](./dynamic.md)
+[Back to home](https://github.com/babyfish-ct/kimmer) | [Back to document](./README.md) | [Next: Dynamics & Unloaded properties >](./dynamic.md)
