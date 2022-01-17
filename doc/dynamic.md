@@ -80,7 +80,7 @@ val treeNode = new(TreeNode::class).by {
     childNodes = emptyList()
 }
 val treeNode2 = new(TreeNode::class).by(treeNode) {
-    Draft.unload(treeNode2, TreeNode::childNodes)
+    Draft.unload(this, TreeNode::childNodes)
 }
 println(Immutable.isLoaded(treeNode, TreeNode::name))
 println(Immutable.isLoaded(treeNode, TreeNode::childNodes))
