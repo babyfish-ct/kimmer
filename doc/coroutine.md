@@ -16,7 +16,7 @@ val book2 = new(Book::class).by(book) {
 
 Kimmer supports the "newAsync" function, the usage is the same as above, the only difference is that the labmda expression is a suspend function.
 
-> To use "newAsync", please add the dependencies required by kotlin coroutine yourself.
+> To use "newAsync", please add the dependencies about kotlin coroutines by yourself.
 
 ```kt
 suspend fun executeAsync() {
