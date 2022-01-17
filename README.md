@@ -48,7 +48,7 @@ WILL COME SOON!
 
 ## 5. Characteristic
 
-### 5.1. Dyamic facade
+### 5.1. Dynamic facade
 
 Kimmer is designed for server-side development, so dynamism is important.
 
