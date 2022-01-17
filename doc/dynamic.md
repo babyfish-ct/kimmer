@@ -19,7 +19,7 @@ Here
 1. The user assigned value to name, so name is a loaded field
 2. The user did not assign any value to childNodes, so childNodes is an unloaded field
 
-### UnloadedException
+### 1. UnloadedException
 
 Direct access to unloaded properties causes org.babyfish.kimmer.UnloadedException
 
@@ -37,7 +37,7 @@ Exception in thread "main" org.babyfish.kimmer.UnloadedException: The field 'val
 	at example.AppKt.main(App.kt:29)
 ```
 
-### Json serialization for unload properties
+### 2. Json serialization for unload properties
 
 Unlike direct access, in JSON serialization, unloaded properties do not cause an exception, but are automatically ignored.
 
@@ -54,8 +54,8 @@ The output is
 {"name":"RootNode"}
 ```
 
-### Check if properties are loaded
-```
+### 3. Check if properties are loaded
+```kt
 val treeNode = new(TreeNode::class).by {
     name = "RootNode"
 }
@@ -68,13 +68,13 @@ true
 false
 ```
 
-### Unload properties manually
+### 4. Unload properties manually
 
 What we saw earlier is that when an object is created, all properties are initially unloaded, and properties automatically become loaded when they are assigned.
 
 However, we can do the reverse manually, using function "Draft.unload" to turn a loaded property back into an unloaded property.
 
-```
+```kt
 val treeNode = new(TreeNode::class).by {
     name = "RootNode"
     childNodes = emptyList()
