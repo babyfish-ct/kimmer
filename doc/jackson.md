@@ -23,7 +23,7 @@ true
 
 ### 2. Explict Serialization/Deserialization
 
-> If you want serialize/deserialize explicitly, please add fastxml/jackson to your project by your self.
+> If you want serialize/deserialize explicitly, please add the dpendencies about fastxml/jackson by yourself.
 
 Kimmer uses "org.babyfish.kimmer.immutableObjectMapper()" to create ObjectMapper for immutable objects.
 
