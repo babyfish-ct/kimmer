@@ -10,7 +10,7 @@ Port [https://github.com/immerjs/immer](https://github.com/immerjs/immer) for ko
 
 > *If data tree is shallow, kotlin data class's copy function is very simple, but if the data tree is deep, copy function is no longer convenient and kimmer can help you.* 
 > 
-> *please view [here](./doc/value.md) to known why* 
+> *If you're confused by this, please click [here](./doc/value.md) to find out why.* 
 
 ## 1. Usage
 
