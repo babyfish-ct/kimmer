@@ -55,7 +55,7 @@ val book = new(Book::class).by {
 ```
 
 2. If you want to modify an existing association, please use the draft function
-```
+```kt
 val book = new(Book::class).by {
     authors() += new(Author::class).by { 
         name = "Autor1"
