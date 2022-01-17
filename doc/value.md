@@ -86,7 +86,7 @@ If the subordinate object changes, the superior object must change too.
 
 The change is propagated from bottom to top until the root object.
 
-## 3. How do you solve this problem?
+## 3. How do kimmer solve this problem?
 
 ```kt
 interface Node: Immutable {
@@ -103,3 +103,6 @@ val newNode = new(Node::class).by(node) {
         .name = "Hello"
 }
 ```
+-----
+
+[Back to home](https://github.com/babyfish-ct/kimmer)
