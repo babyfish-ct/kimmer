@@ -41,6 +41,10 @@ suspend fun executeAsync() {
 }
 ```
 
+> Note
+> 
+> Draft for newAsync is threadsafe
+
 ----
 
 [< Previous: Abstract](abstract.md) | [Back to document](README.md) | [Back to home](https://github.com/babyfish-ct/kimme)
