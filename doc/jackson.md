@@ -21,7 +21,7 @@ false
 true
 ```
 
-### 2. Explict Serialization/Deserialization
+### 2. Explicit Serialization/Deserialization
 
 > If you want serialize/deserialize explicitly, please add the dpendencies about fastxml/jackson by yourself.
 
