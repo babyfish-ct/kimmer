@@ -28,8 +28,8 @@ suspend fun executeAsync() {
         name += "!"
 
         for (author in authors()) {
-             author.name += "!"
              delay(100)
+             author.name += "!"
         }
 
         // org.babyfish.kimmer.AsyncDraft.newAsync
