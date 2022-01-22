@@ -1,9 +1,7 @@
 package org.babyfish.kimmer.runtime.asm
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.babyfish.kimmer.CircularReferenceException
-import org.babyfish.kimmer.Draft
-import org.babyfish.kimmer.Immutable
+import org.babyfish.kimmer.*
 import org.babyfish.kimmer.meta.ImmutableType
 import org.babyfish.kimmer.runtime.AsyncDraftContext
 import org.babyfish.kimmer.runtime.DraftContext
@@ -21,7 +19,13 @@ internal val IMMUTABLE_SPI_INTERNAL_NAME = Type.getInternalName(ImmutableSpi::cl
 
 internal val IMMUTABLE_TYPE_DESCRIPTOR = Type.getDescriptor(ImmutableType::class.java)
 
+internal val DRAFT_INTERNAL_NAME = Type.getInternalName(Draft::class.java)
+
 internal val DRAFT_DESCRIPTOR = Type.getDescriptor(Draft::class.java)
+
+internal val SYNC_DRAFT_INTERNAL_NAME = Type.getInternalName(SyncDraft::class.java)
+
+internal val ASYNC_DRAFT_INTERNAL_NAME = Type.getInternalName(AsyncDraft::class.java)
 
 internal val DRAFT_SPI_INTERNAL_NAME = Type.getInternalName(DraftSpi::class.java)
 

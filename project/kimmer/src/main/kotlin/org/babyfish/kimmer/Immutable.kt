@@ -108,7 +108,7 @@ interface Immutable {
          */
         @JvmStatic
         fun <T: Immutable> get(o: T, prop: KProperty1<T, *>): Any? {
-            return (o as ImmutableSpi).`{value}`(prop.name)
+            return (o as ImmutableSpi).`{get}`(prop.name)
         }
 
         /**
@@ -124,7 +124,7 @@ interface Immutable {
          */
         @JvmStatic
         fun <T: Immutable> get(o: T, prop: ImmutableProp): Any? {
-            return (o as ImmutableSpi).`{value}`(prop.name)
+            return (o as ImmutableSpi).`{get}`(prop.name)
         }
 
         @JvmStatic

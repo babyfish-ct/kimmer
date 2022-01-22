@@ -1,5 +1,6 @@
 package org.babyfish.kimmer.runtime.asm.draft
 
+import org.babyfish.kimmer.runtime.ImmutableSpi
 import org.babyfish.kimmer.runtime.asm.*
 import org.babyfish.kimmer.runtime.asm.loadedName
 import org.babyfish.kimmer.runtime.asm.visitPropNameSwitch
@@ -8,11 +9,74 @@ import org.springframework.asm.ClassVisitor
 import org.springframework.asm.Opcodes
 import org.springframework.asm.Type
 import java.lang.IllegalArgumentException
+import kotlin.reflect.jvm.javaGetter
 
-internal fun ClassVisitor.writeSetValue(args: GeneratorArgs) {
+internal fun ClassVisitor.writeDynamicGetter(args: GeneratorArgs) {
+    val spiInternalName = Type.getInternalName(ImmutableSpi::class.java)
     writeMethod(
         Opcodes.ACC_PUBLIC,
-        "{value}",
+        "{get}",
+        "(Ljava/lang/String;)Ljava/lang/Object;"
+    ) {
+        visitPropNameSwitch(args.immutableType, { visitVarInsn(Opcodes.ALOAD, 1) }) { prop, _ ->
+            visitVarInsn(Opcodes.ALOAD, 0)
+            visitMethodInsn(
+                Opcodes.INVOKEVIRTUAL,
+                args.draftImplInternalName,
+                prop.kotlinProp.javaGetter!!.name,
+                Type.getMethodDescriptor(prop.kotlinProp.javaGetter),
+                false
+            )
+            visitBox(prop.returnType.java)
+            visitInsn(Opcodes.ARETURN)
+        }
+    }
+}
+
+internal fun ClassVisitor.writeDynamicCreator(args: GeneratorArgs) {
+    writeMethod(
+        Opcodes.ACC_PUBLIC,
+        "{getOrCreate}",
+        "(Ljava/lang/String;)Ljava/lang/Object;"
+    ) {
+        visitPropNameSwitch(args.immutableType, { visitVarInsn(Opcodes.ALOAD, 1) }) { prop, _ ->
+            if (prop.targetType === null) {
+                visitVarInsn(Opcodes.ALOAD, 0)
+                visitMethodInsn(
+                    Opcodes.INVOKEVIRTUAL,
+                    args.draftImplInternalName,
+                    prop.name,
+                    Type.getMethodDescriptor(prop.kotlinProp.javaGetter),
+                    false
+                )
+                visitBox(prop.returnType.java)
+            } else {
+                val draftDesc = if (prop.isList) {
+                    "Ljava/util/List;"
+                } else {
+                    prop.targetType?.draftInfo?.abstractType?.let {
+                        Type.getDescriptor(it)
+                    } ?: Type.getDescriptor(prop.targetType!!.kotlinType.java)
+                }
+
+                visitVarInsn(Opcodes.ALOAD, 0)
+                visitMethodInsn(
+                    Opcodes.INVOKEVIRTUAL,
+                    args.draftImplInternalName,
+                    prop.name,
+                    "()$draftDesc",
+                    false
+                )
+            }
+            visitInsn(Opcodes.ARETURN)
+        }
+    }
+}
+
+internal fun ClassVisitor.writeDynamicSetter(args: GeneratorArgs) {
+    writeMethod(
+        Opcodes.ACC_PUBLIC,
+        "{set}",
         "(Ljava/lang/String;Ljava/lang/Object;)V"
     ) {
 

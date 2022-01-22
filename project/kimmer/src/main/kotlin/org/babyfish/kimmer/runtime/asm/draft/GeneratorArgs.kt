@@ -1,5 +1,6 @@
 package org.babyfish.kimmer.runtime.asm.draft
 
+import org.babyfish.kimmer.Draft
 import org.babyfish.kimmer.meta.ImmutableType
 import org.babyfish.kimmer.runtime.DraftContext
 import org.babyfish.kimmer.runtime.asm.draftImplInternalName
@@ -11,7 +12,9 @@ internal data class GeneratorArgs(
 ) {
     val modelInternalName = Type.getInternalName(immutableType.kotlinType.java)
     val modelDescriptor = Type.getDescriptor(immutableType.kotlinType.java)
-    val draftInternalName = Type.getInternalName(immutableType.draftInfo.abstractType)
+    val draftInternalName = immutableType.draftInfo?.abstractType
+        ?.let { Type.getInternalName(it) }
+        ?: Type.getInternalName(immutableType.kotlinType.java)
     val modelImplInternalName = implInternalName(immutableType)
     val modelImplDescriptor = "L$modelImplInternalName;"
     val draftImplInternalName = draftImplInternalName(immutableType)

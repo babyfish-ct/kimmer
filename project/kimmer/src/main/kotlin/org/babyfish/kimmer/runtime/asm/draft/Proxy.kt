@@ -50,27 +50,6 @@ internal fun ClassVisitor.writeLoaded(args: GeneratorArgs) {
     }
 }
 
-internal fun ClassVisitor.writeValue(args: GeneratorArgs) {
-    val spiInternalName = Type.getInternalName(ImmutableSpi::class.java)
-    writeMethod(
-        Opcodes.ACC_PUBLIC,
-        "{value}",
-        "(Ljava/lang/String;)Ljava/lang/Object;"
-    ) {
-        visitModelGetter(args)
-        visitTypeInsn(Opcodes.CHECKCAST, spiInternalName)
-        visitVarInsn(Opcodes.ALOAD, 1)
-        visitMethodInsn(
-            Opcodes.INVOKEINTERFACE,
-            spiInternalName,
-            "{value}",
-            "(Ljava/lang/String;)Ljava/lang/Object;",
-            true
-        )
-        visitInsn(Opcodes.ARETURN)
-    }
-}
-
 internal fun ClassVisitor.writeHashCode(args: GeneratorArgs) {
     writeMethod(
         Opcodes.ACC_PUBLIC,

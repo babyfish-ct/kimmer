@@ -29,7 +29,7 @@ interface ImmutableType {
 
     val props: Map<String, ImmutableProp>
 
-    val draftInfo: DraftInfo
+    val draftInfo: DraftInfo?
 
     companion object {
 
@@ -136,9 +136,9 @@ private fun createImmutableTypeByDraftType(draftType: Class<*>): ImmutableType {
         }")
     }
     val immutableType = getImmutableType(ctx.immutableJavaTypes[0] as Class<out Immutable>)
-    if (immutableType.draftInfo.abstractType === draftType ||
-        immutableType.draftInfo.syncType === draftType ||
-        immutableType.draftInfo.asyncType === draftType
+    if (immutableType.draftInfo?.abstractType === draftType ||
+        immutableType.draftInfo?.syncType === draftType ||
+        immutableType.draftInfo?.asyncType === draftType
     ) {
         return immutableType
     }

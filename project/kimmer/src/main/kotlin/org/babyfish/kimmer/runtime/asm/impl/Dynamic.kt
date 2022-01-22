@@ -29,7 +29,7 @@ internal fun ClassVisitor.writeLoaded(type: ImmutableType) {
 internal fun ClassVisitor.writeValue(type: ImmutableType) {
     writeMethod(
         Opcodes.ACC_PUBLIC,
-        "{value}",
+        "{get}",
         "(Ljava/lang/String;)Ljava/lang/Object;"
     ) {
         visitPropNameSwitch(type, { visitVarInsn(Opcodes.ALOAD, 1)}) { prop, _ ->

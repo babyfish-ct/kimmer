@@ -97,7 +97,10 @@ private fun ClassVisitor.writeProxyProp(
     }
 
     prop.targetType?.let {
-        val targetDesc = Type.getDescriptor(it.draftInfo.abstractType)
+        val targetDesc = it.draftInfo?.abstractType?.let { abstractDraftType ->
+            Type.getDescriptor(abstractDraftType)
+        } ?: Type.getDescriptor(it.kotlinType.java)
+
         val funDesc = if (prop.isList) {
             "()Ljava/util/List;"
         } else {

@@ -67,8 +67,8 @@ private val cacheMap = WeakHashMap<Class<out Immutable>, Class<out Draft<*>>>()
 private val cacheLock = ReentrantReadWriteLock()
 
 private fun createDraftImplementation(immutableType: ImmutableType): Class<out Draft<*>> {
-    val draftType = immutableType.draftInfo.abstractType
-    if (draftType.`package` !== immutableType.kotlinType.java.`package`) {
+    val draftType = immutableType.draftInfo?.abstractType
+    if (draftType !== null && draftType.`package` !== immutableType.kotlinType.java.`package`) {
         throw IllegalArgumentException("Draft type '${draftType.name}' and immutable type ${immutableType.kotlinType.java.name} belongs to different packages")
     }
     return ClassWriter(ClassWriter.COMPUTE_MAXS or ClassWriter.COMPUTE_FRAMES)

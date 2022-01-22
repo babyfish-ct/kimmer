@@ -150,19 +150,24 @@ internal class TypeImpl(
         }
     }
 
-    override val draftInfo: DraftInfo by lazy {
-        val abstractDraftType = getAbstractDraftType(this)
-        val syncDraftType = getFinalDraftType(abstractDraftType, SyncDraft::class.java) as Class<out SyncDraft<*>>?
-        val asyncDraftType = getFinalDraftType(abstractDraftType, AsyncDraft::class.java) as Class<out AsyncDraft<*>>?
-        if (!isAbstract) {
-            asyncDraftType ?: error("No nested interface 'sync' for non-abstract immutable type '${abstractDraftType::class.qualifiedName}'")
-            asyncDraftType ?: error("No nested interface 'sync' for non-abstract immutable type '${abstractDraftType::class.qualifiedName}'")
+    override val draftInfo: DraftInfo? by lazy {
+        getAbstractDraftType(this)?.let {
+            val syncDraftType =
+                getFinalDraftType(it, SyncDraft::class.java) as Class<out SyncDraft<*>>?
+            val asyncDraftType =
+                getFinalDraftType(it, AsyncDraft::class.java) as Class<out AsyncDraft<*>>?
+            if (!isAbstract) {
+                syncDraftType
+                    ?: error("No nested interface 'sync' for non-abstract immutable type '${it::class.qualifiedName}'")
+                asyncDraftType
+                    ?: error("No nested interface 'async' for non-abstract immutable type '${it::class.qualifiedName}'")
+            }
+            DraftInfo(
+                it,
+                syncDraftType,
+                asyncDraftType
+            )
         }
-        DraftInfo(
-            abstractDraftType,
-            syncDraftType,
-            asyncDraftType
-        )
     }
 }
 
@@ -238,13 +243,13 @@ private class PropImpl(
         kotlinProp.toString()
 }
 
-private fun getAbstractDraftType(immutableType: ImmutableType): Class<Draft<*>> {
+private fun getAbstractDraftType(immutableType: ImmutableType): Class<Draft<*>>? {
     val javaType = immutableType.kotlinType.java
     val abstractDraftType =
         try {
             Class.forName("${javaType.name}Draft")
         } catch (ex: ClassNotFoundException) {
-            throw IllegalArgumentException("Cannot find draft type '${javaType.name}Draft' for '${javaType.name}'")
+            return null
         }
     if (!abstractDraftType.isInterface) {
         throw MetadataException(

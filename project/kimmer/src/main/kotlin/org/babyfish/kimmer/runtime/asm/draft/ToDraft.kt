@@ -34,6 +34,12 @@ internal fun MethodVisitor.visitToDraft(
         true
     )
     if (!prop.isList) {
-        visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(prop.targetType!!.draftInfo.abstractType))
+        visitTypeInsn(
+            Opcodes.CHECKCAST,
+            Type.getInternalName(
+            prop.targetType!!.draftInfo?.abstractType
+                ?: prop.targetType!!.kotlinType.java
+            )
+        )
     }
 }

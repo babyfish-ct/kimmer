@@ -164,6 +164,9 @@ private fun ClassVisitor.writeCreateDraft(
             "(L$targetDraftContextInternalName;L$modelInternalName;)V",
             false
         )
+        if (immutableType.draftInfo === null) {
+            visitTypeInsn(Opcodes.CHECKCAST, DRAFT_INTERNAL_NAME)
+        }
         visitInsn(Opcodes.ARETURN)
     }
 }

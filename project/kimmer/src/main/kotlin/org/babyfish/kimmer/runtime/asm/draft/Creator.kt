@@ -14,7 +14,9 @@ internal fun ClassVisitor.writeCreator(prop: ImmutableProp, args: GeneratorArgs)
     val draftDesc = if (prop.isList) {
         "Ljava/util/List;"
     } else {
-        Type.getDescriptor(prop.targetType!!.draftInfo.abstractType)
+        prop.targetType?.draftInfo?.abstractType?.let {
+            Type.getDescriptor(it)
+        } ?: Type.getDescriptor(prop.targetType!!.kotlinType.java)
     }
 
     writeMethod(

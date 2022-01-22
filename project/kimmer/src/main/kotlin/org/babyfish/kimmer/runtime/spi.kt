@@ -6,7 +6,7 @@ import org.babyfish.kimmer.meta.ImmutableType
 internal interface ImmutableSpi {
     fun `{type}`(): ImmutableType
     fun `{loaded}`(prop: String): Boolean
-    fun `{value}`(prop: String): Any?
+    fun `{get}`(prop: String): Any?
     fun hashCode(shallow: Boolean): Int
     fun equals(other: Any?, shallow: Boolean): Boolean
 }
@@ -14,6 +14,7 @@ internal interface ImmutableSpi {
 internal interface DraftSpi: ImmutableSpi {
     fun `{draftContext}`(): DraftContext
     fun `{unload}`(prop: String): Unit
-    fun `{value}`(prop: String, value: Any?): Unit
+    fun `{getOrCreate}`(prop: String): Any
+    fun `{set}`(prop: String, value: Any?): Unit
     fun `{resolve}`(): Immutable
 }

@@ -51,7 +51,6 @@ internal fun ClassVisitor.writeType(args: GeneratorArgs) {
 
     writeRuntimeType(args)
     writeLoaded(args)
-    writeValue(args)
 
     writeHashCode(args)
     writeEquals(args)
@@ -60,7 +59,10 @@ internal fun ClassVisitor.writeType(args: GeneratorArgs) {
     writeContext(args)
     writeResolve(args)
 
-    writeSetValue(args)
+    writeDynamicGetter(args)
+    writeDynamicCreator(args)
+    writeDynamicSetter(args)
+
     writeUnload(args)
 
     visitEnd()

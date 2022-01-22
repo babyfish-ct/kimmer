@@ -1,7 +1,9 @@
 package org.babyfish.kimmer.runtime.asm.sync
 
 import org.babyfish.kimmer.meta.ImmutableType
+import org.babyfish.kimmer.runtime.asm.*
 import org.babyfish.kimmer.runtime.asm.BYTECODE_VERSION
+import org.babyfish.kimmer.runtime.asm.DRAFT_SPI_INTERNAL_NAME
 import org.babyfish.kimmer.runtime.asm.draftImplInternalName
 import org.babyfish.kimmer.runtime.asm.syncDraftImplInternalName
 import org.springframework.asm.ClassVisitor
@@ -16,8 +18,15 @@ internal fun ClassVisitor.writeType(type: ImmutableType) {
         syncDraftImplInternalName(type),
         null,
         draftImplInternalName(type),
-        arrayOf(
-            Type.getInternalName(type.draftInfo.syncType)
+        type.draftInfo?.syncType?.let {
+            arrayOf(
+                Type.getInternalName(it),
+                DRAFT_SPI_INTERNAL_NAME
+            )
+        } ?: arrayOf(
+            SYNC_DRAFT_INTERNAL_NAME,
+            Type.getInternalName(type.kotlinType.java),
+            DRAFT_SPI_INTERNAL_NAME
         )
     )
 

@@ -216,7 +216,7 @@ private val draftContextLocal = ThreadLocal<SyncDraftContext>()
  */
 suspend fun <T: Immutable> produceAsync(
     type: KClass<T>,
-    base: T?,
+    base: T? = null,
     block: suspend Draft<T>.() -> Unit
 ): T =
     currentCoroutineContext()[DraftContextElement]?.ctx?.let {
