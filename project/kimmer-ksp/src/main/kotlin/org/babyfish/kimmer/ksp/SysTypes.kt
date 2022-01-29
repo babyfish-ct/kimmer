@@ -15,7 +15,7 @@ class SysTypes private constructor(
         ?: error("Internal bug")
 
     val connectionType: KSType = resolver
-        .getClassDeclarationByName("$KIMMER_PACKAGE.Connection")
+        .getClassDeclarationByName("$KIMMER_PACKAGE.graphql.Connection")
         ?.asStarProjectedType()
         ?: error("Internal bug")
 

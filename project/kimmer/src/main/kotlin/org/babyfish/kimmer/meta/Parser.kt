@@ -1,6 +1,7 @@
 package org.babyfish.kimmer.meta
 
 import org.babyfish.kimmer.*
+import org.babyfish.kimmer.graphql.Connection
 import org.springframework.core.GenericTypeResolver
 import java.util.*
 import kotlin.reflect.*
