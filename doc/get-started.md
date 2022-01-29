@@ -14,8 +14,8 @@ id("com.google.devtools.ksp") version "1.6.10-1.0.2"
 ```
 b. Add this section into *dependencies{}*
 ```kts
-implementation("org.babyfish.kimmer:kimmer:0.0.3")
-ksp("org.babyfish.kimmer:kimmer-ksp:0.0.3")
+implementation("org.babyfish.kimmer:kimmer:0.0.4")
+ksp("org.babyfish.kimmer:kimmer-ksp:0.0.4")
 ```
 Then click the refresh icon of gradle window.
 
