@@ -6,8 +6,13 @@ plugins {
 }
 
 dependencies {
+
     api(project(":kimmer"))
+    api("io.r2dbc:r2dbc-spi:0.9.1.RELEASE")
+
     kspTest(project(":kimmer-ksp"))
+
+    testImplementation(kotlin("test"))
 }
 
 ksp {
