@@ -18,7 +18,9 @@ internal class EntityPropImpl(
     kotlinProp: KProperty1<*, *>
 ): EntityProp {
 
-    var _mappedBy: Any? = null
+    private var _mappedBy: Any? = null
+
+    private var _opposite: EntityProp? = null
 
     private var _storage: Storage? = null
 
@@ -68,6 +70,19 @@ internal class EntityPropImpl(
     override val mappedBy: EntityProp?
         get() = _mappedBy as EntityProp?
 
+    override val opposite: EntityProp?
+        get() = _opposite
+
+    fun setMappedByName(name: String) {
+        if (_mappedBy !== null) {
+            throw MappingException(
+                "Cannot set mappedBy of '${kotlinProp}' " +
+                    "because it has already been set"
+            )
+        }
+        _mappedBy = name
+    }
+
     fun resolve(builder: EntityMappingBuilderImpl, phase: ResolvingPhase) {
         when (phase) {
             ResolvingPhase.PROP_TARGET -> resolveTarget(builder)
@@ -105,6 +120,8 @@ internal class EntityPropImpl(
                 )
             }
             _mappedBy = mappedByProp
+            _opposite = mappedByProp
+            mappedByProp._opposite = this
         }
     }
 

@@ -37,7 +37,9 @@ interface EntityProp {
 
     val targetType: EntityType?
 
-    val mappedBy: EntityProp?
+    val mappedBy: EntityProp? // Same as opposite if not null
+
+    val opposite: EntityProp?
 
     val storage: Storage?
 }

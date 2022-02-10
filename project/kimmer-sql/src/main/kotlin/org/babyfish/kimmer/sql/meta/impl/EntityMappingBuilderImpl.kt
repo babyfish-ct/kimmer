@@ -43,7 +43,7 @@ internal class EntityMappingBuilderImpl: EntityMappingBuilder {
             if (!immutableProp.isAssociation) {
                 throw MappingException("Cannot map the non-association prop '$prop' as association prop")
             }
-            _mappedBy = mappedBy.name
+            setMappedByName(mappedBy.name)
         }
     }
 
