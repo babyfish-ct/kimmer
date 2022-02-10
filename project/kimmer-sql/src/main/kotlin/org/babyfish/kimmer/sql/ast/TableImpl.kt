@@ -58,17 +58,7 @@ internal class TableImpl<T: Immutable>(
         if (entityProp?.isReference != true) {
             throw IllegalArgumentException("'$prop' is not reference")
         }
-        val existing = childTableMap[prop.name]
-        if (existing !== null) {
-            if (existing.joinType != joinType) {
-                existing.joinType = JoinType.INNER
-            }
-            return existing as JoinableTable<X>
-        }
-        val newTable = TableImpl<X>(query, entityProp.targetType!!, this, entityProp, joinType)
-        childTableMap[prop.name] = newTable
-        use()
-        return newTable
+        return join(entityProp, joinType)
     }
 
     override fun <X : Immutable> joinList(prop: KProperty1<T, List<X>?>, joinType: JoinType): JoinableTable<X> {
@@ -76,17 +66,7 @@ internal class TableImpl<T: Immutable>(
         if (entityProp?.isList != true) {
             throw IllegalArgumentException("'$prop' is not list")
         }
-        val existing = childTableMap[prop.name]
-        if (existing !== null) {
-            if (existing.joinType != joinType) {
-                existing.joinType = JoinType.INNER
-            }
-            return existing as JoinableTable<X>
-        }
-        val newTable = TableImpl<X>(query, entityProp.targetType!!, this, entityProp, joinType)
-        childTableMap[prop.name] = newTable
-        use()
-        return newTable
+        return join(entityProp, joinType)
     }
 
     override fun <X : Immutable> joinConnection(prop: KProperty1<T, Connection<X>?>, joinType: JoinType): JoinableTable<X> {
@@ -94,7 +74,11 @@ internal class TableImpl<T: Immutable>(
         if (entityProp?.isConnection != true) {
             throw IllegalArgumentException("'$prop' is not connection")
         }
-        val existing = childTableMap[prop.name]
+        return join(entityProp, joinType)
+    }
+
+    private fun <X: Immutable> join(entityProp: EntityProp, joinType: JoinType): JoinableTable<X> {
+        val existing = childTableMap[entityProp.name]
         if (existing !== null) {
             if (existing.joinType != joinType) {
                 existing.joinType = JoinType.INNER
@@ -102,7 +86,7 @@ internal class TableImpl<T: Immutable>(
             return existing as JoinableTable<X>
         }
         val newTable = TableImpl<X>(query, entityProp.targetType!!, this, entityProp, joinType)
-        childTableMap[prop.name] = newTable
+        childTableMap[entityProp.name] = newTable
         use()
         return newTable
     }
