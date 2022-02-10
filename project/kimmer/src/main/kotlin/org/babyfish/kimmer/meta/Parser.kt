@@ -2,6 +2,7 @@ package org.babyfish.kimmer.meta
 
 import org.babyfish.kimmer.*
 import org.babyfish.kimmer.graphql.Connection
+import org.babyfish.kimmer.graphql.Input
 import org.springframework.core.GenericTypeResolver
 import java.util.*
 import kotlin.reflect.*
@@ -200,9 +201,12 @@ private class PropImpl(
             throw MetadataException("Illegal property '${kotlinProp}', array is not allowed")
         }
         isConnection = Connection::class.java.isAssignableFrom(returnType.java)
-        isList = !isConnection && Collection::class.java.isAssignableFrom(returnType.java)
-        isReference = !isConnection && !isList && Immutable::class.java.isAssignableFrom(returnType.java)
-        isTargetNullable = if (isList) {
+        isList = Collection::class.java.isAssignableFrom(returnType.java)
+        isReference = !isConnection && Immutable::class.java.isAssignableFrom(returnType.java)
+        if (isConnection && isList) {
+            throw MetadataException("Illegal property '${kotlinProp}', its return type canot be both connection and list")
+        }
+        isTargetNullable = if (isConnection || isList) {
             kotlinProp.returnType.arguments[0].type?.isMarkedNullable ?: false
         } else {
             false
@@ -218,25 +222,48 @@ private class PropImpl(
     override val targetType: ImmutableType?
         get() = _targetType
 
+    @Suppress("UNCHECKED_CAST")
     fun resolve(parser: Parser) {
         val cls = kotlinProp.returnType.classifier as KClass<*>
-        if (isConnection) {
-            if (cls.typeParameters.isNotEmpty()) {
-                throw MetadataException("Illegal property '${kotlinProp}', connection property of immutable object must return derived type of '${Connection::class.qualifiedName}' without type parameters")
+        val targetJavaType = when {
+            isConnection -> {
+                if (cls.typeParameters.isNotEmpty()) {
+                    throw MetadataException(
+                        "Illegal property '${kotlinProp}', the type of connection " +
+                            "must must be strictly equal to '${Connection::class.qualifiedName}'"
+                    )
+                }
+                val targetClassifier = kotlinProp.returnType.arguments[0].type?.classifier
+                if (targetClassifier !is KClass<*> || !Immutable::class.java.isAssignableFrom(targetClassifier.java)) {
+                    throw MetadataException("Illegal property '${kotlinProp}', generic argument of connection is not immutable type")
+                }
+                if (Input::class.java.isAssignableFrom(targetClassifier.java)) {
+                    throw MetadataException("Illegal property '${kotlinProp}', generic argument of connection cannot be input type")
+                }
+                targetClassifier.java
             }
-            val targetJavaType = GenericTypeResolver.resolveTypeArgument(cls.java, Connection::class.java)
+            isList -> {
+                if (cls != List::class) {
+                    throw MetadataException(
+                        "Illegal property '${kotlinProp}', the type of connection " +
+                            "must must be strictly equal to '${List::class.qualifiedName}'"
+                    )
+                }
+                val targetClassifier = kotlinProp.returnType.arguments[0].type?.classifier
+                if (targetClassifier !is KClass<*> || !Immutable::class.java.isAssignableFrom(targetClassifier.java)) {
+                    throw MetadataException("Illegal property '${kotlinProp}', generic argument of list is not immutable type")
+                }
+                if (Input::class.java.isAssignableFrom(targetClassifier.java)) {
+                    throw MetadataException("Illegal property '${kotlinProp}', generic argument of list cannot be input type")
+                }
+                targetClassifier.java
+            }
+            isReference ->
+                cls.java
+            else -> null
+        }
+        if (targetJavaType !== null) {
             _targetType = parser.get(targetJavaType as Class<out Immutable>)
-        } else if (isList) {
-            if (cls != List::class) {
-                throw MetadataException("Illegal property '${kotlinProp}', list property of immutable object must return 'kotlin.List'")
-            }
-            val targetClassifier = kotlinProp.returnType.arguments[0].type?.classifier
-            if (targetClassifier !is KClass<*> || !Immutable::class.java.isAssignableFrom(targetClassifier.java)) {
-                throw MetadataException("Illegal property '${kotlinProp}', generic argument of list is not immutable type")
-            }
-            _targetType = parser.get(targetClassifier.java as Class<out Immutable>)
-        } else if (isReference) {
-            _targetType = parser.get(cls.java as Class<out Immutable>)
         }
     }
 

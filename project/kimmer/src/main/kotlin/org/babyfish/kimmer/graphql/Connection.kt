@@ -4,6 +4,8 @@ import org.babyfish.kimmer.Immutable
 
 interface Connection<N>: Immutable {
 
+    val totalCount: Int
+
     val edges: List<Edge<N>>
 
     val pageInfo: PageInfo

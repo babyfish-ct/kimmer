@@ -19,9 +19,9 @@ class DraftGenerator(
             file.fileName.let {
                 var lastDotIndex = it.lastIndexOf('.')
                 if (lastDotIndex === -1) {
-                    "${it}Draft"
+                    "${it}$DRAFT_SUFFIX"
                 } else {
-                    "${it.substring(0, lastDotIndex)}${DRAFT_SUFFIX}"
+                    "${it.substring(0, lastDotIndex)}$DRAFT_SUFFIX"
                 }
             }
         codeGenerator.createNewFile(
@@ -98,7 +98,7 @@ class DraftGenerator(
         if (prop.isMutable) {
             throw GeneratorException("The property '${prop.qualifiedName!!.asString()}' cannot be mutable")
         }
-        val meta = prop.findPropMeta()
+        val meta = PropMeta.of(prop, sysTypes)
 
         addProperty(
             PropertySpec.builder(
@@ -116,96 +116,11 @@ class DraftGenerator(
                     .builder(prop.simpleName.asString())
                     .apply {
                         modifiers += KModifier.ABSTRACT
-                        returns(meta.funReturnType)
+                        returns(meta.draftFunReturnType)
                     }
                     .build()
             )
         }
-    }
-
-    private fun KSPropertyDeclaration.findPropMeta(): PropMeta {
-        val nullableType = type.resolve()
-        val nonNullType = nullableType.makeNotNullable()
-        if (sysTypes.mapType.isAssignableFrom(nonNullType)) {
-            throw GeneratorException("The property '${qualifiedName!!.asString()}' cannot be map")
-        }
-        val isList = sysTypes.collectionType.isAssignableFrom(nonNullType)
-        val targetType = when {
-            sysTypes.connectionType.isAssignableFrom(nonNullType) -> {
-                val declaration = nonNullType.declaration
-                if (nonNullType.arguments.isNotEmpty() ||
-                    declaration !is KSClassDeclaration ||
-                    declaration.classKind !== ClassKind.INTERFACE
-                ) {
-                    throw GeneratorException(
-                        "The property '${qualifiedName!!.asString()}' must " +
-                            "be derived interface of connection without type arguments"
-                    )
-                }
-                nonNullType.findConnectionNodeType()?.also {
-                    if (it.isMarkedNullable) {
-                        throw GeneratorException(
-                            "The connection type '${nonNullType.declaration.qualifiedName!!.asString()}' " +
-                                "of the property '${qualifiedName!!.asString()}' does not support nullable node"
-                        )
-                    }
-                } ?: throw GeneratorException(
-                    "Cannot get connection node type from '${qualifiedName!!.asString()}'"
-                )
-            }
-            isList -> {
-                if (nonNullType.declaration != sysTypes.listType.declaration) {
-                    throw GeneratorException("The property '${qualifiedName!!.asString()}' must be list")
-                }
-                nonNullType.arguments[0].type?.resolve() ?: throw GeneratorException(
-                    "Cannot get list element type from '${qualifiedName!!.asString()}'"
-                )
-            }
-            sysTypes.immutableType.isAssignableFrom(nonNullType) -> {
-                nonNullType
-            }
-            else -> null
-        } ?: return PropMeta(this, nullableType.isMarkedNullable)
-
-        val declaration = targetType.declaration
-        if (!sysTypes.immutableType.isAssignableFrom(targetType) ||
-            declaration !is KSClassDeclaration ||
-            declaration.classKind != ClassKind.INTERFACE ||
-            declaration.typeParameters.isNotEmpty()
-        ) {
-            throw GeneratorException(
-                "The property '${qualifiedName!!.asString()}' is not valid association, " +
-                    "its target type '${declaration.qualifiedName!!.asString()}' is not " +
-                    "interface extends Immutable"
-            )
-        }
-        return PropMeta(
-            this,
-            nullableType.isMarkedNullable,
-            declaration,
-            isList,
-            if (isList) {
-                targetType.isMarkedNullable
-            } else {
-                !sysTypes.connectionType.isAssignableFrom(nonNullType) && nullableType.isMarkedNullable
-            }
-        )
-    }
-
-    private fun KSType.findConnectionNodeType(): KSType? {
-        if (this == sysTypes.connectionType) {
-            return arguments[0].type?.resolve()
-        }
-        val declaration = declaration
-        if (declaration is KSClassDeclaration) {
-            for (superType in declaration.superTypes) {
-                val result = superType.resolve().findConnectionNodeType()
-                if (result !== null) {
-                    return result
-                }
-            }
-        }
-        return null
     }
 
     private fun TypeSpec.Builder.addNestedTypes(declaration: KSClassDeclaration) {
@@ -289,71 +204,20 @@ class DraftGenerator(
                     val simpleName = declaration.simpleName.asString()
                     val suffix = if (isAsync) "Async" else ""
                     if (forDraft) {
-                        addCode("return $KIMMER_PACKAGE.produceDraft${suffix}(type, base, block)")
+                        addCode(
+                            "return %T(type, base, block)",
+                            ClassName(KIMMER_PACKAGE, "produceDraft$suffix")
+                        )
                     } else {
-                        addCode("return $KIMMER_PACKAGE.produce${suffix}(type, base) { (this as ${simpleName}Draft.$mode).block() }")
+                        addCode(
+                            "return %T(type, base) { (this as ${simpleName}Draft.$mode).block() }",
+                            ClassName(KIMMER_PACKAGE, "produce$suffix")
+                        )
                     }
                 }
                 .build()
         )
     }
-}
-
-private fun KSClassDeclaration.asClassName(simpleNameMapper: ((String) -> String)? = null): ClassName {
-    val simpleName = simpleName.asString()
-    if (simpleNameMapper === null) {
-        return ClassName(packageName.asString(), simpleName)
-    }
-    return ClassName(packageName.asString(), simpleNameMapper(simpleName))
-}
-
-private val KSClassDeclaration.isImmutableAbstract: Boolean
-    get() = this.annotations.any {
-        it.annotationType.resolve().declaration.qualifiedName?.asString() ==
-            "$KIMMER_PACKAGE.Abstract"
-    }
-
-private data class PropMeta(
-    val prop: KSPropertyDeclaration,
-    val nullable: Boolean,
-    val targetDeclaration: KSClassDeclaration? = null,
-    val isList: Boolean = false,
-    val isTargetNullable: Boolean = false
-) {
-    val returnType: TypeName by lazy {
-        if (isList) {
-            ClassName("kotlin.collections", "List")
-                .parameterizedBy(
-                    targetDeclaration!!.asClassName()
-                )
-        } else {
-            scalarTypeName
-        }
-    }
-
-    val funReturnType: TypeName by lazy {
-        targetDeclaration
-            ?.run {
-                val draftTypeName = asClassName {
-                    "$it$DRAFT_SUFFIX"
-                }.parameterizedBy(
-                    WildcardTypeName.producerOf(asClassName())
-                )
-                if (isList) {
-                    ClassName("kotlin.collections", "MutableList")
-                        .parameterizedBy(draftTypeName)
-                } else {
-                    draftTypeName
-                }
-            }
-            ?: scalarTypeName
-    }
-
-    private val scalarTypeName: TypeName
-        get() = (
-            prop.type.resolve().declaration as? KSClassDeclaration
-                ?: throw GeneratorException("The property '${prop}' must returns class/interface type")
-        ).asClassName().copy(nullable = isTargetNullable)
 }
 
 private val finalDraftPrefixes = listOf("Sync", "Async")

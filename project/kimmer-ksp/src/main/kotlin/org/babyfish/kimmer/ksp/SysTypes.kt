@@ -3,9 +3,8 @@ package org.babyfish.kimmer.ksp
 import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSType
-import java.lang.IllegalStateException
 
-class SysTypes private constructor(
+open class SysTypes internal constructor(
     val immutableType: KSType,
     resolver: Resolver
 ) {
@@ -16,6 +15,11 @@ class SysTypes private constructor(
 
     val connectionType: KSType = resolver
         .getClassDeclarationByName("$KIMMER_PACKAGE.graphql.Connection")
+        ?.asStarProjectedType()
+        ?: error("Internal bug")
+
+    val inputType: KSType = resolver
+        .getClassDeclarationByName("$KIMMER_PACKAGE.graphql.Input")
         ?.asStarProjectedType()
         ?: error("Internal bug")
 
@@ -35,11 +39,14 @@ class SysTypes private constructor(
         ?: error("Internal bug")
 
     companion object {
-        fun of(resolver: Resolver): SysTypes? {
+        fun of(resolver: Resolver, table: Boolean): SysTypes? {
             val immutableType = resolver
                 .getClassDeclarationByName("$KIMMER_PACKAGE.Immutable")
                 ?.asStarProjectedType()
                 ?: return null
+            if (table) {
+                return TableSysTypes(immutableType, resolver)
+            }
             return SysTypes(immutableType, resolver)
         }
     }

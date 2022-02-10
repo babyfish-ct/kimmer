@@ -6,21 +6,12 @@ plugins {
 }
 
 dependencies {
-    implementation(kotlin("reflect"))
-
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:1.6.0")
-
-    implementation("org.springframework.boot:spring-boot-autoconfigure:2.6.2")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
-
-    testImplementation(kotlin("test"))
-
+    api(project(":kimmer"))
     kspTest(project(":kimmer-ksp"))
+}
 
-    dokkaHtmlPlugin("org.jetbrains.dokka:dokka-base:1.6.0")
+ksp {
+    arg("immutable.table", "true")
 }
 
 kotlin {

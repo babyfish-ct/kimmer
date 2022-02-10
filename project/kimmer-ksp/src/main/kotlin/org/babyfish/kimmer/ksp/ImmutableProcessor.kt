@@ -7,9 +7,10 @@ import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.*
-import com.google.devtools.ksp.validate
 
-class DraftProcessor(
+class ImmutableProcessor(
+    private val draft: Boolean,
+    private val table: Boolean,
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger
 ): SymbolProcessor {
@@ -21,12 +22,18 @@ class DraftProcessor(
             return emptyList()
         }
         invoked = true
-        val sysTypes = SysTypes.of(resolver) ?: return mutableListOf()
+        val sysTypes = SysTypes.of(resolver, table) ?: return mutableListOf()
         val modelMap = findModelMap(resolver, sysTypes)
         if (modelMap.isNotEmpty()) {
             for ((file, declarations) in modelMap) {
-                DraftGenerator(codeGenerator, sysTypes, file, declarations)
-                    .generate(resolver.getAllFiles().toList())
+                if (draft) {
+                    DraftGenerator(codeGenerator, sysTypes, file, declarations)
+                        .generate(resolver.getAllFiles().toList())
+                }
+                if (table) {
+                    TableGenerator(codeGenerator, sysTypes as TableSysTypes, file, declarations)
+                        .generate(resolver.getAllFiles().toList())
+                }
             }
         }
         return emptyList()
