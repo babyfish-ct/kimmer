@@ -9,7 +9,7 @@ internal class SubQueryImpl<P: Immutable, T: Immutable>(
     type: KClass<T>,
 ): AbstractQueryImpl<T>(
     parentQuery.tableAliasAllocator,
-    parentQuery.entityTypeMap,
+    parentQuery.sqlClient,
     type
 ), SqlSubQuery<P, T> {
 

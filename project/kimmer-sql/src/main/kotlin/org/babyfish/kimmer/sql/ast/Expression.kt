@@ -71,12 +71,9 @@ internal class PropExpression<T>(
         get() = 0
 
     override fun SqlBuilder.render() {
-        if (prop.isId && table.parentProp !== null) {
-            val middleTable = (
-                table.parentProp.storage ?:
-                table.parentProp?.mappedBy?.storage
-            ) as? MiddleTable
-            val inverse = table.parentProp.mappedBy !== null
+        if (prop.isId && table.joinProp !== null) {
+            val middleTable = table.joinProp.storage as? MiddleTable
+            val inverse = table.isInverse
             if (middleTable !== null) {
                 sql(table.middleTableAlias!!)
                 sql(".")
@@ -90,7 +87,7 @@ internal class PropExpression<T>(
             if (!inverse) {
                 sql(table.parent!!.alias)
                 sql(".")
-                sql((table.parentProp.storage as Column).name)
+                sql((table.joinProp.storage as Column).name)
                 return
             }
         }

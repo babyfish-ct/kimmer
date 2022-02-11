@@ -20,4 +20,19 @@ interface JoinableTable<T: Immutable> : Table<T>, Selection<T> {
         prop: KProperty1<T, Connection<X>?>,
         joinType: JoinType = JoinType.INNER
     ): JoinableTable<X>
+
+    fun <X: Immutable> reverseJoinReference(
+        prop: KProperty1<X, T?>,
+        joinType: JoinType = JoinType.INNER
+    ): JoinableTable<X>
+
+    fun <X: Immutable> reverseJoinList(
+        prop: KProperty1<X, List<T>?>,
+        joinType: JoinType = JoinType.INNER
+    ): JoinableTable<X>
+
+    fun <X: Immutable> reverseJoinConnection(
+        prop: KProperty1<X, Connection<T>?>,
+        joinType: JoinType = JoinType.INNER
+    ): JoinableTable<X>
 }

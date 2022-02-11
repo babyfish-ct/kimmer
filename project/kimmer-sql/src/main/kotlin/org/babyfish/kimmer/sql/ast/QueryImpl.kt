@@ -8,7 +8,7 @@ import kotlin.reflect.KProperty1
 internal class QueryImpl<T: Immutable>(
     val sql: SqlClientImpl,
     type: KClass<T>
-): AbstractQueryImpl<T>(TableAliasAllocator(), sql.entityTypeMap, type), SqlQuery<T> {
+): AbstractQueryImpl<T>(TableAliasAllocator(), sql, type), SqlQuery<T> {
 
     override fun <R> select(
         prop: KProperty1<T, R?>

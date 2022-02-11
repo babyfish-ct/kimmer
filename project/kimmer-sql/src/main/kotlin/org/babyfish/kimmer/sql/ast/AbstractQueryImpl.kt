@@ -2,14 +2,19 @@ package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.meta.ImmutableType
+import org.babyfish.kimmer.sql.SqlClient
+import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import org.babyfish.kimmer.sql.meta.EntityType
 import kotlin.reflect.KClass
 
 internal abstract class AbstractQueryImpl<T: Immutable>(
     val tableAliasAllocator: TableAliasAllocator,
-    val entityTypeMap: Map<KClass<out Immutable>, EntityType>,
+    val sqlClient: SqlClientImpl,
     type: KClass<T>
 ): AbstractSqlQuery<T>, Renderable {
+
+    val entityTypeMap: Map<KClass<out Immutable>, EntityType>
+        get() = sqlClient.entityTypeMap
 
     private val predicates = mutableListOf<Expression<Boolean>>()
 
