@@ -59,5 +59,9 @@ internal class ConcatExpression(
             }
         }
     }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        parts.forEach { it.accept(visitor) }
+    }
 }
 

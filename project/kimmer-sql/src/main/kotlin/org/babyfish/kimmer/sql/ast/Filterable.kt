@@ -4,10 +4,7 @@ import org.babyfish.kimmer.sql.Entity
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
-interface Filterable<E, ID>
-    where E:
-          Entity<ID>,
-          ID: Comparable<ID> {
+interface Filterable<E: Entity<ID>, ID: Comparable<ID>> {
 
     val table: JoinableTable<E, ID>
 

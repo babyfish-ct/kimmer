@@ -56,3 +56,298 @@ data class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>(
     val _8: T8,
     val _9: T9
 )
+
+internal class PairExpression<A, B>(
+    private val a: Selection<A>,
+    private val b: Selection<B>
+): AbstractExpression<Pair<A, B>>() {
+
+    override val precedence: Int
+        get() = 0
+
+    override fun SqlBuilder.render() {
+        lowestPrecedence(true) {
+            render(a)
+            sql(", ")
+            render(b)
+        }
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        a.accept(visitor)
+        b.accept(visitor)
+    }
+}
+
+internal class TripleExpression<A, B, C>(
+    private val a: Selection<A>,
+    private val b: Selection<B>,
+    private val c: Selection<C>
+): AbstractExpression<Triple<A, B, C>>() {
+
+    override val precedence: Int
+        get() = 0
+
+    override fun SqlBuilder.render() {
+
+        lowestPrecedence(true) {
+            render(a)
+            sql(", ")
+            render(b)
+            sql(", ")
+            render(c)
+        }
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        a.accept(visitor)
+        b.accept(visitor)
+        c.accept(visitor)
+    }
+}
+
+internal class Tuple4Expression<T1, T2, T3, T4>(
+    private val selection1: Selection<T1>,
+    private val selection2: Selection<T2>,
+    private val selection3: Selection<T3>,
+    private val selection4: Selection<T4>,
+): AbstractExpression<Tuple4<T1, T2, T3, T4>>() {
+
+    override val precedence: Int
+        get() = 0
+
+    override fun SqlBuilder.render() {
+
+        lowestPrecedence(true) {
+            render(selection1)
+            sql(", ")
+            render(selection2)
+            sql(", ")
+            render(selection3)
+            sql(", ")
+            render(selection4)
+        }
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        selection1.accept(visitor)
+        selection2.accept(visitor)
+        selection3.accept(visitor)
+        selection4.accept(visitor)
+    }
+}
+
+internal class Tuple5Expression<T1, T2, T3, T4, T5>(
+    private val selection1: Selection<T1>,
+    private val selection2: Selection<T2>,
+    private val selection3: Selection<T3>,
+    private val selection4: Selection<T4>,
+    private val selection5: Selection<T5>,
+): AbstractExpression<Tuple5<T1, T2, T3, T4, T5>>() {
+
+    override val precedence: Int
+        get() = 0
+
+    override fun SqlBuilder.render() {
+
+        lowestPrecedence(true) {
+            render(selection1)
+            sql(", ")
+            render(selection2)
+            sql(", ")
+            render(selection3)
+            sql(", ")
+            render(selection4)
+            sql(", ")
+            render(selection5)
+        }
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        selection1.accept(visitor)
+        selection2.accept(visitor)
+        selection3.accept(visitor)
+        selection4.accept(visitor)
+        selection5.accept(visitor)
+    }
+}
+
+internal class Tuple6Expression<T1, T2, T3, T4, T5, T6>(
+    private val selection1: Selection<T1>,
+    private val selection2: Selection<T2>,
+    private val selection3: Selection<T3>,
+    private val selection4: Selection<T4>,
+    private val selection5: Selection<T5>,
+    private val selection6: Selection<T6>,
+): AbstractExpression<Tuple6<T1, T2, T3, T4, T5, T6>>() {
+
+    override val precedence: Int
+        get() = 0
+
+    override fun SqlBuilder.render() {
+
+        lowestPrecedence(true) {
+            render(selection1)
+            sql(", ")
+            render(selection2)
+            sql(", ")
+            render(selection3)
+            sql(", ")
+            render(selection4)
+            sql(", ")
+            render(selection5)
+            sql(", ")
+            render(selection6)
+        }
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        selection1.accept(visitor)
+        selection2.accept(visitor)
+        selection3.accept(visitor)
+        selection4.accept(visitor)
+        selection5.accept(visitor)
+        selection6.accept(visitor)
+    }
+}
+
+internal class Tuple7Expression<T1, T2, T3, T4, T5, T6, T7>(
+    private val selection1: Selection<T1>,
+    private val selection2: Selection<T2>,
+    private val selection3: Selection<T3>,
+    private val selection4: Selection<T4>,
+    private val selection5: Selection<T5>,
+    private val selection6: Selection<T6>,
+    private val selection7: Selection<T7>,
+): AbstractExpression<Tuple7<T1, T2, T3, T4, T5, T6, T7>>() {
+
+    override val precedence: Int
+        get() = 0
+
+    override fun SqlBuilder.render() {
+
+        lowestPrecedence(true) {
+            render(selection1)
+            sql(", ")
+            render(selection2)
+            sql(", ")
+            render(selection3)
+            sql(", ")
+            render(selection4)
+            sql(", ")
+            render(selection5)
+            sql(", ")
+            render(selection6)
+            sql(", ")
+            render(selection7)
+        }
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        selection1.accept(visitor)
+        selection2.accept(visitor)
+        selection3.accept(visitor)
+        selection4.accept(visitor)
+        selection5.accept(visitor)
+        selection6.accept(visitor)
+        selection7.accept(visitor)
+    }
+}
+
+internal class Tuple8Expression<T1, T2, T3, T4, T5, T6, T7, T8>(
+    private val selection1: Selection<T1>,
+    private val selection2: Selection<T2>,
+    private val selection3: Selection<T3>,
+    private val selection4: Selection<T4>,
+    private val selection5: Selection<T5>,
+    private val selection6: Selection<T6>,
+    private val selection7: Selection<T7>,
+    private val selection8: Selection<T8>,
+): AbstractExpression<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>>() {
+
+    override val precedence: Int
+        get() = 0
+
+    override fun SqlBuilder.render() {
+
+        lowestPrecedence(true) {
+            render(selection1)
+            sql(", ")
+            render(selection2)
+            sql(", ")
+            render(selection3)
+            sql(", ")
+            render(selection4)
+            sql(", ")
+            render(selection5)
+            sql(", ")
+            render(selection6)
+            sql(", ")
+            render(selection7)
+            sql(", ")
+            render(selection8)
+        }
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        selection1.accept(visitor)
+        selection2.accept(visitor)
+        selection3.accept(visitor)
+        selection4.accept(visitor)
+        selection5.accept(visitor)
+        selection6.accept(visitor)
+        selection7.accept(visitor)
+        selection8.accept(visitor)
+    }
+}
+
+internal class Tuple9Expression<T1, T2, T3, T4, T5, T6, T7, T8, T9>(
+    private val selection1: Selection<T1>,
+    private val selection2: Selection<T2>,
+    private val selection3: Selection<T3>,
+    private val selection4: Selection<T4>,
+    private val selection5: Selection<T5>,
+    private val selection6: Selection<T6>,
+    private val selection7: Selection<T7>,
+    private val selection8: Selection<T8>,
+    private val selection9: Selection<T9>,
+): AbstractExpression<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>>() {
+
+    override val precedence: Int
+        get() = 0
+
+    override fun SqlBuilder.render() {
+
+        lowestPrecedence(true) {
+            render(selection1)
+            sql(", ")
+            render(selection2)
+            sql(", ")
+            render(selection3)
+            sql(", ")
+            render(selection4)
+            sql(", ")
+            render(selection5)
+            sql(", ")
+            render(selection6)
+            sql(", ")
+            render(selection7)
+            sql(", ")
+            render(selection8)
+            sql(", ")
+            render(selection9)
+        }
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        selection1.accept(visitor)
+        selection2.accept(visitor)
+        selection3.accept(visitor)
+        selection4.accept(visitor)
+        selection5.accept(visitor)
+        selection6.accept(visitor)
+        selection7.accept(visitor)
+        selection8.accept(visitor)
+        selection9.accept(visitor)
+    }
+}

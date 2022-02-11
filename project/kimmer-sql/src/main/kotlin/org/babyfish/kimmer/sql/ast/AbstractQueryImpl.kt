@@ -11,7 +11,8 @@ internal abstract class AbstractQueryImpl<E, ID>(
     val sqlClient: SqlClientImpl,
     type: KClass<E>
 ): AbstractSqlQuery<E, ID>,
-    Renderable
+    Renderable,
+    TableReferenceElement
     where E:
           Entity<ID>,
           ID: Comparable<ID> {
@@ -152,5 +153,12 @@ internal abstract class AbstractQueryImpl<E, ID>(
                 }
             }
         }
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        predicates.forEach { it.accept(visitor) }
+        groupByExpressions.forEach { it.accept(visitor) }
+        havingPredicates.forEach { it.accept(visitor) }
+        orders.forEach { it.accept(visitor) }
     }
 }

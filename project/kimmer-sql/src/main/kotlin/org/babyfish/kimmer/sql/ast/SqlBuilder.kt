@@ -4,6 +4,8 @@ import java.lang.StringBuilder
 
 internal interface SqlBuilder {
 
+    fun isTableUsed(table: Table<*, *>): Boolean = true
+
     fun sql(sql: String)
 
     fun variable(value: Any?)

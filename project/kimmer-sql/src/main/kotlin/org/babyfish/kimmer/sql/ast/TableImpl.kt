@@ -22,7 +22,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
 
     val middleTableAlias: String?
 
-    private var _used = parent === null
+    private var _staticallyUsed = parent === null
 
     private val childTableMap = mutableMapOf<String, TableImpl<*, *>>()
 
@@ -56,6 +56,10 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             joinType
         )
 
+    override val id: Expression<ID>
+        get() =
+            PropExpression(this, entityType.idProp)
+
     override fun <X> get(prop: KProperty1<E, X?>): Expression<X> {
         val entityProp = entityType.props[prop.name] ?: error("No property '${prop.name}'")
         if (entityProp.targetType !== null) {
@@ -65,7 +69,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             )
         }
         if (!entityProp.isId) {
-            use()
+            staticallyUse()
         }
         return PropExpression(this, entityProp)
     }
@@ -177,7 +181,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             joinType
         )
         childTableMap[joinName] = newTable
-        use()
+        staticallyUse()
         return newTable
     }
 
@@ -251,7 +255,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
 
     override fun renderTo(builder: SqlBuilder) {
         builder.renderSelf()
-        if (_used) {
+        if (_staticallyUsed && builder.isTableUsed(this)) {
             for (childTable in childTableMap.values) {
                 childTable.renderTo(builder)
             }
@@ -286,7 +290,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 middleTable.joinColumnName,
                 false
             )
-            if (_used) {
+            if (_staticallyUsed && isTableUsed(this@TableImpl)) {
                 joinImpl(
                     joinType,
                     middleTableAlias!!,
@@ -297,7 +301,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                     false
                 )
             }
-        } else if (_used) {
+        } else if (_staticallyUsed && isTableUsed(this@TableImpl)) {
             joinImpl(
                 joinType,
                 parent.alias,
@@ -325,7 +329,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 middleTable.targetJoinColumnName,
                 true
             )
-            if (_used) {
+            if (_staticallyUsed && isTableUsed(this@TableImpl)) {
                 joinImpl(
                     joinType,
                     middleTableAlias!!,
@@ -380,10 +384,10 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         sql(newColumnName)
     }
 
-    private fun use() {
-        if (!_used) {
-            _used = true
-            parent?.use()
+    private fun staticallyUse() {
+        if (!_staticallyUsed) {
+            _staticallyUsed = true
+            parent?.staticallyUse()
         }
     }
 }

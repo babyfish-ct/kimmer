@@ -1,3 +1,3 @@
 package org.babyfish.kimmer.sql.ast
 
-interface Selection<T>
+sealed interface Selection<T>

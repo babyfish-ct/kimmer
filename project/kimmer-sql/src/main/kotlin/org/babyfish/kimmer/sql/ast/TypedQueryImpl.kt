@@ -7,7 +7,8 @@ internal class TypedQueryImpl<E, ID, R>(
     private val baseQuery: QueryImpl<E, ID>
 ) : TypedSqlQuery<E, ID, R>,
     SqlQuery<E, ID> by (baseQuery),
-    Renderable
+    Renderable,
+    TableReferenceElement
     where E:
           Entity<ID>,
           ID: Comparable<ID> {
@@ -48,5 +49,9 @@ internal class TypedQueryImpl<E, ID, R>(
             (selection as Renderable).renderTo(builder)
         }
         baseQuery.renderWithoutSelection(builder)
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        selections.forEach { it.accept(visitor) }
     }
 }

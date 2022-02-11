@@ -1,12 +1,14 @@
 package org.babyfish.kimmer.sql.ast
 
+import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
+import kotlin.reflect.KProperty1
 
-interface Expression<T> : Selection<T>
+sealed interface Expression<T> : Selection<T>
 
-internal abstract class AbstractExpression<T>: Expression<T>, Renderable {
+internal abstract class AbstractExpression<T>: Expression<T>, Renderable, TableReferenceElement {
 
     protected abstract fun SqlBuilder.render()
 
@@ -56,7 +58,7 @@ internal abstract class AbstractExpression<T>: Expression<T>, Renderable {
     protected inner class LowestPrecedenceContext(
         private val builder: SqlBuilder
     ) {
-        fun render(expression: Expression<*>) {
+        fun render(expression: Selection<*>) {
             (expression as Renderable).renderTo(builder)
         }
     }
@@ -95,6 +97,10 @@ internal class PropExpression<T>(
         sql(".")
         sql((prop.storage as Column).name)
     }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        visitor.visit(table, prop)
+    }
 }
 
 internal class CombinedExpression(
@@ -126,6 +132,10 @@ internal class CombinedExpression(
             render(predicate)
         }
     }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        predicates.forEach { it.accept(visitor) }
+    }
 }
 
 internal class NotExpression(
@@ -139,6 +149,10 @@ internal class NotExpression(
         sql("not(")
         render(predicate)
         sql(")")
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        predicate.accept(visitor)
     }
 }
 
@@ -187,6 +201,10 @@ internal class LikeExpression(
             variable(pattern)
         }
     }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        expression.accept(visitor)
+    }
 }
 
 internal class ComparisonExpression<T: Comparable<T>>(
@@ -205,6 +223,11 @@ internal class ComparisonExpression<T: Comparable<T>>(
         sql(" ")
         render(right)
     }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        left.accept(visitor)
+        right.accept(visitor)
+    }
 }
 
 internal class BetweenExpression<T: Comparable<T>>(
@@ -222,6 +245,12 @@ internal class BetweenExpression<T: Comparable<T>>(
         render(min)
         sql(" and ")
         render(max)
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        expression.accept(visitor)
+        min.accept(visitor)
+        max.accept(visitor)
     }
 }
 
@@ -243,6 +272,11 @@ internal class BinaryExpression<T: Number>(
         sql(" ")
         render(right)
     }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        left.accept(visitor)
+        right.accept(visitor)
+    }
 }
 
 internal class UnaryExpression<T: Number>(
@@ -256,6 +290,10 @@ internal class UnaryExpression<T: Number>(
     override fun SqlBuilder.render() {
         sql(operator)
         render(target)
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        target.accept(visitor)
     }
 }
 
@@ -275,43 +313,9 @@ internal class NullityExpression(
             sql(" is not null")
         }
     }
-}
 
-internal class PairExpression<A, B>(
-    private val a: Expression<A>,
-    private val b: Expression<B>
-): AbstractExpression<Pair<A, B>>() {
-
-    override val precedence: Int
-        get() = 0
-
-    override fun SqlBuilder.render() {
-        lowestPrecedence(true) {
-            render(a)
-            sql(", ")
-            render(b)
-        }
-    }
-}
-
-internal class TripleExpression<A, B, C>(
-    private val a: Expression<A>,
-    private val b: Expression<B>,
-    private val c: Expression<C>
-): AbstractExpression<Triple<A, B, C>>() {
-
-    override val precedence: Int
-        get() = 0
-
-    override fun SqlBuilder.render() {
-
-        lowestPrecedence(true) {
-            render(a)
-            sql(", ")
-            render(b)
-            sql(", ")
-            render(c)
-        }
+    override fun accept(visitor: TableReferenceVisitor) {
+        expression.accept(visitor)
     }
 }
 
@@ -342,6 +346,10 @@ internal class InListExpression<T>(
             sql(")")
         }
     }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        expression.accept(visitor)
+    }
 }
 
 internal class InSubQueryExpression<T>(
@@ -357,6 +365,11 @@ internal class InSubQueryExpression<T>(
         render(expression)
         sql(if (negative) " not in " else " in ")
         render(subQuery)
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        expression.accept(visitor)
+        subQuery.accept(visitor)
     }
 }
 
@@ -374,6 +387,10 @@ internal class ExistsExpression(
         (subQuery.select(constant(1)) as Renderable).renderTo(this)
         sql(")")
     }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        (subQuery as TableReferenceElement).accept(visitor)
+    }
 }
 
 internal class OperatorSubQueryExpression<T>(
@@ -388,6 +405,10 @@ internal class OperatorSubQueryExpression<T>(
         sql(operator)
         render(subQuery)
     }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        subQuery.accept(visitor)
+    }
 }
 
 internal class ValueExpression<T>(
@@ -400,6 +421,8 @@ internal class ValueExpression<T>(
     override fun SqlBuilder.render() {
         variable(value)
     }
+
+    override fun accept(visitor: TableReferenceVisitor) {}
 }
 
 internal class ConstantExpression<T: Number>(
@@ -415,6 +438,8 @@ internal class ConstantExpression<T: Number>(
         }
         sql(value.toString())
     }
+
+    override fun accept(visitor: TableReferenceVisitor) {}
 }
 
 internal class AggregationExpression<T>(
@@ -436,6 +461,10 @@ internal class AggregationExpression<T>(
             render(base)
         }
     }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        base.accept(visitor)
+    }
 }
 
 internal class ContainsExpression(
@@ -450,6 +479,8 @@ internal class ContainsExpression(
     private val targetColumnName: String
 
     private val thisColumnName: String
+
+    private val thisIdExpression: Expression<*>
 
     init {
         val middleTable = prop.storage as? MiddleTable
@@ -469,6 +500,8 @@ internal class ContainsExpression(
             targetColumnName = (prop.declaringType.idProp.storage as Column).name
             thisColumnName = column!!.name
         }
+
+        thisIdExpression = table.id
     }
 
     override val precedence: Int
@@ -479,9 +512,7 @@ internal class ContainsExpression(
             sql("1 = 0")
             return
         }
-        sql(table.alias)
-        sql(".")
-        sql((table.entityType.idProp.storage as Column).name)
+        render(thisIdExpression)
         sql(" in (select $thisColumnName from $tableName where $targetColumnName in (")
         var sp: String? = null
         for (targetId in targetIds) {
@@ -493,5 +524,9 @@ internal class ContainsExpression(
             variable(targetId)
         }
         sql("))")
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        thisIdExpression.accept(visitor)
     }
 }

@@ -7,7 +7,8 @@ internal class TypedSubQueryImpl<P, PID, E, ID, R>(
     private val baseQuery: SubQueryImpl<P, PID, E, ID>
 ): TypedSqlSubQuery<P, PID, E, ID, R>,
     SqlSubQuery<P, PID, E, ID> by (baseQuery),
-    Renderable
+    Renderable,
+    TableReferenceElement
     where
         P: Entity<PID>,
         PID: Comparable<PID>,
@@ -27,5 +28,9 @@ internal class TypedSubQueryImpl<P, PID, E, ID, R>(
         }
         baseQuery.renderWithoutSelection(builder)
         builder.sql(")")
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        selections.forEach { it.accept(visitor) }
     }
 }

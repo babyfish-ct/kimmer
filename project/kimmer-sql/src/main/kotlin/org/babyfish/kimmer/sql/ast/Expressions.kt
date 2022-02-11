@@ -222,18 +222,80 @@ fun Expression<*>.isNotNull(): Expression<Boolean> =
     NullityExpression(false, this)
 
 fun <A, B> tuple(
-    a: Expression<A>,
-    b: Expression<B>
+    a: Selection<A>,
+    b: Selection<B>
 ): Expression<Pair<A, B>> =
     PairExpression(a, b)
 
 fun <A, B, C> tuple(
-    a: Expression<A>,
-    b: Expression<B>,
-    c: Expression<C>
+    a: Selection<A>,
+    b: Selection<B>,
+    c: Selection<C>
 ): Expression<Triple<A, B, C>> =
     TripleExpression(a, b, c)
 
+fun <T1, T2, T3, T4> tuple(
+    selection1: Selection<T1>,
+    selection2: Selection<T2>,
+    selection3: Selection<T3>,
+    selection4: Selection<T4>,
+): Expression<Tuple4<T1, T2, T3, T4>> =
+    Tuple4Expression(selection1, selection2, selection3, selection4)
+
+fun <T1, T2, T3, T4, T5> tuple(
+    selection1: Selection<T1>,
+    selection2: Selection<T2>,
+    selection3: Selection<T3>,
+    selection4: Selection<T4>,
+    selection5: Selection<T5>,
+): Expression<Tuple5<T1, T2, T3, T4, T5>> =
+    Tuple5Expression(selection1, selection2, selection3, selection4, selection5)
+
+fun <T1, T2, T3, T4, T5, T6> tuple(
+    selection1: Selection<T1>,
+    selection2: Selection<T2>,
+    selection3: Selection<T3>,
+    selection4: Selection<T4>,
+    selection5: Selection<T5>,
+    selection6: Selection<T6>,
+): Expression<Tuple6<T1, T2, T3, T4, T5, T6>> =
+    Tuple6Expression(selection1, selection2, selection3, selection4, selection5, selection6)
+
+fun <T1, T2, T3, T4, T5, T6, T7> tuple(
+    selection1: Selection<T1>,
+    selection2: Selection<T2>,
+    selection3: Selection<T3>,
+    selection4: Selection<T4>,
+    selection5: Selection<T5>,
+    selection6: Selection<T6>,
+    selection7: Selection<T7>,
+): Expression<Tuple7<T1, T2, T3, T4, T5, T6, T7>> =
+    Tuple7Expression(selection1, selection2, selection3, selection4, selection5, selection6, selection7)
+
+fun <T1, T2, T3, T4, T5, T6, T7, T8> tuple(
+    selection1: Selection<T1>,
+    selection2: Selection<T2>,
+    selection3: Selection<T3>,
+    selection4: Selection<T4>,
+    selection5: Selection<T5>,
+    selection6: Selection<T6>,
+    selection7: Selection<T7>,
+    selection8: Selection<T8>,
+): Expression<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> =
+    Tuple8Expression(selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8)
+
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9> tuple(
+    selection1: Selection<T1>,
+    selection2: Selection<T2>,
+    selection3: Selection<T3>,
+    selection4: Selection<T4>,
+    selection5: Selection<T5>,
+    selection6: Selection<T6>,
+    selection7: Selection<T7>,
+    selection8: Selection<T8>,
+    selection9: Selection<T9>,
+): Expression<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> =
+    Tuple9Expression(selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8, selection9)
 
 infix fun <T> Expression<T>.valueIn(
     values: Collection<T>

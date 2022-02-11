@@ -13,7 +13,7 @@ internal class SubQueryImpl<P, PID, E, ID>(
         parentQuery.sqlClient,
         type
     ), 
-    SqlSubQuery<P, PID, E, ID> 
+    SqlSubQuery<P, PID, E, ID>
     where
         P: Entity<PID>,
         PID: Comparable<PID>,

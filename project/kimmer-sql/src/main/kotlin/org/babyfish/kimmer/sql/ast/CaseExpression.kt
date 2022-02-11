@@ -88,9 +88,11 @@ interface CaseBuilder<T> {
     ): Expression<T>
 }
 
+internal interface CaseChainNode: Renderable, TableReferenceElement
+
 internal class SimpleCaseStartBuilderImpl<C>(
     private val expression: Expression<C>
-) : SimpleCaseStartBuilder<C>, Renderable {
+) : SimpleCaseStartBuilder<C>, CaseChainNode {
 
     override fun <T> match(
         cond: Expression<C>,
@@ -102,13 +104,17 @@ internal class SimpleCaseStartBuilderImpl<C>(
         builder.sql("case ")
         (expression as Renderable).renderTo(builder)
     }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        expression.accept(visitor)
+    }
 }
 
 internal class SimpleCaseBuilderImpl<C, T>(
-    private val parent: Renderable,
+    private val parent: CaseChainNode,
     private val cond: Expression<C>,
     private val value: Expression<T>
-): SimpleCaseBuilder<C, T>, Renderable {
+): SimpleCaseBuilder<C, T>, CaseChainNode {
 
     override fun match(
         cond: Expression<C>,
@@ -126,9 +132,15 @@ internal class SimpleCaseBuilderImpl<C, T>(
         builder.sql(" then ")
         (value as Renderable).renderTo(builder)
     }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        parent.accept(visitor)
+        cond.accept(visitor)
+        value.accept(visitor)
+    }
 }
 
-internal class CaseStartBuilderImpl: CaseStartBuilder, Renderable {
+internal class CaseStartBuilderImpl: CaseStartBuilder, CaseChainNode {
 
     override fun <T> match(
         cond: Expression<Boolean>,
@@ -139,13 +151,15 @@ internal class CaseStartBuilderImpl: CaseStartBuilder, Renderable {
     override fun renderTo(builder: SqlBuilder) {
         builder.sql("case")
     }
+
+    override fun accept(visitor: TableReferenceVisitor) {}
 }
 
 internal class CaseBuilderImpl<T>(
-    private val parent: Renderable,
+    private val parent: CaseChainNode,
     private val cond: Expression<Boolean>,
     private val value: Expression<T>
-): CaseBuilder<T>, Renderable {
+): CaseBuilder<T>, CaseChainNode {
 
     override fun match(
         cond: Expression<Boolean>,
@@ -165,10 +179,16 @@ internal class CaseBuilderImpl<T>(
         builder.sql(" then ")
         (value as Renderable).renderTo(builder)
     }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        parent.accept(visitor)
+        cond.accept(visitor)
+        value.accept(visitor)
+    }
 }
 
 internal class CaseExpression<T>(
-    private val parent: Renderable,
+    private val parent: CaseChainNode,
     private val otherwise: Expression<T>
 ): AbstractExpression<T>() {
 
@@ -182,5 +202,10 @@ internal class CaseExpression<T>(
             render(otherwise)
             sql(" end")
         }
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        parent.accept(visitor)
+        otherwise.accept(visitor)
     }
 }
