@@ -1,6 +1,7 @@
 package org.babyfish.kimmer.sql.impl
 
 import org.babyfish.kimmer.Immutable
+import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.ast.QueryImpl
 import org.babyfish.kimmer.sql.ast.SqlQuery
@@ -14,10 +15,10 @@ internal class SqlClientImpl(
     internal val r2dbcExecutor: (suspend (String, List<Any?>) -> List<*>)?
 ) : SqlClient {
 
-    override fun <T: Immutable, R> createQuery(
-        type: KClass<T>,
-        block: SqlQuery<T>.() -> TypedSqlQuery<T, R>
-    ): TypedSqlQuery<T, R> =
+    override fun <E: Entity<ID>, ID: Comparable<ID>, R> createQuery(
+        type: KClass<E>,
+        block: SqlQuery<E, ID>.() -> TypedSqlQuery<E, ID, R>
+    ): TypedSqlQuery<E, ID, R> =
         QueryImpl(this, type).run {
             block()
         }

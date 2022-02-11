@@ -31,8 +31,14 @@ class ImmutableProcessor(
                         .generate(resolver.getAllFiles().toList())
                 }
                 if (table) {
-                    TableGenerator(codeGenerator, sysTypes as TableSysTypes, file, declarations)
-                        .generate(resolver.getAllFiles().toList())
+                    val tableSysTypes = sysTypes as TableSysTypes
+                    val entityDeclarations = declarations.filter {
+                        tableSysTypes.entityType.isAssignableFrom(it.asStarProjectedType())
+                    }
+                    if (entityDeclarations.isNotEmpty()) {
+                        TableGenerator(codeGenerator, tableSysTypes, file, entityDeclarations)
+                            .generate(resolver.getAllFiles().toList())
+                    }
                 }
             }
         }

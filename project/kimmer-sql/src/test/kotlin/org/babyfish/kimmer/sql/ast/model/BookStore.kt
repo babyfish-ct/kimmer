@@ -1,6 +1,8 @@
 package org.babyfish.kimmer.sql.ast.model
 
-interface BookStore: Node {
+import org.babyfish.kimmer.sql.Entity
+
+interface BookStore: Entity<String> {
     val name: String
     val books: List<Book>
 }

@@ -9,22 +9,27 @@ class TableSysTypes(
     resolver: Resolver
 ): SysTypes(immutableType, resolver) {
 
+    val entityType: KSType = resolver
+        .getClassDeclarationByName("$KIMMER_PACKAGE.sql.Entity")
+        ?.asStarProjectedType()
+        ?: error("Internal bug")
+
     val tableType: KSType = resolver
         .getClassDeclarationByName("$KIMMER_SQL_AST_PACKAGE.Table")
         ?.asStarProjectedType()
-        ?: noKimmerSqlType("Table")
+        ?: noAstType("Table")
 
     val joinableTableType: KSType = resolver
         .getClassDeclarationByName("$KIMMER_SQL_AST_PACKAGE.JoinableTable")
         ?.asStarProjectedType()
-        ?: noKimmerSqlType("Table")
+        ?: noAstType("Table")
 
     val joinTypeType: KSType = resolver
         .getClassDeclarationByName("$KIMMER_SQL_AST_PACKAGE.JoinType")
         ?.asStarProjectedType()
-        ?: noKimmerSqlType("JoinType")
+        ?: noAstType("JoinType")
 
-    private fun noKimmerSqlType(simpleName: String): Nothing {
+    private fun noAstType(simpleName: String): Nothing {
         throw GeneratorException(
             "The 'immutable.table' of ksp options is true, " +
                 "but the type '$KIMMER_SQL_AST_PACKAGE.$simpleName' cannot be resolved. " +

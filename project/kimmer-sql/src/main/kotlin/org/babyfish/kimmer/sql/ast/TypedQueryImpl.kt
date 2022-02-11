@@ -1,11 +1,17 @@
 package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.Immutable
+import org.babyfish.kimmer.sql.Entity
 
-internal class TypedQueryImpl<T: Immutable, R>(
+internal class TypedQueryImpl<E, ID, R>(
     private val selections: List<Selection<*>>,
-    private val baseQuery: QueryImpl<T>
-) : TypedSqlQuery<T, R>, SqlQuery<T> by (baseQuery), Renderable {
+    private val baseQuery: QueryImpl<E, ID>
+) : TypedSqlQuery<E, ID, R>,
+    SqlQuery<E, ID> by (baseQuery),
+    Renderable
+    where E:
+          Entity<ID>,
+          ID: Comparable<ID> {
 
     @Suppress("UNCHECKED_CAST")
     override fun execute(con: java.sql.Connection): List<R> {

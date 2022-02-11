@@ -1,11 +1,18 @@
 package org.babyfish.kimmer.sql.ast
 
-import org.babyfish.kimmer.Immutable
+import org.babyfish.kimmer.sql.Entity
 
-internal class TypedSubQueryImpl<P: Immutable, T: Immutable, R>(
+internal class TypedSubQueryImpl<P, PID, E, ID, R>(
     private val selections: List<Selection<*>>,
-    private val baseQuery: SubQueryImpl<P, T>
-): TypedSqlSubQuery<P, T, R>, SqlSubQuery<P, T> by (baseQuery), Renderable {
+    private val baseQuery: SubQueryImpl<P, PID, E, ID>
+): TypedSqlSubQuery<P, PID, E, ID, R>,
+    SqlSubQuery<P, PID, E, ID> by (baseQuery),
+    Renderable
+    where
+        P: Entity<PID>,
+        PID: Comparable<PID>,
+        E: Entity<ID>,
+        ID: Comparable<ID> {
 
     override fun renderTo(builder: SqlBuilder) {
         builder.sql("(select ")

@@ -1,5 +1,11 @@
 package org.babyfish.kimmer.sql.ast
 
-import org.babyfish.kimmer.Immutable
+import org.babyfish.kimmer.sql.Entity
 
-interface TypedSqlSubQuery<P: Immutable, T: Immutable, R> : SqlSubQuery<P, T>, Expression<R>
+interface TypedSqlSubQuery<
+    P: Entity<PID>,
+    PID: Comparable<PID>,
+    E: Entity<ID>,
+    ID: Comparable<ID>,
+    R
+> : SqlSubQuery<P, PID, E, ID>, Expression<R>

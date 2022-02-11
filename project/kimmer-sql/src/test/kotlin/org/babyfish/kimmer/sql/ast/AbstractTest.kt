@@ -3,6 +3,7 @@ package org.babyfish.kimmer.sql.ast
 import io.r2dbc.spi.Connection
 import kotlinx.coroutines.runBlocking
 import org.babyfish.kimmer.Immutable
+import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.model.Author
 import org.babyfish.kimmer.sql.ast.model.Book
 import org.babyfish.kimmer.sql.ast.model.BookStore
@@ -53,11 +54,11 @@ abstract class AbstractTest {
         inverseAssociation(Author::books, Book::authors)
     }
 
-    protected fun <T: Immutable, R> testQuery(
-        type: KClass<T>,
+    protected fun <E: Entity<ID>, ID: Comparable<ID>, R> testQuery(
+        type: KClass<E>,
         sql: String,
         vararg variables: Any?,
-        block: SqlQuery<T>.() -> TypedSqlQuery<T, R>
+        block: SqlQuery<E, ID>.() -> TypedSqlQuery<E, ID, R>
     ) {
         runBlocking {
             sqlClient.createQuery(type, block).execute(con)

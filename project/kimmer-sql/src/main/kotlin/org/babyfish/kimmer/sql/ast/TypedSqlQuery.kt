@@ -1,8 +1,13 @@
 package org.babyfish.kimmer.sql.ast
 
-import org.babyfish.kimmer.Immutable
+import org.babyfish.kimmer.sql.Entity
 
-interface TypedSqlQuery<T: Immutable, R>: SqlQuery<T>, Expression<R> {
+interface TypedSqlQuery<E, ID, R>:
+    SqlQuery<E, ID>,
+    Expression<R>
+    where E:
+          Entity<ID>,
+          ID: Comparable<ID> {
 
     fun execute(con: java.sql.Connection): List<R>
 

@@ -1,5 +1,6 @@
 package org.babyfish.kimmer.sql.ast
 
+import org.babyfish.kimmer.Immutable
 import kotlin.reflect.KClass
 
 fun <X: Any> sql(
@@ -246,39 +247,39 @@ infix fun <T> Expression<T>.valueNotIn(
 
 
 infix fun <T> Expression<T>.valueIn(
-    subQuery: TypedSqlSubQuery<*, *, T>
+    subQuery: TypedSqlSubQuery<*, *, *, *, T>
 ): Expression<Boolean> =
     InSubQueryExpression(false, this, subQuery)
 
 infix fun <T> Expression<T>.valueNotIn(
-    subQuery: TypedSqlSubQuery<*, *, T>
+    subQuery: TypedSqlSubQuery<*, *, *, *, T>
 ): Expression<Boolean> =
     InSubQueryExpression(true, this, subQuery)
 
 
 fun exists(
-    subQuery: SqlSubQuery<*, *>
+    subQuery: SqlSubQuery<*, *, *, *>
 ): Expression<Boolean> =
     ExistsExpression(false, subQuery)
 
 fun notExists(
-    subQuery: SqlSubQuery<*, *>
+    subQuery: SqlSubQuery<*, *, *, *>
 ): Expression<Boolean> =
     ExistsExpression(true, subQuery)
 
 
 fun <T> all(
-    subQuery: TypedSqlSubQuery<*, *, T>
+    subQuery: TypedSqlSubQuery<*, *, *, *, T>
 ): Expression<T> =
     OperatorSubQueryExpression("all", subQuery)
 
 fun <T> any(
-    subQuery: TypedSqlSubQuery<*, *, T>
+    subQuery: TypedSqlSubQuery<*, *, *, *, T>
 ): Expression<T> =
     OperatorSubQueryExpression("any", subQuery)
 
 fun <T> some(
-    subQuery: TypedSqlSubQuery<*, *, T>
+    subQuery: TypedSqlSubQuery<*, *, *, *, T>
 ): Expression<T> =
     OperatorSubQueryExpression("some", subQuery)
 

@@ -10,8 +10,8 @@ interface SqlClient {
 
     val entityTypeMap: Map<KClass<out Immutable>, EntityType>
 
-    fun <T: Immutable, R> createQuery(
-        type: KClass<T>,
-        block: SqlQuery<T>.() -> TypedSqlQuery<T, R>
-    ): TypedSqlQuery<T, R>
+    fun <E: Entity<ID>, ID: Comparable<ID>, R> createQuery(
+        type: KClass<E>,
+        block: SqlQuery<E, ID>.() -> TypedSqlQuery<E, ID, R>
+    ): TypedSqlQuery<E, ID, R>
 }

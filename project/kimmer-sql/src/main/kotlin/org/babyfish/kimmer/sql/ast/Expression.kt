@@ -347,7 +347,7 @@ internal class InListExpression<T>(
 internal class InSubQueryExpression<T>(
     private val negative: Boolean,
     private val expression: Expression<T>,
-    private val subQuery: TypedSqlSubQuery<*, *, T>
+    private val subQuery: TypedSqlSubQuery<*, *, *, *, T>
 ): AbstractExpression<Boolean>() {
 
     override val precedence: Int
@@ -362,7 +362,7 @@ internal class InSubQueryExpression<T>(
 
 internal class ExistsExpression(
     private val negative: Boolean,
-    private val subQuery: SqlSubQuery<*, *>
+    private val subQuery: SqlSubQuery<*, *, *, *>
 ): AbstractExpression<Boolean>() {
 
     override val precedence: Int
@@ -378,7 +378,7 @@ internal class ExistsExpression(
 
 internal class OperatorSubQueryExpression<T>(
     private val operator: String,
-    private val subQuery: TypedSqlSubQuery<*, *, T>
+    private val subQuery: TypedSqlSubQuery<*, *, *, *, T>
 ): AbstractExpression<T>() {
 
     override val precedence: Int

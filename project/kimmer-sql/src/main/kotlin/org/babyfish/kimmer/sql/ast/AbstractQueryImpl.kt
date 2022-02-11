@@ -2,16 +2,21 @@ package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.meta.ImmutableType
+import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import org.babyfish.kimmer.sql.meta.EntityType
 import kotlin.reflect.KClass
 
-internal abstract class AbstractQueryImpl<T: Immutable>(
+internal abstract class AbstractQueryImpl<E, ID>(
     val tableAliasAllocator: TableAliasAllocator,
     val sqlClient: SqlClientImpl,
-    type: KClass<T>
-): AbstractSqlQuery<T>, Renderable {
+    type: KClass<E>
+): AbstractSqlQuery<E, ID>,
+    Renderable
+    where E:
+          Entity<ID>,
+          ID: Comparable<ID> {
 
     val entityTypeMap: Map<KClass<out Immutable>, EntityType>
         get() = sqlClient.entityTypeMap
@@ -24,7 +29,7 @@ internal abstract class AbstractQueryImpl<T: Immutable>(
 
     private val orders = mutableListOf<Order>()
 
-    override val table: TableImpl<T> = TableImpl(
+    override val table: TableImpl<E> = TableImpl(
         this.let { it }, // Boring code ".let{ it }" is used to avoid compilation warning
         entityTypeMap[type]
             ?: throw IllegalArgumentException("Cannot create query for unmapped type '${type.qualifiedName}'")
@@ -72,20 +77,22 @@ internal abstract class AbstractQueryImpl<T: Immutable>(
         orders.clear()
     }
 
-    override fun <X : Immutable> subQuery(
+    override fun <X, XID, R> subQuery(
         type: KClass<X>,
-        block: (SqlSubQuery<T, X>.() -> Unit)?
-    ): SqlSubQuery<T, X> =
-        SubQueryImpl(this, type).apply {
-            block?.invoke(this)
+        block: SqlSubQuery<E, ID, X, XID>.() -> TypedSqlSubQuery<E, ID, X, XID, R>
+    ): TypedSqlSubQuery<E, ID, X, XID, R>
+    where X: Entity<XID>, XID: Comparable<XID> =
+        SubQueryImpl(this, type).run {
+            block()
         }
 
-    override fun <X : Immutable, R> typedSubQuery(
+    override fun <X, XID> untypedSubQuery(
         type: KClass<X>,
-        block: SqlSubQuery<T, X>.() -> TypedSqlSubQuery<T, X, R>
-    ): TypedSqlSubQuery<T, X, R> =
-        SubQueryImpl(this, type).run {
-            block?.invoke(this)
+        block: SqlSubQuery<E, ID, X, XID>.() -> Unit
+    ): SqlSubQuery<E, ID, X, XID>
+    where X: Entity<XID>, XID: Comparable<XID> =
+        SubQueryImpl(this, type).apply {
+            block()
         }
 
     override fun renderTo(builder: SqlBuilder) {

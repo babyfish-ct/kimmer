@@ -10,10 +10,9 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 internal class TableImpl<T: Immutable>(
-    private val query: AbstractQueryImpl<*>,
+    private val query: AbstractQueryImpl<*, *>,
     val entityType: EntityType,
     val parent: TableImpl<*>? = null,
-    private val joinName: String? = null,
     val isInverse: Boolean = false,
     val joinProp: EntityProp? = null,
     var joinType: JoinType = JoinType.INNER
@@ -140,7 +139,6 @@ internal class TableImpl<T: Immutable>(
             query,
             if (inverse) joinProp.declaringType else joinProp.targetType!!,
             this,
-            joinName,
             inverse,
             joinProp,
             joinType

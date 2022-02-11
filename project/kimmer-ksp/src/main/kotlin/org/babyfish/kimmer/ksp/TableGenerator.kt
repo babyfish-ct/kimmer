@@ -47,7 +47,7 @@ class TableGenerator(
                     for (classDeclaration in modelClassDeclarations) {
                         val selfTypeName = classDeclaration.asClassName()
                         for (prop in classDeclaration.getAllProperties()) {
-                            val propMeta = PropMeta.of(prop, sysTypes)
+                            val propMeta = PropMeta.of(prop, sysTypes, true)
                             val receiverTypeName =
                                 ClassName(
                                     KIMMER_SQL_AST_PACKAGE,

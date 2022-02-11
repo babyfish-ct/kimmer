@@ -54,7 +54,7 @@ data class PropMeta(
             ).asClassName().copy(nullable = isTargetNullable)
 
     companion object {
-        fun of(prop: KSPropertyDeclaration, sysTypes: SysTypes): PropMeta {
+        fun of(prop: KSPropertyDeclaration, sysTypes: SysTypes, mustBeEntity: Boolean = false): PropMeta {
             val nullableType = prop.type.resolve()
             val nonNullType = nullableType.makeNotNullable()
             if (sysTypes.mapType.isAssignableFrom(nonNullType)) {
@@ -95,14 +95,19 @@ data class PropMeta(
             } ?: return PropMeta(prop, nullableType.isMarkedNullable)
 
             val targetDeclaration = targetType.declaration
-            if (!sysTypes.immutableType.isAssignableFrom(targetType) ||
+            val expectedTargetType = if (mustBeEntity) {
+                (sysTypes as TableSysTypes).entityType
+            } else {
+                sysTypes.immutableType
+            }
+            if (!expectedTargetType.isAssignableFrom(targetType) ||
                 targetDeclaration !is KSClassDeclaration ||
                 targetDeclaration.classKind != ClassKind.INTERFACE
             ) {
                 throw GeneratorException(
                     "The property '${prop.qualifiedName!!.asString()}' is not valid association, " +
                         "its target type '${targetDeclaration.qualifiedName!!.asString()}' is not " +
-                        "interface extends Immutable"
+                        "interface extends '${expectedTargetType.declaration.qualifiedName?.asString()}'"
                 )
             }
             if (targetDeclaration.typeParameters.isNotEmpty()) {
