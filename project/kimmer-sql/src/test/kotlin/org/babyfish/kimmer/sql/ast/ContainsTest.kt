@@ -69,7 +69,7 @@ class ContainsTest: AbstractTest() {
             "id1",
             "id2"
         ) {
-            where(table.`~listContains`(Author::books, listOf("id1", "id2")))
+            where(table.`←listContains`(Author::books, listOf("id1", "id2")))
             select(constant(1))
         }
     }
@@ -86,7 +86,7 @@ class ContainsTest: AbstractTest() {
             "id1",
             "id2"
         ) {
-            where(table.`~listContains`(Book::authors, listOf("id1", "id2")))
+            where(table.`←listContains`(Book::authors, listOf("id1", "id2")))
             select(constant(1))
         }
     }

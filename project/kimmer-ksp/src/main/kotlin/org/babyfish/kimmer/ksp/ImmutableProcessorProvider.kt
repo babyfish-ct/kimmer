@@ -7,8 +7,19 @@ import com.google.devtools.ksp.processing.SymbolProcessorProvider
 class ImmutableProcessorProvider: SymbolProcessorProvider {
 
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
-        val draft = environment.parseBoolean("immutable.draft") ?: true
-        val table = environment.parseBoolean("immutable.table") ?: false
+
+        for (key in environment.options.keys) {
+            if (key.startsWith(ENV_OPTION_PREFIX) && !ENV_OPTION_KEYS.contains(key)) {
+                throw GeneratorException(
+                    "ksp option '$key' starts with '$ENV_OPTION_PREFIX', " +
+                        "but it is any one of these keys: $ENV_OPTION_KEYS"
+                )
+            }
+        }
+
+        val draft = environment.parseBoolean(ENV_OPTION_DRAFT) ?: true
+        val table = environment.parseBoolean(ENV_OPTION_TABLE) ?: false
+        val collectionJoinOnlyForSubQuery = environment.parseBoolean(ENV_OPTION_TABLE_COLLECTION_JOIN) ?: false
         if (!draft && table) {
             throw GeneratorException(
                 "Both 'immutable.draft' and 'immutable.table' of ksp options are false, " +
@@ -18,6 +29,7 @@ class ImmutableProcessorProvider: SymbolProcessorProvider {
         return ImmutableProcessor(
             draft,
             table,
+            collectionJoinOnlyForSubQuery,
             environment.codeGenerator,
             environment.logger
         )
@@ -32,3 +44,10 @@ class ImmutableProcessorProvider: SymbolProcessorProvider {
             }
         }
 }
+
+
+private const val ENV_OPTION_PREFIX = "kimmer."
+private const val ENV_OPTION_DRAFT = "${ENV_OPTION_PREFIX}draft"
+private const val ENV_OPTION_TABLE = "${ENV_OPTION_PREFIX}table"
+private const val ENV_OPTION_TABLE_COLLECTION_JOIN = "${ENV_OPTION_PREFIX}table.collection-join-only-for-sub-query"
+private val ENV_OPTION_KEYS = setOf(ENV_OPTION_DRAFT, ENV_OPTION_TABLE, ENV_OPTION_TABLE_COLLECTION_JOIN)

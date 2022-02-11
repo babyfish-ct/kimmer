@@ -20,8 +20,18 @@ internal class SubQueryImpl<P, PID, E, ID>(
         E: Entity<ID>,
         ID: Comparable<ID> {
 
+    override val table: SubQueryTableImpl<E, ID>
+        get() = super.table as SubQueryTableImpl<E, ID>
+
     override val parentTable: JoinableTable<P, PID>
         get() = parentQuery.table
+
+    override fun createTable(type: KClass<E>): SubQueryTableImpl<E, ID> =
+        SubQueryTableImpl(
+            this,
+            entityTypeMap[type]
+                ?: throw IllegalArgumentException("Cannot create query for unmapped type '${type.qualifiedName}'")
+        )
 
     override fun <R> select(
         prop: KProperty1<E, R?>

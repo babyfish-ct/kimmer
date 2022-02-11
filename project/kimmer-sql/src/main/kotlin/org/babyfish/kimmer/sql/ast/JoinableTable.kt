@@ -21,17 +21,17 @@ interface JoinableTable<E: Entity<ID>, ID: Comparable<ID>> : Table<E, ID>, Selec
         joinType: JoinType = JoinType.INNER
     ): JoinableTable<X, XID>
 
-    fun <X: Entity<XID>, XID: Comparable<XID>> `~joinReference`(
+    fun <X: Entity<XID>, XID: Comparable<XID>> `←joinReference`(
         prop: KProperty1<X, E?>,
         joinType: JoinType = JoinType.INNER
     ): JoinableTable<X, XID>
 
-    fun <X: Entity<XID>, XID: Comparable<XID>> `~joinList`(
+    fun <X: Entity<XID>, XID: Comparable<XID>> `←joinList`(
         prop: KProperty1<X, List<E>?>,
         joinType: JoinType = JoinType.INNER
     ): JoinableTable<X, XID>
 
-    fun <X: Entity<XID>, XID: Comparable<XID>> `~joinConnection`(
+    fun <X: Entity<XID>, XID: Comparable<XID>> `←joinConnection`(
         prop: KProperty1<X, Connection<E>?>,
         joinType: JoinType = JoinType.INNER
     ): JoinableTable<X, XID>
@@ -46,12 +46,12 @@ interface JoinableTable<E: Entity<ID>, ID: Comparable<ID>> : Table<E, ID>, Selec
         xIds: Collection<XID>
     ): Expression<Boolean>
 
-    fun <X: Entity<XID>, XID: Comparable<XID>> `~listContains`(
+    fun <X: Entity<XID>, XID: Comparable<XID>> `←listContains`(
         prop: KProperty1<X, List<E>?>,
         xIds: Collection<XID>
     ): Expression<Boolean>
 
-    fun <X: Entity<XID>, XID: Comparable<XID>> `~connectionContains`(
+    fun <X: Entity<XID>, XID: Comparable<XID>> `←connectionContains`(
         prop: KProperty1<X, Connection<E>?>,
         xIds: Collection<XID>
     ): Expression<Boolean>

@@ -16,7 +16,8 @@ dependencies {
 }
 
 ksp {
-    arg("immutable.table", "true")
+    arg("kimmer.table", "true")
+    arg("kimmer.table.collection-join-only-for-sub-query", "false")
 }
 
 kotlin {

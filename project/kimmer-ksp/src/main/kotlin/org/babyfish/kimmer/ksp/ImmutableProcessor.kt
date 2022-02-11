@@ -11,6 +11,7 @@ import com.google.devtools.ksp.symbol.*
 class ImmutableProcessor(
     private val draft: Boolean,
     private val table: Boolean,
+    private val collectionJoinOnlyForSubQuery: Boolean,
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger
 ): SymbolProcessor {
@@ -36,7 +37,7 @@ class ImmutableProcessor(
                         tableSysTypes.entityType.isAssignableFrom(it.asStarProjectedType())
                     }
                     if (entityDeclarations.isNotEmpty()) {
-                        TableGenerator(codeGenerator, tableSysTypes, file, entityDeclarations)
+                        TableGenerator(codeGenerator, tableSysTypes, file, entityDeclarations, collectionJoinOnlyForSubQuery)
                             .generate(resolver.getAllFiles().toList())
                     }
                 }

@@ -9,13 +9,13 @@ import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
-internal class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
+internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     private val query: AbstractQueryImpl<*, *>,
     val entityType: EntityType,
     val parent: TableImpl<*, *>? = null,
     val isInverse: Boolean = false,
     val joinProp: EntityProp? = null,
-    var joinType: JoinType = JoinType.INNER
+    private var joinType: JoinType = JoinType.INNER
 ): JoinableTable<E, ID>, Renderable {
 
     val alias: String
@@ -39,6 +39,22 @@ internal class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             }
         alias = query.tableAliasAllocator.allocate()
     }
+
+    protected open fun <X: Entity<XID>, XID: Comparable<XID>> createChildTable(
+        query: AbstractQueryImpl<*, *>,
+        entityType: EntityType,
+        isInverse: Boolean,
+        joinProp: EntityProp,
+        joinType: JoinType
+    ): TableImpl<X, XID> =
+        TableImpl(
+            query,
+            if (isInverse) joinProp.declaringType else joinProp.targetType!!,
+            this,
+            isInverse,
+            joinProp,
+            joinType
+        )
 
     override fun <X> get(prop: KProperty1<E, X?>): Expression<X> {
         val entityProp = entityType.props[prop.name] ?: error("No property '${prop.name}'")
@@ -89,7 +105,7 @@ internal class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <X: Entity<XID>, XID: Comparable<XID>> `~joinReference`(
+    override fun <X: Entity<XID>, XID: Comparable<XID>> `←joinReference`(
         prop: KProperty1<X, E?>,
         joinType: JoinType
     ): JoinableTable<X, XID> {
@@ -100,7 +116,7 @@ internal class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         return join0(entityProp, joinType.reversed(), true)
     }
 
-    override fun <X: Entity<XID>, XID: Comparable<XID>> `~joinList`(
+    override fun <X: Entity<XID>, XID: Comparable<XID>> `←joinList`(
         prop: KProperty1<X, List<E>?>,
         joinType: JoinType
     ): JoinableTable<X, XID> {
@@ -111,7 +127,7 @@ internal class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         return join0(entityProp, joinType.reversed(), true)
     }
 
-    override fun <X: Entity<XID>, XID: Comparable<XID>> `~joinConnection`(
+    override fun <X: Entity<XID>, XID: Comparable<XID>> `←joinConnection`(
         prop: KProperty1<X, Connection<E>?>,
         joinType: JoinType
     ): JoinableTable<X, XID> {
@@ -153,10 +169,9 @@ internal class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             }
             return existing as JoinableTable<X, XID>
         }
-        val newTable = TableImpl<X, XID>(
+        val newTable = this.createChildTable<X, XID>(
             query,
             if (inverse) joinProp.declaringType else joinProp.targetType!!,
-            this,
             inverse,
             joinProp,
             joinType
@@ -201,7 +216,7 @@ internal class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         return contains0(entityProp, xIds, false)
     }
 
-    override fun <X: Entity<XID>, XID: Comparable<XID>> `~listContains`(
+    override fun <X: Entity<XID>, XID: Comparable<XID>> `←listContains`(
         prop: KProperty1<X, List<E>?>,
         xIds: Collection<XID>
     ): Expression<Boolean> {
@@ -212,7 +227,7 @@ internal class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         return contains0(entityProp, xIds, true)
     }
 
-    override fun <X: Entity<XID>, XID: Comparable<XID>> `~connectionContains`(
+    override fun <X: Entity<XID>, XID: Comparable<XID>> `←connectionContains`(
         prop: KProperty1<X, Connection<E>?>,
         xIds: Collection<XID>
     ): Expression<Boolean> {

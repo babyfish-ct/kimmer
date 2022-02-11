@@ -11,6 +11,8 @@ interface SqlSubQuery<P, PID, E, ID>:
         E: Entity<ID>,
         ID: Comparable<ID> {
 
+    override val table: SubQueryTable<E, ID>
+
     val parentTable: Table<P, PID>
 
     fun <R> select(

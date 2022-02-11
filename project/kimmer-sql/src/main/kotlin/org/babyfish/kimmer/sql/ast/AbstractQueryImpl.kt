@@ -1,9 +1,7 @@
 package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.Immutable
-import org.babyfish.kimmer.meta.ImmutableType
 import org.babyfish.kimmer.sql.Entity
-import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import org.babyfish.kimmer.sql.meta.EntityType
 import kotlin.reflect.KClass
@@ -18,7 +16,7 @@ internal abstract class AbstractQueryImpl<E, ID>(
           Entity<ID>,
           ID: Comparable<ID> {
 
-    val entityTypeMap: Map<KClass<out Immutable>, EntityType>
+    protected val entityTypeMap: Map<KClass<out Immutable>, EntityType>
         get() = sqlClient.entityTypeMap
 
     private val predicates = mutableListOf<Expression<Boolean>>()
@@ -29,11 +27,14 @@ internal abstract class AbstractQueryImpl<E, ID>(
 
     private val orders = mutableListOf<Order>()
 
-    override val table: TableImpl<E, ID> = TableImpl(
-        this.let { it }, // Boring code ".let{ it }" is used to avoid compilation warning
-        entityTypeMap[type]
-            ?: throw IllegalArgumentException("Cannot create query for unmapped type '${type.qualifiedName}'")
-    )
+    override val table: TableImpl<E, ID> = createTable(type)
+
+    protected open fun createTable(type: KClass<E>): TableImpl<E, ID> =
+        TableImpl(
+            this,
+            entityTypeMap[type]
+                ?: throw IllegalArgumentException("Cannot create query for unmapped type '${type.qualifiedName}'")
+        )
 
     override fun where(vararg predicates: Expression<Boolean>?) {
         for (predicate in predicates) {

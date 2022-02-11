@@ -15,7 +15,7 @@ class ReverseJoinTest: AbstractTest() {
                 |where table_3.NAME = :1""".trimMargin().toOneLine(),
             "Alex"
         ) {
-            where(table.`~joinList`(Author::books).name eq "Alex")
+            where(table.`←joinList`(Author::books).name eq "Alex")
             select(constant(1))
         }
     }
@@ -30,7 +30,7 @@ class ReverseJoinTest: AbstractTest() {
                 |where table_3.NAME = :1""".trimMargin().toOneLine(),
             "Learning GraphQL"
         ) {
-            where(table.`~joinList`(Book::authors).name eq "Learning GraphQL")
+            where(table.`←joinList`(Book::authors).name eq "Learning GraphQL")
             select(constant(1))
         }
     }
@@ -45,7 +45,7 @@ class ReverseJoinTest: AbstractTest() {
             "id1",
             "id2"
         ) {
-            where(table.`~joinList`(Author::books).id valueIn listOf("id1", "id2"))
+            where(table.`←joinList`(Author::books).id valueIn listOf("id1", "id2"))
             select(constant(1))
         }
     }
@@ -60,7 +60,7 @@ class ReverseJoinTest: AbstractTest() {
             "id1",
             "id2"
         ) {
-            where(table.`~joinList`(Book::authors).id valueIn listOf("id1", "id2"))
+            where(table.`←joinList`(Book::authors).id valueIn listOf("id1", "id2"))
             select(constant(1))
         }
     }
@@ -80,8 +80,8 @@ class ReverseJoinTest: AbstractTest() {
             where(
                 or(
                     table
-                        .`~joinReference`(Book::store, JoinType.LEFT)
-                        .`~joinList`(Author::books, JoinType.LEFT)
+                        .`←joinReference`(Book::store, JoinType.LEFT)
+                        .`←joinList`(Author::books, JoinType.LEFT)
                         [Author::name] eq "Alex",
                     table.books(JoinType.LEFT).authors(JoinType.LEFT).name eq "Tim"
                 )
@@ -105,8 +105,8 @@ class ReverseJoinTest: AbstractTest() {
             where(
                 or(
                     table
-                        .`~joinReference`(Book::store, JoinType.LEFT)
-                        .`~joinList`(Author::books, JoinType.LEFT)
+                        .`←joinReference`(Book::store, JoinType.LEFT)
+                        .`←joinList`(Author::books, JoinType.LEFT)
                         [Author::name] eq "Alex",
                     table.books(JoinType.RIGHT).authors(JoinType.RIGHT).name eq "Tim"
                 )

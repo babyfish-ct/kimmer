@@ -13,7 +13,8 @@ class TableGenerator(
     private val codeGenerator: CodeGenerator,
     private val sysTypes: TableSysTypes,
     private val file: KSFile,
-    private val modelClassDeclarations: List<KSClassDeclaration>
+    private val modelClassDeclarations: List<KSClassDeclaration>,
+    private val collectionJoinOnlyForSubQuery: Boolean
 ) {
 
     fun generate(files: List<KSFile>) {
@@ -54,6 +55,8 @@ class TableGenerator(
                                     KIMMER_SQL_AST_PACKAGE,
                                     if (propMeta.targetDeclaration === null) {
                                         "Table"
+                                    } else if (collectionJoinOnlyForSubQuery && (propMeta.isList || propMeta.isConnection)) {
+                                        "SubQueryTable"
                                     } else {
                                         "JoinableTable"
                                     }
