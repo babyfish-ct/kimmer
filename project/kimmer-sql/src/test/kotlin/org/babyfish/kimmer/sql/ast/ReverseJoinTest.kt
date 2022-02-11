@@ -12,10 +12,10 @@ class ReverseJoinTest: AbstractTest() {
             """select 1 from BOOK as table_1 
                 |inner join BOOK_AUTHOR_MAPPING as table_2 on table_1.ID = table_2.BOOK_ID 
                 |inner join AUTHOR as table_3 on table_2.AUTHOR_ID = table_3.ID 
-                |where table_3.NAME = :1""".trimMarginToOneLine(),
+                |where table_3.NAME = :1""".trimMargin().toOneLine(),
             "Alex"
         ) {
-            where(table.reverseJoinList(Author::books).name eq "Alex")
+            where(table.`~joinList`(Author::books).name eq "Alex")
             select(constant(1))
         }
     }
@@ -27,10 +27,10 @@ class ReverseJoinTest: AbstractTest() {
             """select 1 from AUTHOR as table_1 
                 |inner join BOOK_AUTHOR_MAPPING as table_2 on table_1.ID = table_2.AUTHOR_ID 
                 |inner join BOOK as table_3 on table_2.BOOK_ID = table_3.ID 
-                |where table_3.NAME = :1""".trimMarginToOneLine(),
+                |where table_3.NAME = :1""".trimMargin().toOneLine(),
             "Learning GraphQL"
         ) {
-            where(table.reverseJoinList(Book::authors).name eq "Learning GraphQL")
+            where(table.`~joinList`(Book::authors).name eq "Learning GraphQL")
             select(constant(1))
         }
     }
@@ -41,11 +41,11 @@ class ReverseJoinTest: AbstractTest() {
             Book::class,
             """select 1 from BOOK as table_1 
                 |inner join BOOK_AUTHOR_MAPPING as table_2 on table_1.ID = table_2.BOOK_ID 
-                |where table_2.AUTHOR_ID in (:1, :2)""".trimMarginToOneLine(),
+                |where table_2.AUTHOR_ID in (:1, :2)""".trimMargin().toOneLine(),
             "id1",
             "id2"
         ) {
-            where(table.reverseJoinList(Author::books).id valueIn listOf("id1", "id2"))
+            where(table.`~joinList`(Author::books).id valueIn listOf("id1", "id2"))
             select(constant(1))
         }
     }
@@ -56,11 +56,11 @@ class ReverseJoinTest: AbstractTest() {
             Author::class,
             """select 1 from AUTHOR as table_1 
                 |inner join BOOK_AUTHOR_MAPPING as table_2 on table_1.ID = table_2.AUTHOR_ID 
-                |where table_2.BOOK_ID in (:1, :2)""".trimMarginToOneLine(),
+                |where table_2.BOOK_ID in (:1, :2)""".trimMargin().toOneLine(),
             "id1",
             "id2"
         ) {
-            where(table.reverseJoinList(Book::authors).id valueIn listOf("id1", "id2"))
+            where(table.`~joinList`(Book::authors).id valueIn listOf("id1", "id2"))
             select(constant(1))
         }
     }
@@ -73,15 +73,15 @@ class ReverseJoinTest: AbstractTest() {
                 |left join BOOK as table_2 on table_1.ID = table_2.STORE_ID 
                 |left join BOOK_AUTHOR_MAPPING as table_3 on table_2.ID = table_3.BOOK_ID 
                 |left join AUTHOR as table_4 on table_3.AUTHOR_ID = table_4.ID 
-                |where table_4.NAME = :1 or table_4.NAME = :2""".trimMarginToOneLine(),
+                |where table_4.NAME = :1 or table_4.NAME = :2""".trimMargin().toOneLine(),
             "Alex",
             "Tim"
         ) {
             where(
                 or(
                     table
-                        .reverseJoinReference(Book::store, JoinType.LEFT)
-                        .reverseJoinList(Author::books, JoinType.LEFT)
+                        .`~joinReference`(Book::store, JoinType.LEFT)
+                        .`~joinList`(Author::books, JoinType.LEFT)
                         [Author::name] eq "Alex",
                     table.books(JoinType.LEFT).authors(JoinType.LEFT).name eq "Tim"
                 )
@@ -98,15 +98,15 @@ class ReverseJoinTest: AbstractTest() {
                 |inner join BOOK as table_2 on table_1.ID = table_2.STORE_ID 
                 |inner join BOOK_AUTHOR_MAPPING as table_3 on table_2.ID = table_3.BOOK_ID 
                 |inner join AUTHOR as table_4 on table_3.AUTHOR_ID = table_4.ID 
-                |where table_4.NAME = :1 or table_4.NAME = :2""".trimMarginToOneLine(),
+                |where table_4.NAME = :1 or table_4.NAME = :2""".trimMargin().toOneLine(),
             "Alex",
             "Tim"
         ) {
             where(
                 or(
                     table
-                        .reverseJoinReference(Book::store, JoinType.LEFT)
-                        .reverseJoinList(Author::books, JoinType.LEFT)
+                        .`~joinReference`(Book::store, JoinType.LEFT)
+                        .`~joinList`(Author::books, JoinType.LEFT)
                         [Author::name] eq "Alex",
                     table.books(JoinType.RIGHT).authors(JoinType.RIGHT).name eq "Tim"
                 )

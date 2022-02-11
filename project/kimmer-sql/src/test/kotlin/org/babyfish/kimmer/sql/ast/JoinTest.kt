@@ -26,7 +26,7 @@ class JoinTest: AbstractTest() {
             |inner join AUTHOR as table_4 on table_3.AUTHOR_ID = table_4.ID 
             |where table_2.PRICE >= :1 
             |and table_2.PRICE <= :2 
-            |and lower(table_4.NAME) like :3""".trimMarginToOneLine(),
+            |and lower(table_4.NAME) like :3""".trimMargin().toOneLine(),
             BigDecimal(20),
             BigDecimal(30),
             "alex"
@@ -48,7 +48,7 @@ class JoinTest: AbstractTest() {
             |inner join BOOK_STORE as table_4 on table_3.STORE_ID = table_4.ID 
             |where table_3.PRICE <= :1 
             |and table_3.PRICE <= :2 
-            |and lower(table_4.NAME) like :3""".trimMarginToOneLine(),
+            |and lower(table_4.NAME) like :3""".trimMargin().toOneLine(),
             BigDecimal(20),
             BigDecimal(30),
             "manning"
@@ -79,7 +79,7 @@ class JoinTest: AbstractTest() {
             Book::class,
             """select 1 from BOOK as table_1 
             |inner join BOOK_AUTHOR_MAPPING as table_2 on table_1.ID = table_2.BOOK_ID 
-            |where table_2.AUTHOR_ID in (:1, :2)""".trimMarginToOneLine(),
+            |where table_2.AUTHOR_ID in (:1, :2)""".trimMargin().toOneLine(),
             "id1",
             "id2"
         ) {
@@ -94,7 +94,7 @@ class JoinTest: AbstractTest() {
             Author::class,
             """select 1 from AUTHOR as table_1 
             |inner join BOOK_AUTHOR_MAPPING as table_2 on table_1.ID = table_2.AUTHOR_ID 
-            |where table_2.BOOK_ID in (:1, :2)""".trimMarginToOneLine(),
+            |where table_2.BOOK_ID in (:1, :2)""".trimMargin().toOneLine(),
             "id1",
             "id2"
         ) {
@@ -109,7 +109,7 @@ class JoinTest: AbstractTest() {
             BookStore::class,
             """select 1 from BOOK_STORE as table_1 
             |inner join BOOK as table_2 on table_1.ID = table_2.STORE_ID 
-            |where table_2.ID in (:1, :2)""".trimMarginToOneLine(),
+            |where table_2.ID in (:1, :2)""".trimMargin().toOneLine(),
             "id1",
             "id2"
         ) {
@@ -125,7 +125,7 @@ class JoinTest: AbstractTest() {
             """select 1 from BOOK as table_1 
             |left join BOOK_STORE as table_2 on table_1.STORE_ID = table_2.ID 
             |where table_1.STORE_ID is null 
-            |or lower(table_2.NAME) like :1""".trimMarginToOneLine(),
+            |or lower(table_2.NAME) like :1""".trimMargin().toOneLine(),
             "manning"
         ) {
             where(

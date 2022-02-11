@@ -63,7 +63,7 @@ internal abstract class AbstractExpression<T>: Expression<T>, Renderable {
 }
 
 internal class PropExpression<T>(
-    val table: TableImpl<*>,
+    val table: TableImpl<*, *>,
     val prop: EntityProp
 ): AbstractExpression<T>() {
 
@@ -435,5 +435,63 @@ internal class AggregationExpression<T>(
             }
             render(base)
         }
+    }
+}
+
+internal class ContainsExpression(
+    private val table: TableImpl<*, *>,
+    prop: EntityProp,
+    private val targetIds: Collection<Any>,
+    inverse: Boolean
+): AbstractExpression<Boolean>() {
+
+    private val tableName: String
+
+    private val targetColumnName: String
+
+    private val thisColumnName: String
+
+    init {
+        val middleTable = prop.storage as? MiddleTable
+        val column = prop.storage as? Column
+        tableName = middleTable?.tableName
+            ?: prop.declaringType.tableName
+
+        if (middleTable !== null) {
+            if (inverse) {
+                targetColumnName = middleTable.joinColumnName
+                thisColumnName = middleTable.targetJoinColumnName
+            } else {
+                targetColumnName = middleTable.targetJoinColumnName
+                thisColumnName = middleTable.joinColumnName
+            }
+        } else {
+            targetColumnName = (prop.declaringType.idProp.storage as Column).name
+            thisColumnName = column!!.name
+        }
+    }
+
+    override val precedence: Int
+        get() = 7
+
+    override fun SqlBuilder.render() {
+        if (targetIds.isEmpty()) {
+            sql("1 = 0")
+            return
+        }
+        sql(table.alias)
+        sql(".")
+        sql((table.entityType.idProp.storage as Column).name)
+        sql(" in (select $thisColumnName from $tableName where $targetColumnName in (")
+        var sp: String? = null
+        for (targetId in targetIds) {
+            if (sp === null) {
+                sp = ", "
+            } else {
+                sql(sp)
+            }
+            variable(targetId)
+        }
+        sql("))")
     }
 }

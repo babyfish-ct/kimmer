@@ -31,6 +31,7 @@ class TableGenerator(
             file.packageName.asString(),
             draftFileName
         ).use {
+            val entityIDTypeNameProvider = EntityIDTypeNameProvider()
             val fileSpec = FileSpec
                 .builder(
                     file.packageName.asString(),
@@ -56,11 +57,17 @@ class TableGenerator(
                                     } else {
                                         "JoinableTable"
                                     }
-                                ).parameterizedBy(selfTypeName)
+                                ).parameterizedBy(
+                                    selfTypeName,
+                                    entityIDTypeNameProvider[classDeclaration]
+                                )
                             val returnTypeName =
                                 propMeta.targetDeclaration?.let { tgt ->
                                     ClassName(KIMMER_SQL_AST_PACKAGE, "JoinableTable")
-                                        .parameterizedBy(tgt.asClassName())
+                                        .parameterizedBy(
+                                            tgt.asClassName(),
+                                            entityIDTypeNameProvider[tgt]
+                                        )
                                 } ?: ClassName(KIMMER_SQL_AST_PACKAGE, "Expression")
                                     .parameterizedBy(propMeta.returnType)
                             addProperty(

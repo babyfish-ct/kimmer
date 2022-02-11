@@ -11,7 +11,7 @@ interface SqlSubQuery<P, PID, E, ID>:
         E: Entity<ID>,
         ID: Comparable<ID> {
 
-    val parentTable: Table<P>
+    val parentTable: Table<P, PID>
 
     fun <R> select(
         prop: KProperty1<E, R?>

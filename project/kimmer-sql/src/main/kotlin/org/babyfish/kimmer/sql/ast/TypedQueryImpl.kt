@@ -1,6 +1,5 @@
 package org.babyfish.kimmer.sql.ast
 
-import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.sql.Entity
 
 internal class TypedQueryImpl<E, ID, R>(

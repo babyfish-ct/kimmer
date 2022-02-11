@@ -1,11 +1,11 @@
 package org.babyfish.kimmer.sql.ast
 
-import org.babyfish.kimmer.Immutable
+import org.babyfish.kimmer.sql.Entity
 import kotlin.reflect.KProperty1
 
-interface Table<T: Immutable> {
+interface Table<E: Entity<ID>, ID: Comparable<ID>> {
 
     operator fun <X> get(
-        prop: KProperty1<T, X?>
+        prop: KProperty1<E, X?>
     ): Expression<X>
 }

@@ -9,7 +9,7 @@ interface Filterable<E, ID>
           Entity<ID>,
           ID: Comparable<ID> {
 
-    val table: JoinableTable<E>
+    val table: JoinableTable<E, ID>
 
     fun where(vararg predicates: Expression<Boolean>?)
 

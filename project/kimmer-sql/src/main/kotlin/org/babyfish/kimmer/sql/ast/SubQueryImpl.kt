@@ -20,7 +20,7 @@ internal class SubQueryImpl<P, PID, E, ID>(
         E: Entity<ID>,
         ID: Comparable<ID> {
 
-    override val parentTable: JoinableTable<P>
+    override val parentTable: JoinableTable<P, PID>
         get() = parentQuery.table
 
     override fun <R> select(

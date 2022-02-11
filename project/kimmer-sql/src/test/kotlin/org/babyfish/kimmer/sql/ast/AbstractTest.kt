@@ -70,9 +70,8 @@ abstract class AbstractTest {
     companion object {
 
         @JvmStatic
-        protected fun String.trimMarginToOneLine() =
-            trimMargin()
-                .replace("\r", "")
+        protected fun String.toOneLine(): String =
+            replace("\r", "")
                 .replace("\n", "")
     }
 }

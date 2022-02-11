@@ -29,7 +29,7 @@ internal abstract class AbstractQueryImpl<E, ID>(
 
     private val orders = mutableListOf<Order>()
 
-    override val table: TableImpl<E> = TableImpl(
+    override val table: TableImpl<E, ID> = TableImpl(
         this.let { it }, // Boring code ".let{ it }" is used to avoid compilation warning
         entityTypeMap[type]
             ?: throw IllegalArgumentException("Cannot create query for unmapped type '${type.qualifiedName}'")
