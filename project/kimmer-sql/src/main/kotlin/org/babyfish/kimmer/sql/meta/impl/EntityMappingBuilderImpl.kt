@@ -21,15 +21,6 @@ internal class EntityMappingBuilderImpl: EntityMappingBuilder {
         this[ImmutableType.of(type)].tableName = tableName
     }
 
-    override fun id(prop: KProperty1<out Immutable, *>, storage: Storage?) {
-        createProp(prop).apply {
-            isId = true
-            storage?.let {
-                this.storage = it
-            }
-        }
-    }
-
     override fun prop(prop: KProperty1<out Immutable, *>, storage: Storage?) {
         createProp(prop).apply {
             storage?.let {
@@ -38,7 +29,7 @@ internal class EntityMappingBuilderImpl: EntityMappingBuilder {
         }
     }
 
-    override fun inverseAssociation(prop: KProperty1<out Immutable, *>, mappedBy: KProperty1<out Immutable, *>) {
+    override fun inverseProp(prop: KProperty1<out Immutable, *>, mappedBy: KProperty1<out Immutable, *>) {
         createProp(prop).apply {
             if (!immutableProp.isAssociation) {
                 throw MappingException("Cannot map the non-association prop '$prop' as association prop")

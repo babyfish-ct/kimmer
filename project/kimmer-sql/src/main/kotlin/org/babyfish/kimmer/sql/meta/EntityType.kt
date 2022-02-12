@@ -13,7 +13,7 @@ interface EntityType {
     val kotlinType: KClass<out Immutable>
         get() = immutableType.kotlinType
 
-    val superTypes: List<EntityType>
+    val superType: EntityType?
 
     val derivedTypes: List<EntityType>
 

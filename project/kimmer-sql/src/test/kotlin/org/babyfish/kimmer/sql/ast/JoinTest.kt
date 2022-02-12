@@ -10,7 +10,7 @@ class JoinTest: AbstractTest() {
     fun testSimple() {
         testQuery(
             Book::class,
-            "select table_1.ID, table_1.NAME, table_1.PRICE, table_1.STORE_ID from BOOK as table_1"
+            "select tb_1_.EDITION, tb_1_.ID, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID from BOOK as tb_1_"
         ) {
             select(table)
         }
@@ -20,13 +20,13 @@ class JoinTest: AbstractTest() {
     fun testMergedJoinFromParentToChild() {
         testQuery(
             BookStore::class,
-            """select 1 from BOOK_STORE as table_1 
-            |inner join BOOK as table_2 on table_1.ID = table_2.STORE_ID 
-            |inner join BOOK_AUTHOR_MAPPING as table_3 on table_2.ID = table_3.BOOK_ID 
-            |inner join AUTHOR as table_4 on table_3.AUTHOR_ID = table_4.ID 
-            |where table_2.PRICE >= :1 
-            |and table_2.PRICE <= :2 
-            |and lower(table_4.NAME) like :3""".trimMargin().toOneLine(),
+            """select 1 from BOOK_STORE as tb_1_ 
+            |inner join BOOK as tb_2_ on tb_1_.ID = tb_2_.STORE_ID 
+            |inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.BOOK_ID 
+            |inner join AUTHOR as tb_4_ on tb_3_.AUTHOR_ID = tb_4_.ID 
+            |where tb_2_.PRICE >= :1 
+            |and tb_2_.PRICE <= :2 
+            |and lower(tb_4_.NAME) like :3""".trimMargin().toOneLine(),
             BigDecimal(20),
             BigDecimal(30),
             "alex"
@@ -42,13 +42,13 @@ class JoinTest: AbstractTest() {
     fun testMergedJoinFromChildToParent() {
         testQuery(
             Author::class,
-            """select 1 from AUTHOR as table_1 
-            |inner join BOOK_AUTHOR_MAPPING as table_2 on table_1.ID = table_2.AUTHOR_ID 
-            |inner join BOOK as table_3 on table_2.BOOK_ID = table_3.ID 
-            |inner join BOOK_STORE as table_4 on table_3.STORE_ID = table_4.ID 
-            |where table_3.PRICE <= :1 
-            |and table_3.PRICE <= :2 
-            |and lower(table_4.NAME) like :3""".trimMargin().toOneLine(),
+            """select 1 from AUTHOR as tb_1_ 
+            |inner join BOOK_AUTHOR_MAPPING as tb_2_ on tb_1_.ID = tb_2_.AUTHOR_ID 
+            |inner join BOOK as tb_3_ on tb_2_.BOOK_ID = tb_3_.ID 
+            |inner join BOOK_STORE as tb_4_ on tb_3_.STORE_ID = tb_4_.ID 
+            |where tb_3_.PRICE <= :1 
+            |and tb_3_.PRICE <= :2 
+            |and lower(tb_4_.NAME) like :3""".trimMargin().toOneLine(),
             BigDecimal(20),
             BigDecimal(30),
             "manning"
@@ -64,7 +64,7 @@ class JoinTest: AbstractTest() {
     fun testUnnecessaryJoin() {
         testQuery(
             Book::class,
-            "select 1 from BOOK as table_1 where table_1.STORE_ID in (:1, :2)",
+            "select 1 from BOOK as tb_1_ where tb_1_.STORE_ID in (:1, :2)",
             "id1",
             "id2"
         ) {
@@ -77,9 +77,9 @@ class JoinTest: AbstractTest() {
     fun testHalfJoin() {
         testQuery(
             Book::class,
-            """select 1 from BOOK as table_1 
-            |inner join BOOK_AUTHOR_MAPPING as table_2 on table_1.ID = table_2.BOOK_ID 
-            |where table_2.AUTHOR_ID in (:1, :2)""".trimMargin().toOneLine(),
+            """select 1 from BOOK as tb_1_ 
+            |inner join BOOK_AUTHOR_MAPPING as tb_2_ on tb_1_.ID = tb_2_.BOOK_ID 
+            |where tb_2_.AUTHOR_ID in (:1, :2)""".trimMargin().toOneLine(),
             "id1",
             "id2"
         ) {
@@ -92,9 +92,9 @@ class JoinTest: AbstractTest() {
     fun testHalfInverseJoin() {
         testQuery(
             Author::class,
-            """select 1 from AUTHOR as table_1 
-            |inner join BOOK_AUTHOR_MAPPING as table_2 on table_1.ID = table_2.AUTHOR_ID 
-            |where table_2.BOOK_ID in (:1, :2)""".trimMargin().toOneLine(),
+            """select 1 from AUTHOR as tb_1_ 
+            |inner join BOOK_AUTHOR_MAPPING as tb_2_ on tb_1_.ID = tb_2_.AUTHOR_ID 
+            |where tb_2_.BOOK_ID in (:1, :2)""".trimMargin().toOneLine(),
             "id1",
             "id2"
         ) {
@@ -107,9 +107,9 @@ class JoinTest: AbstractTest() {
     fun testOneToManyCannotBeOptimized() {
         testQuery(
             BookStore::class,
-            """select 1 from BOOK_STORE as table_1 
-            |inner join BOOK as table_2 on table_1.ID = table_2.STORE_ID 
-            |where table_2.ID in (:1, :2)""".trimMargin().toOneLine(),
+            """select 1 from BOOK_STORE as tb_1_ 
+            |inner join BOOK as tb_2_ on tb_1_.ID = tb_2_.STORE_ID 
+            |where tb_2_.ID in (:1, :2)""".trimMargin().toOneLine(),
             "id1",
             "id2"
         ) {
@@ -122,10 +122,10 @@ class JoinTest: AbstractTest() {
     fun testOuterJoin() {
         testQuery(
             Book::class,
-            """select 1 from BOOK as table_1 
-            |left join BOOK_STORE as table_2 on table_1.STORE_ID = table_2.ID 
-            |where table_1.STORE_ID is null 
-            |or lower(table_2.NAME) like :1""".trimMargin().toOneLine(),
+            """select 1 from BOOK as tb_1_ 
+            |left join BOOK_STORE as tb_2_ on tb_1_.STORE_ID = tb_2_.ID 
+            |where tb_1_.STORE_ID is null 
+            |or lower(tb_2_.NAME) like :1""".trimMargin().toOneLine(),
             "manning"
         ) {
             where(

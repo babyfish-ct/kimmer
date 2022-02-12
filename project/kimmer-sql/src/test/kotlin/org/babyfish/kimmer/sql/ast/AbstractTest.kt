@@ -40,18 +40,15 @@ abstract class AbstractTest {
         }
     ) {
 
-        id(BookStore::id)
-        inverseAssociation(BookStore::books, Book::store)
+        inverseProp(BookStore::books, Book::store)
 
-        id(Book::id)
-        prop(Book::store, Column("STORE_ID"))
+        prop(Book::store)
         prop(
             Book::authors,
             MiddleTable("BOOK_AUTHOR_MAPPING", "BOOK_ID", "AUTHOR_ID")
         )
 
-        id(Author::id)
-        inverseAssociation(Author::books, Book::authors)
+        inverseProp(Author::books, Book::authors)
     }
 
     protected val sql: String?

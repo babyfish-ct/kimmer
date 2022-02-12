@@ -11,8 +11,8 @@ class ContainsTest: AbstractTest() {
     fun testOneToMany() {
         testQuery(
             BookStore::class,
-            """select 1 from BOOK_STORE as table_1 
-                |where table_1.ID in (
+            """select 1 from BOOK_STORE as tb_1_ 
+                |where tb_1_.ID in (
                     |select STORE_ID from BOOK where ID in (:1, :2)
                 |)""".trimMargin().toOneLine(),
             "id1",
@@ -27,8 +27,8 @@ class ContainsTest: AbstractTest() {
     fun testNormalManyToManyByNormalApi() {
         testQuery(
             Book::class,
-            """select 1 from BOOK as table_1 where 
-                |table_1.ID in (
+            """select 1 from BOOK as tb_1_ where 
+                |tb_1_.ID in (
                     |select BOOK_ID from BOOK_AUTHOR_MAPPING 
                     |where AUTHOR_ID in (:1, :2)
                 |)""".trimMargin().toOneLine(),
@@ -44,8 +44,8 @@ class ContainsTest: AbstractTest() {
     fun testInverseManyToManyByNormalApi() {
         testQuery(
             Author::class,
-            """select 1 from AUTHOR as table_1 
-                |where table_1.ID in (
+            """select 1 from AUTHOR as tb_1_ 
+                |where tb_1_.ID in (
                     |select AUTHOR_ID from BOOK_AUTHOR_MAPPING 
                     |where BOOK_ID in (:1, :2)
                 |)""".trimMargin().trimMargin().toOneLine(),
@@ -61,8 +61,8 @@ class ContainsTest: AbstractTest() {
     fun testNormalManyToManyByInverseApi() {
         testQuery(
             Book::class,
-            """select 1 from BOOK as table_1 where 
-                |table_1.ID in (
+            """select 1 from BOOK as tb_1_ where 
+                |tb_1_.ID in (
                     |select BOOK_ID from BOOK_AUTHOR_MAPPING 
                     |where AUTHOR_ID in (:1, :2)
                 |)""".trimMargin().toOneLine(),
@@ -78,8 +78,8 @@ class ContainsTest: AbstractTest() {
     fun testInverseManyToManyByInverseApi() {
         testQuery(
             Author::class,
-            """select 1 from AUTHOR as table_1 
-                |where table_1.ID in (
+            """select 1 from AUTHOR as tb_1_ 
+                |where tb_1_.ID in (
                     |select AUTHOR_ID from BOOK_AUTHOR_MAPPING 
                     |where BOOK_ID in (:1, :2)
                 |)""".trimMargin().toOneLine(),

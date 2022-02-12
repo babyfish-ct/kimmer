@@ -13,18 +13,19 @@ class ComplexExprTest: AbstractTest() {
         testQuery(
             Book::class,
             """select 
-                    |table_1.ID, 
-                    |table_1.NAME, 
-                    |table_1.PRICE, 
-                    |table_1.STORE_ID, 
+                    |tb_1_.EDITION, 
+                    |tb_1_.ID, 
+                    |tb_1_.NAME, 
+                    |tb_1_.PRICE, 
+                    |tb_1_.STORE_ID, 
                     |rank() over(
-                       |order by table_1.PRICE asc
+                       |order by tb_1_.PRICE asc
                     |), 
                     |rank() over(
-                        |partition by table_1.STORE_ID 
-                        |order by table_1.PRICE asc
+                        |partition by tb_1_.STORE_ID 
+                        |order by tb_1_.PRICE asc
                     |) 
-                |from BOOK as table_1""".trimMargin().toOneLine()
+                |from BOOK as tb_1_""".trimMargin().toOneLine()
         ) {
             select(
                 table,

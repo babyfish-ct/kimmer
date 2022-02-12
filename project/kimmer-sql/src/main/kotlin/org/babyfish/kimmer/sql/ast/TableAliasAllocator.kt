@@ -5,5 +5,5 @@ value class TableAliasAllocator(
     private val idRef: IntArray = IntArray(1)
 ) {
     fun allocate(): String =
-        "table_${++idRef[0]}"
+        "tb_${++idRef[0]}_"
 }

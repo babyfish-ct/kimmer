@@ -1,6 +1,7 @@
 package org.babyfish.kimmer.sql.meta.impl
 
 import org.babyfish.kimmer.meta.ImmutableType
+import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.MappingException
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
@@ -12,7 +13,16 @@ internal class EntityTypeImpl(
     override val immutableType: ImmutableType
 ): EntityType {
 
-    private val _superTypes = mutableListOf<EntityTypeImpl>()
+    init {
+        if (!Entity::class.java.isAssignableFrom(immutableType.kotlinType.java)) {
+            throw IllegalArgumentException(
+                "Cannot create entity type of '${immutableType.kotlinType.qualifiedName}' " +
+                    "because it does inherit '${Entity::class.qualifiedName}'"
+            )
+        }
+    }
+
+    private var _superType: EntityTypeImpl? = null
 
     private val _derivedTypes = mutableListOf<EntityTypeImpl>()
 
@@ -41,8 +51,8 @@ internal class EntityTypeImpl(
             _tableName = value
         }
 
-    override val superTypes: List<EntityType>
-        get() = _superTypes
+    override val superType: EntityType?
+        get() = _superType
 
     override val derivedTypes: List<EntityType>
         get() = _derivedTypes
@@ -88,9 +98,19 @@ internal class EntityTypeImpl(
 
     private fun resolveSuperTypes(builder: EntityMappingBuilderImpl) {
         for (superImmutableType in immutableType.superTypes) {
-            val superType = builder[superImmutableType]
-            _superTypes += superType
-            superType._derivedTypes += this
+            if (Entity::class.java.isAssignableFrom(superImmutableType.kotlinType.java)) {
+                val superType = builder[superImmutableType]
+                if (_superType !== null) {
+                    throw MappingException(
+                        "Illegal entity type '${immutableType.kotlinType.qualifiedName}', " +
+                            "only one super interface is allowed to inherit '${Entity::class.qualifiedName}', " +
+                            "but two super interfaces inherit it: '${_superType!!.immutableType.kotlinType.qualifiedName}' " +
+                            "and '${superType.immutableType.kotlinType.qualifiedName}'"
+                    )
+                }
+                _superType = superType
+                superType._derivedTypes += this
+            }
         }
     }
 
@@ -112,27 +132,24 @@ internal class EntityTypeImpl(
     }
 
     private fun resolveProps(builder: EntityMappingBuilderImpl) {
-        for (superType in _superTypes) {
-            superType.resolve(builder, ResolvingPhase.PROPS)
-        }
-        if (_superTypes.isEmpty()) {
+        val sp = _superType
+        if (sp === null) {
             _props = declaredProps
         } else {
+            sp.resolve(builder, ResolvingPhase.PROPS)
             val map = sortedMapOf<String, EntityProp>()
             map += declaredProps
-            for (superType in _superTypes) {
-                if (builder[superType.immutableType].isMapped) {
-                    for (superProp in superType.props.values) {
-                        val prop = map[superProp.name]
-                        if (prop !== null) {
-                            if (!superProp.isId) {
-                                throw MappingException(
-                                    "Duplicate properties: '$superProp' and '$prop'"
-                                )
-                            }
-                        } else {
-                            map[superProp.name] = superProp
+            if (builder[sp.immutableType].isMapped) {
+                for (superProp in sp.props.values) {
+                    val prop = map[superProp.name]
+                    if (prop !== null) {
+                        if (!superProp.isId) {
+                            throw MappingException(
+                                "Duplicate properties: '$superProp' and '$prop'"
+                            )
                         }
+                    } else {
+                        map[superProp.name] = superProp
                     }
                 }
             }
@@ -147,32 +164,12 @@ internal class EntityTypeImpl(
     }
 
     private fun resolveIdProp(): EntityProp? {
-
-        if (superTypes.isNotEmpty()) {
-            var superIdProp: EntityProp? = null
-            for (superType in _superTypes) {
-                var prop = superType.resolveIdProp()
-                if (superIdProp !== null) {
-                    throw MappingException(
-                        "'${this}' inherits two id properties:" +
-                            "'$superIdProp' and '$prop'"
-                    )
-                }
-                superIdProp = prop
-            }
-            if (superIdProp !== null) {
-                _idProp = superIdProp
-                return _idProp
-            }
-        }
-        val idProps = declaredProps.values.filter { it.isId }
-        if (idProps.size > 1) {
-            throw MappingException(
-                "More than one 1 id properties is specified for type '${immutableType}'"
-            )
-        }
-        _idProp = idProps.firstOrNull()
-        return _idProp
+        val idProp = _superType?.resolveIdProp()
+            ?: declaredProps
+                .values
+                .first { it.isId }
+        _idProp = idProp
+        return idProp
     }
 
     override fun toString(): String =

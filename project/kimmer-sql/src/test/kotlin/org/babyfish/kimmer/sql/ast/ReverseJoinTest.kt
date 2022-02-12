@@ -9,10 +9,10 @@ class ReverseJoinTest: AbstractTest() {
     fun testReverseJoinOnInverseProp() {
         testQuery(
             Book::class,
-            """select 1 from BOOK as table_1 
-                |inner join BOOK_AUTHOR_MAPPING as table_2 on table_1.ID = table_2.BOOK_ID 
-                |inner join AUTHOR as table_3 on table_2.AUTHOR_ID = table_3.ID 
-                |where table_3.NAME = :1""".trimMargin().toOneLine(),
+            """select 1 from BOOK as tb_1_ 
+                |inner join BOOK_AUTHOR_MAPPING as tb_2_ on tb_1_.ID = tb_2_.BOOK_ID 
+                |inner join AUTHOR as tb_3_ on tb_2_.AUTHOR_ID = tb_3_.ID 
+                |where tb_3_.NAME = :1""".trimMargin().toOneLine(),
             "Alex"
         ) {
             where(table.`←joinList`(Author::books).name eq "Alex")
@@ -24,10 +24,10 @@ class ReverseJoinTest: AbstractTest() {
     fun testReverseJoinOnNormalProp() {
         testQuery(
             Author::class,
-            """select 1 from AUTHOR as table_1 
-                |inner join BOOK_AUTHOR_MAPPING as table_2 on table_1.ID = table_2.AUTHOR_ID 
-                |inner join BOOK as table_3 on table_2.BOOK_ID = table_3.ID 
-                |where table_3.NAME = :1""".trimMargin().toOneLine(),
+            """select 1 from AUTHOR as tb_1_ 
+                |inner join BOOK_AUTHOR_MAPPING as tb_2_ on tb_1_.ID = tb_2_.AUTHOR_ID 
+                |inner join BOOK as tb_3_ on tb_2_.BOOK_ID = tb_3_.ID 
+                |where tb_3_.NAME = :1""".trimMargin().toOneLine(),
             "Learning GraphQL"
         ) {
             where(table.`←joinList`(Book::authors).name eq "Learning GraphQL")
@@ -39,9 +39,9 @@ class ReverseJoinTest: AbstractTest() {
     fun testReverseHalfJoinOnInverseProp() {
         testQuery(
             Book::class,
-            """select 1 from BOOK as table_1 
-                |inner join BOOK_AUTHOR_MAPPING as table_2 on table_1.ID = table_2.BOOK_ID 
-                |where table_2.AUTHOR_ID in (:1, :2)""".trimMargin().toOneLine(),
+            """select 1 from BOOK as tb_1_ 
+                |inner join BOOK_AUTHOR_MAPPING as tb_2_ on tb_1_.ID = tb_2_.BOOK_ID 
+                |where tb_2_.AUTHOR_ID in (:1, :2)""".trimMargin().toOneLine(),
             "id1",
             "id2"
         ) {
@@ -54,9 +54,9 @@ class ReverseJoinTest: AbstractTest() {
     fun testReverseHalfJoinOnNormalProp() {
         testQuery(
             Author::class,
-            """select 1 from AUTHOR as table_1 
-                |inner join BOOK_AUTHOR_MAPPING as table_2 on table_1.ID = table_2.AUTHOR_ID 
-                |where table_2.BOOK_ID in (:1, :2)""".trimMargin().toOneLine(),
+            """select 1 from AUTHOR as tb_1_ 
+                |inner join BOOK_AUTHOR_MAPPING as tb_2_ on tb_1_.ID = tb_2_.AUTHOR_ID 
+                |where tb_2_.BOOK_ID in (:1, :2)""".trimMargin().toOneLine(),
             "id1",
             "id2"
         ) {
@@ -69,11 +69,11 @@ class ReverseJoinTest: AbstractTest() {
     fun mergeNormalJoinsAndReversedJoins() {
         testQuery(
             BookStore::class,
-            """select 1 from BOOK_STORE as table_1 
-                |left join BOOK as table_2 on table_1.ID = table_2.STORE_ID 
-                |left join BOOK_AUTHOR_MAPPING as table_3 on table_2.ID = table_3.BOOK_ID 
-                |left join AUTHOR as table_4 on table_3.AUTHOR_ID = table_4.ID 
-                |where table_4.NAME = :1 or table_4.NAME = :2""".trimMargin().toOneLine(),
+            """select 1 from BOOK_STORE as tb_1_ 
+                |left join BOOK as tb_2_ on tb_1_.ID = tb_2_.STORE_ID 
+                |left join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.BOOK_ID 
+                |left join AUTHOR as tb_4_ on tb_3_.AUTHOR_ID = tb_4_.ID 
+                |where tb_4_.NAME = :1 or tb_4_.NAME = :2""".trimMargin().toOneLine(),
             "Alex",
             "Tim"
         ) {
@@ -94,11 +94,11 @@ class ReverseJoinTest: AbstractTest() {
     fun mergeNormalJoinsAndReversedJoinsWithDiffJoinTypes() {
         testQuery(
             BookStore::class,
-            """select 1 from BOOK_STORE as table_1 
-                |inner join BOOK as table_2 on table_1.ID = table_2.STORE_ID 
-                |inner join BOOK_AUTHOR_MAPPING as table_3 on table_2.ID = table_3.BOOK_ID 
-                |inner join AUTHOR as table_4 on table_3.AUTHOR_ID = table_4.ID 
-                |where table_4.NAME = :1 or table_4.NAME = :2""".trimMargin().toOneLine(),
+            """select 1 from BOOK_STORE as tb_1_ 
+                |inner join BOOK as tb_2_ on tb_1_.ID = tb_2_.STORE_ID 
+                |inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.BOOK_ID 
+                |inner join AUTHOR as tb_4_ on tb_3_.AUTHOR_ID = tb_4_.ID 
+                |where tb_4_.NAME = :1 or tb_4_.NAME = :2""".trimMargin().toOneLine(),
             "Alex",
             "Tim"
         ) {

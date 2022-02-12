@@ -1,6 +1,7 @@
 package org.babyfish.kimmer.sql.meta.impl
 
 import org.babyfish.kimmer.meta.ImmutableProp
+import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.MappingException
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
@@ -28,7 +29,7 @@ internal class EntityPropImpl(
         declaringType.immutableType.props[kotlinProp.name]
             ?: throw IllegalArgumentException("No prop '${kotlinProp.name}' of type '${declaringType.kotlinType.qualifiedName}'")
 
-    override var isId: Boolean = false
+    override val isId: Boolean = kotlinProp.name == Entity<*>::id.name
 
     override var targetType: EntityType? = null
 
@@ -128,11 +129,15 @@ internal class EntityPropImpl(
     private fun resolveDefaultColumn() {
         if (storage === null &&
             _mappedBy === null &&
-            !isReference &&
             !isList &&
             !isConnection
         ) {
-            storage = Column(databaseIdentifier(name))
+            storage =
+                if (isReference) {
+                    Column(databaseIdentifier("${name}_id"))
+                } else {
+                    Column(databaseIdentifier(name))
+                }
         }
     }
 
