@@ -29,7 +29,125 @@ internal abstract class SqlBuilder {
         builder.append(sql)
     }
 
-    abstract fun variable(value: Any?)
+    fun variable(value: Any?) {
+        when (value) {
+            is Pair<*, *> -> {
+                sql("(")
+                singleVariable(value.first)
+                sql(", ")
+                singleVariable(value.second)
+                sql(")")
+            }
+            is Triple<*, *, *> -> {
+                sql("(")
+                singleVariable(value.first)
+                sql(", ")
+                singleVariable(value.second)
+                sql(", ")
+                singleVariable(value.third)
+                sql(")")
+            }
+            is Tuple4<*, *, *, *> -> {
+                sql("(")
+                singleVariable(value._1)
+                sql(", ")
+                singleVariable(value._2)
+                sql(", ")
+                singleVariable(value._3)
+                sql(", ")
+                singleVariable(value._4)
+                sql(")")
+            }
+            is Tuple5<*, *, *, *, *> -> {
+                sql("(")
+                singleVariable(value._1)
+                sql(", ")
+                singleVariable(value._2)
+                sql(", ")
+                singleVariable(value._3)
+                sql(", ")
+                singleVariable(value._4)
+                sql(", ")
+                singleVariable(value._5)
+                sql(")")
+            }
+            is Tuple6<*, *, *, *, *, *> -> {
+                sql("(")
+                singleVariable(value._1)
+                sql(", ")
+                singleVariable(value._2)
+                sql(", ")
+                singleVariable(value._3)
+                sql(", ")
+                singleVariable(value._4)
+                sql(", ")
+                singleVariable(value._5)
+                sql(", ")
+                singleVariable(value._6)
+                sql(")")
+            }
+            is Tuple7<*, *, *, *, *, *, *> -> {
+                sql("(")
+                singleVariable(value._1)
+                sql(", ")
+                singleVariable(value._2)
+                sql(", ")
+                singleVariable(value._3)
+                sql(", ")
+                singleVariable(value._4)
+                sql(", ")
+                singleVariable(value._5)
+                sql(", ")
+                singleVariable(value._6)
+                sql(", ")
+                singleVariable(value._7)
+                sql(")")
+            }
+            is Tuple8<*, *, *, *, *, *, *, *> -> {
+                sql("(")
+                singleVariable(value._1)
+                sql(", ")
+                singleVariable(value._2)
+                sql(", ")
+                singleVariable(value._3)
+                sql(", ")
+                singleVariable(value._4)
+                sql(", ")
+                singleVariable(value._5)
+                sql(", ")
+                singleVariable(value._6)
+                sql(", ")
+                singleVariable(value._7)
+                sql(", ")
+                singleVariable(value._8)
+                sql(")")
+            }
+            is Tuple9<*, *, *, *, *, *, *, *, *> -> {
+                sql("(")
+                singleVariable(value._1)
+                sql(", ")
+                singleVariable(value._2)
+                sql(", ")
+                singleVariable(value._3)
+                sql(", ")
+                singleVariable(value._4)
+                sql(", ")
+                singleVariable(value._5)
+                sql(", ")
+                singleVariable(value._6)
+                sql(", ")
+                singleVariable(value._7)
+                sql(", ")
+                singleVariable(value._8)
+                sql(", ")
+                singleVariable(value._9)
+                sql(")")
+            }
+            else -> singleVariable(value)
+        }
+    }
+
+    protected abstract fun singleVariable(value: Any?)
 
     fun resolveFormula(formulaProp: EntityProp, block: () -> Unit) {
         if (!formulaPropStack.add(formulaProp)) {
@@ -48,7 +166,7 @@ internal abstract class SqlBuilder {
 
 internal class JdbcSqlBuilder : SqlBuilder() {
 
-    override fun variable(value: Any?) {
+    override fun singleVariable(value: Any?) {
         variables += value
         builder.append("?")
     }
@@ -56,7 +174,7 @@ internal class JdbcSqlBuilder : SqlBuilder() {
 
 internal class R2dbcSqlBuilder: SqlBuilder() {
 
-    override fun variable(value: Any?) {
+    override fun singleVariable(value: Any?) {
         variables += value
         builder.append(":")
         builder.append(variables.size)

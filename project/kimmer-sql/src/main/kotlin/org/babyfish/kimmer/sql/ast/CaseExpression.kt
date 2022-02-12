@@ -52,6 +52,11 @@ interface SimpleCaseBuilder<C, T> {
     ): SimpleCaseBuilder<C, T>
 
     fun otherwise(
+        value: T
+    ): Expression<T> =
+        otherwise(value(value))
+
+    fun otherwise(
         expression: Expression<T>
     ): Expression<T>
 }
@@ -82,6 +87,11 @@ interface CaseBuilder<T> {
         cond: Expression<Boolean>,
         value: Expression<T>
     ): CaseBuilder<T>
+
+    fun otherwise(
+        value: T
+    ): Expression<T> =
+        otherwise(value(value))
 
     fun otherwise(
         expression: Expression<T>
