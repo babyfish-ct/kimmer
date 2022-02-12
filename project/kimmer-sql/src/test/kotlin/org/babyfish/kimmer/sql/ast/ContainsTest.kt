@@ -3,7 +3,7 @@ package org.babyfish.kimmer.sql.ast
 import org.babyfish.kimmer.sql.ast.model.Author
 import org.babyfish.kimmer.sql.ast.model.Book
 import org.babyfish.kimmer.sql.ast.model.BookStore
-import org.junit.Test
+import kotlin.test.Test
 
 class ContainsTest: AbstractTest() {
 

@@ -44,7 +44,7 @@ internal class EntityPropImpl(
             if ((isList || isConnection) && value !is MiddleTable) {
                 throw MappingException("list/connection association '$kotlinProp' only accept middle table")
             }
-            if (isReference && value is Formula) {
+            if (isReference && value is Formula<*, *, *>) {
                 throw MappingException("reference association '$kotlinProp' does not accept formula")
             }
             _storage = value

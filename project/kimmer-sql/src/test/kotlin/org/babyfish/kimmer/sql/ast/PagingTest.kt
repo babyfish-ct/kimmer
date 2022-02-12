@@ -4,7 +4,7 @@ import org.babyfish.kimmer.sql.ast.model.Book
 import org.babyfish.kimmer.sql.ast.model.name
 import org.babyfish.kimmer.sql.ast.model.price
 import org.babyfish.kimmer.sql.ast.model.store
-import org.junit.Test
+import kotlin.test.Test
 import java.math.BigDecimal
 import kotlin.test.expect
 

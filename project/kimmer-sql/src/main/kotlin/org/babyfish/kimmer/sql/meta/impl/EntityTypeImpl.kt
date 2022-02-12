@@ -71,7 +71,7 @@ internal class EntityTypeImpl(
             .values
             .filter {
                 // Ignore middle table because there are expensive
-                it.storage is Column || it.storage is Formula
+                it.storage is Column || it.storage is Formula<*, *, *>
             }
             .associateBy { it.name }
     }

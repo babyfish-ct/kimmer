@@ -3,6 +3,7 @@ package org.babyfish.kimmer.sql.ast
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
+import java.util.regex.Pattern
 import kotlin.reflect.KClass
 
 sealed interface Expression<T> : Selection<T>
@@ -26,11 +27,14 @@ internal abstract class AbstractExpression<T>: Expression<T>, Renderable, TableR
      * 6 AND
      * 7 ALL, ANY, BETWEEN, IN, LIKE, OR, SOME
      * 8 = (Assignment)
+     *
+     * Notes: the brackets for sub queries is always generated
+     * "ALL, ANY, SOME" look like function, so I still set their precedent to be 0
      */
     protected abstract val precedence: Int
 
-    protected fun SqlBuilder.render(expression: Expression<*>) {
-        (expression as Renderable).let {
+    protected fun SqlBuilder.render(selection: Selection<*>) {
+        (selection as Renderable).let {
             if (it !is AbstractExpression<*> || it.precedence <= precedence) {
                 it.renderTo(this)
             } else {
@@ -57,8 +61,8 @@ internal abstract class AbstractExpression<T>: Expression<T>, Renderable, TableR
     protected inner class LowestPrecedenceContext(
         private val builder: SqlBuilder
     ) {
-        fun render(expression: Selection<*>) {
-            (expression as Renderable).renderTo(builder)
+        fun render(selection: Selection<*>) {
+            (selection as Renderable).renderTo(builder)
         }
     }
 }
@@ -376,9 +380,8 @@ internal class ExistsExpression(
 
     override fun SqlBuilder.render() {
         sql(if (negative) "not " else "")
-        sql("exists(select *")
+        sql("exists")
         (subQuery.select(constant(1)) as Renderable).renderTo(this)
-        sql(")")
     }
 
     override fun accept(visitor: TableReferenceVisitor) {
@@ -392,11 +395,13 @@ internal class OperatorSubQueryExpression<T>(
 ): AbstractExpression<T>() {
 
     override val precedence: Int
-        get() = 7
+        get() = 0
 
     override fun SqlBuilder.render() {
-        sql(operator)
-        render(subQuery)
+        lowestPrecedence(false) {
+            sql(operator)
+            render(subQuery)
+        }
     }
 
     override fun accept(visitor: TableReferenceVisitor) {
@@ -426,9 +431,6 @@ internal class ConstantExpression<T: Number>(
         get() = 0
 
     override fun SqlBuilder.render() {
-        if (value::class == String::class) {
-            error("In order to avoid injection attack, constant expression is not supported for string")
-        }
         sql(value.toString())
     }
 

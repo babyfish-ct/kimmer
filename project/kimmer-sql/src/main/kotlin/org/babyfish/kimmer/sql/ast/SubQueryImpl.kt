@@ -121,10 +121,10 @@ internal class SubQueryImpl<P, PID, E, ID>(
         TypedSubQueryImpl(listOf(selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8, selection9), this)
 
     override fun accept(visitor: TableReferenceVisitor) {
-        parentQuery.accept(visitor)
+        accept(visitor, false)
     }
 
     override fun renderTo(builder: SqlBuilder) {
-         parentQuery.renderTo(builder)
+         renderTo(builder, false)
     }
 }

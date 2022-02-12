@@ -402,6 +402,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun renderSelection(prop: EntityProp, builder: SqlBuilder, starMode: Boolean) {
         builder.apply {
             if (prop.isId && joinProp !== null) {
@@ -427,9 +428,9 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 }
             }
             val storage = prop.storage
-            if (storage is Formula) {
+            if (storage is Formula<*, *, *>) {
                 resolveFormula(prop) {
-                    storage.get(this@TableImpl).let {
+                    (storage as Formula<E, ID, Any>).get(this@TableImpl).let {
                         if (starMode && it is SqlSubQuery<*, *, *, *>) {
                             throw MappingException(
                                 "Cannot select formula prop implicitly (select whole table) because it's expensive"

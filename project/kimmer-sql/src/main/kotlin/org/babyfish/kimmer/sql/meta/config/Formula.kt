@@ -1,8 +1,21 @@
 package org.babyfish.kimmer.sql.meta.config
 
-import org.babyfish.kimmer.sql.ast.Expression
-import org.babyfish.kimmer.sql.ast.JoinableTable
+import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.ast.*
 
-interface Formula: Storage {
-    fun get(table: JoinableTable<*, *>): Expression<*>
+interface Formula<E: Entity<ID>, ID: Comparable<ID>, T>: Storage {
+
+    fun get(table: Table<E, ID>): Expression<T>
+
+    companion object {
+
+        @JvmStatic
+        fun <E: Entity<ID>, ID: Comparable<ID>, T> of(
+            block: Table<E, ID>.() -> Expression<T>
+        ): Formula<E, ID, T> =
+            object : Formula<E, ID, T> {
+                override fun get(table: Table<E, ID>): Expression<T> =
+                    table.block()
+            }
+    }
 }

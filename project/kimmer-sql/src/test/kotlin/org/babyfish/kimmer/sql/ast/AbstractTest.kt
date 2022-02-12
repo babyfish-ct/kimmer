@@ -2,12 +2,9 @@ package org.babyfish.kimmer.sql.ast
 
 import io.r2dbc.spi.Connection
 import kotlinx.coroutines.runBlocking
-import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.sql.Entity
-import org.babyfish.kimmer.sql.ast.model.Author
-import org.babyfish.kimmer.sql.ast.model.Book
-import org.babyfish.kimmer.sql.ast.model.BookStore
-import org.babyfish.kimmer.sql.meta.config.Column
+import org.babyfish.kimmer.sql.ast.model.*
+import org.babyfish.kimmer.sql.meta.config.Formula
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import org.babyfish.kimmer.sql.spi.createSqlClient
 import java.lang.UnsupportedOperationException
@@ -41,6 +38,13 @@ abstract class AbstractTest {
     ) {
 
         inverseProp(BookStore::books, Book::store)
+        prop(BookStore::globalId, Formula.of<BookStore, String, String> {
+            concat {
+                +id
+                +"-"
+                +name
+            }
+        })
 
         prop(Book::store)
         prop(

@@ -1,7 +1,7 @@
 package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.sql.ast.model.*
-import org.junit.Test
+import kotlin.test.Test
 
 class ReverseJoinTest: AbstractTest() {
 

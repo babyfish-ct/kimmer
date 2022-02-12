@@ -96,7 +96,7 @@ internal abstract class AbstractQueryImpl<E, ID>(
             block()
         }
 
-    fun renderTo(builder: SqlBuilder, withoutSortingAndPaging: Boolean = false) {
+    fun renderTo(builder: SqlBuilder, withoutSortingAndPaging: Boolean) {
         (table as Renderable).renderTo(builder)
         builder.apply {
             if (predicates.isNotEmpty()) {
@@ -150,7 +150,7 @@ internal abstract class AbstractQueryImpl<E, ID>(
         }
     }
 
-    fun accept(visitor: TableReferenceVisitor, withoutSortingAndPaging: Boolean = false) {
+    fun accept(visitor: TableReferenceVisitor, withoutSortingAndPaging: Boolean) {
         predicates.forEach { it.accept(visitor) }
         groupByExpressions.forEach { it.accept(visitor) }
         havingPredicates.forEach { it.accept(visitor) }
