@@ -2,6 +2,8 @@ package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.meta.EntityProp
+import org.babyfish.kimmer.sql.runtime.R2dbcExecutor
+import org.babyfish.kimmer.sql.runtime.R2dbcExecutorContext
 
 internal class TypedQueryImpl<E, ID, R>(
     private val selections: List<Selection<*>>,
@@ -41,10 +43,7 @@ internal class TypedQueryImpl<E, ID, R>(
     override suspend fun execute(con: io.r2dbc.spi.Connection): List<R> {
         val (sql, variables) = prepare(R2dbcSqlBuilder())
         val executor = baseQuery.sql.r2dbcExecutor
-        if (executor !== null) {
-            return executor(sql, variables) as List<R>
-        }
-        TODO("Not yet implemented")
+        return executor(R2dbcExecutorContext(con, sql, variables)) as List<R>
     }
 
     private fun prepare(builder: SqlBuilder): Pair<String, List<Any?>> {

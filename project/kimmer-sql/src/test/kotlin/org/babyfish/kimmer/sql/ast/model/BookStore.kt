@@ -1,9 +1,9 @@
 package org.babyfish.kimmer.sql.ast.model
 
 import org.babyfish.kimmer.sql.Entity
+import java.util.*
 
-interface BookStore: Entity<String> {
+interface BookStore: Entity<UUID> {
     val name: String
     val books: List<Book>
-    val fullName: String
 }

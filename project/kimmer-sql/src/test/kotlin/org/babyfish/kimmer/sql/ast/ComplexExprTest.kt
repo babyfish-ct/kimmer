@@ -1,5 +1,6 @@
 package org.babyfish.kimmer.sql.ast
 
+import org.babyfish.kimmer.sql.ast.common.AbstractTest
 import org.babyfish.kimmer.sql.ast.model.*
 import kotlin.test.Test
 import java.math.BigDecimal
@@ -45,7 +46,7 @@ class ComplexExprTest: AbstractTest() {
                 |tb_1_.EDITION, tb_1_.ID, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
             |from BOOK as tb_1_ 
             |where (tb_1_.NAME, tb_1_.EDITION) in (
-                |(:1, :2), (:3, :4)
+                |($1, $2), ($3, $4)
             |)""".trimMargin().toOneLine(),
             "Learning GraphQL",
             3,
@@ -67,16 +68,14 @@ class ComplexExprTest: AbstractTest() {
         testQuery(
             BookStore::class,
             """select 
-                |concat(tb_1_.ID, :1, tb_1_.NAME), 
                 |tb_1_.ID, 
                 |tb_1_.NAME, 
                 |case tb_1_.NAME 
-                    |when :2 then :3 
-                    |when :4 then :5 
-                    |else :6 
+                    |when $1 then $2 
+                    |when $3 then $4 
+                    |else $5 
                 |end 
                 |from BOOK_STORE as tb_1_""".trimMargin().toOneLine(),
-            "-",
             "O'RELLIY",
             "Classic publishing house",
             "MANNING",
@@ -104,9 +103,9 @@ class ComplexExprTest: AbstractTest() {
                 |tb_1_.PRICE, 
                 |tb_1_.STORE_ID, 
                 |case 
-                    |when tb_1_.PRICE > :1 then :2 
-                    |when tb_1_.PRICE < :3 then :4 
-                    |else :5 
+                    |when tb_1_.PRICE > $1 then $2 
+                    |when tb_1_.PRICE < $3 then $4 
+                    |else $5 
                 |end 
                 |from BOOK as tb_1_""".trimMargin().toOneLine(),
             BigDecimal(200),

@@ -1,5 +1,6 @@
 package org.babyfish.kimmer.sql.ast
 
+import org.babyfish.kimmer.sql.ast.common.AbstractTest
 import org.babyfish.kimmer.sql.ast.model.*
 import kotlin.test.Test
 
@@ -14,13 +15,13 @@ class SubQueryTest: AbstractTest() {
                 |from BOOK as tb_1_ where tb_1_.ID in (
                     |select tb_3_.BOOK_ID from AUTHOR as tb_2_ 
                     |inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.AUTHOR_ID 
-                    |where tb_2_.NAME = :1
+                    |where tb_2_.FIRST_NAME = $1
                 |)""".trimMargin().toOneLine(),
             "Alex"
         ) {
             where(
                 table.id valueIn subQuery(Author::class) {
-                    where(table.name eq "Alex")
+                    where(table.firstName eq "Alex")
                     select(table.books.id)
                 }
             )
@@ -73,7 +74,7 @@ class SubQueryTest: AbstractTest() {
                     |where 
                         |tb_1_.ID = tb_3_.BOOK_ID 
                     |and 
-                        |tb_2_.NAME = :1
+                        |tb_2_.FIRST_NAME = $1
                 |)""".trimMargin().toOneLine(),
             "Alex"
         ) {
@@ -81,7 +82,7 @@ class SubQueryTest: AbstractTest() {
                 exists(untypedSubQuery(Author::class) {
                     where(
                         parentTable.id eq table.books.id,
-                        table.name eq "Alex"
+                        table.firstName eq "Alex"
                     )
                 })
             )
@@ -102,7 +103,7 @@ class SubQueryTest: AbstractTest() {
                     |where 
                         |tb_1_.ID = tb_3_.BOOK_ID 
                     |and 
-                        |tb_2_.NAME = :1
+                        |tb_2_.FIRST_NAME = $1
                 |)""".trimMargin().toOneLine(),
             "Alex"
         ) {
@@ -110,7 +111,7 @@ class SubQueryTest: AbstractTest() {
                 exists(subQuery(Author::class) {
                     where(
                         parentTable.id eq table.books.id,
-                        table.name eq "Alex"
+                        table.firstName eq "Alex"
                     )
                     select(table)
                 })
@@ -142,7 +143,6 @@ class SubQueryTest: AbstractTest() {
         testQuery(
             BookStore::class,
             """select 
-                |concat(tb_1_.ID, :1, tb_1_.NAME), 
                 |tb_1_.ID, 
                 |tb_1_.NAME, 
                 |(
@@ -156,7 +156,6 @@ class SubQueryTest: AbstractTest() {
                     |from BOOK as tb_2_ 
                     |where tb_1_.ID = tb_2_.STORE_ID
                 |) desc""".trimMargin().toOneLine(),
-            "-"
         ) {
             val subQuery = subQuery(Book::class) {
                 where(parentTable.id eq table.store.id)
@@ -177,7 +176,7 @@ class SubQueryTest: AbstractTest() {
                     |select tb_3_.BOOK_ID 
                     |from AUTHOR as tb_2_ 
                     |inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.AUTHOR_ID 
-                    |where tb_2_.NAME in (:1, :2)
+                    |where tb_2_.FIRST_NAME in ($1, $2)
                 |)""".trimMargin().toOneLine(),
             "Alex",
             "Bill"
@@ -185,7 +184,7 @@ class SubQueryTest: AbstractTest() {
             where(
                 table.id eq any(
                         subQuery(Author::class) {
-                        where(table.name valueIn listOf("Alex", "Bill"))
+                        where(table.firstName valueIn listOf("Alex", "Bill"))
                         select(table.books.id)
                     }
                 )
@@ -204,7 +203,7 @@ class SubQueryTest: AbstractTest() {
                     |select tb_3_.BOOK_ID 
                     |from AUTHOR as tb_2_ 
                     |inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.AUTHOR_ID 
-                    |where tb_2_.NAME in (:1, :2)
+                    |where tb_2_.FIRST_NAME in ($1, $2)
                 |)""".trimMargin().toOneLine(),
             "Alex",
             "Bill"
@@ -212,7 +211,7 @@ class SubQueryTest: AbstractTest() {
             where(
                 table.id eq some(
                     subQuery(Author::class) {
-                        where(table.name valueIn listOf("Alex", "Bill"))
+                        where(table.firstName valueIn listOf("Alex", "Bill"))
                         select(table.books.id)
                     }
                 )
@@ -231,7 +230,7 @@ class SubQueryTest: AbstractTest() {
                     |select tb_3_.BOOK_ID 
                     |from AUTHOR as tb_2_ 
                     |inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.AUTHOR_ID 
-                    |where tb_2_.NAME in (:1, :2)
+                    |where tb_2_.FIRST_NAME in ($1, $2)
                 |)""".trimMargin().toOneLine(),
             "Alex",
             "Bill"
@@ -239,7 +238,7 @@ class SubQueryTest: AbstractTest() {
             where(
                 table.id eq all(
                     subQuery(Author::class) {
-                        where(table.name valueIn listOf("Alex", "Bill"))
+                        where(table.firstName valueIn listOf("Alex", "Bill"))
                         select(table.books.id)
                     }
                 )

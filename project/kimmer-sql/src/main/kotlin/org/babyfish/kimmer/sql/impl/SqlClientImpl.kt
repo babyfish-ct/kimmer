@@ -7,12 +7,14 @@ import org.babyfish.kimmer.sql.ast.QueryImpl
 import org.babyfish.kimmer.sql.ast.SqlQuery
 import org.babyfish.kimmer.sql.ast.TypedSqlQuery
 import org.babyfish.kimmer.sql.meta.EntityType
+import org.babyfish.kimmer.sql.runtime.R2dbcExecutor
+import org.babyfish.kimmer.sql.runtime.defaultR2dbcExecutor
 import kotlin.reflect.KClass
 
 internal class SqlClientImpl(
     override val entityTypeMap: Map<KClass<out Immutable>, EntityType>,
     internal val jdbcExecutor: ((String, List<Any?>) -> List<*>)?,
-    internal val r2dbcExecutor: (suspend (String, List<Any?>) -> List<*>)?
+    internal val r2dbcExecutor: R2dbcExecutor = defaultR2dbcExecutor
 ) : SqlClient {
 
     override fun <E: Entity<ID>, ID: Comparable<ID>, R> createQuery(

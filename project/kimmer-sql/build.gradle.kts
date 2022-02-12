@@ -13,6 +13,7 @@ dependencies {
     kspTest(project(":kimmer-ksp"))
 
     testImplementation(kotlin("test"))
+    testImplementation("io.r2dbc:r2dbc-h2:0.9.1.RELEASE")
 }
 
 ksp {

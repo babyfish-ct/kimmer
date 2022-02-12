@@ -176,7 +176,7 @@ internal class R2dbcSqlBuilder: SqlBuilder() {
 
     override fun singleVariable(value: Any?) {
         variables += value
-        builder.append(":")
+        builder.append("$")
         builder.append(variables.size)
     }
 }
