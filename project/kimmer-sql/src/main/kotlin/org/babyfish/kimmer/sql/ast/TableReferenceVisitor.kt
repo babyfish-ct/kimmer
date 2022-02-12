@@ -3,7 +3,12 @@ package org.babyfish.kimmer.sql.ast
 import org.babyfish.kimmer.sql.meta.EntityProp
 
 internal interface TableReferenceVisitor {
+
+    val sqlBuilder: SqlBuilder
+
     fun visit(table: TableImpl<*, *>, entityProp: EntityProp?)
+
+    fun skipSubQuery(): Boolean = false
 }
 
 internal interface TableReferenceElement {

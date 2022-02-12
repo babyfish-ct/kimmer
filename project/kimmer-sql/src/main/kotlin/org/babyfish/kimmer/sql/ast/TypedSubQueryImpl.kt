@@ -35,7 +35,9 @@ internal class TypedSubQueryImpl<P, PID, E, ID, R>(
     }
 
     override fun accept(visitor: TableReferenceVisitor) {
-        selections.forEach { it.accept(visitor) }
-        baseQuery.accept(visitor)
+        if (!visitor.skipSubQuery()) {
+            selections.forEach { it.accept(visitor) }
+            baseQuery.accept(visitor)
+        }
     }
 }

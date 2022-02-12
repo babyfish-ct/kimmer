@@ -70,14 +70,16 @@ internal class TypedQueryImpl<E, ID, R>(
             }
         }
         baseQuery.renderTo(builder, withoutSortingAndPaging)
-        builder.apply {
-            if (limit != Int.MAX_VALUE) {
-                sql(" limit ")
-                variable(limit)
-            }
-            if (offset > 0) {
-                sql(" offset ")
-                variable(offset)
+        if (!withoutSortingAndPaging) {
+            builder.apply {
+                if (limit != Int.MAX_VALUE) {
+                    sql(" limit ")
+                    variable(limit)
+                }
+                if (offset > 0) {
+                    sql(" offset ")
+                    variable(offset)
+                }
             }
         }
     }
@@ -88,7 +90,7 @@ internal class TypedQueryImpl<E, ID, R>(
     }
 
     private class UseTableVisitor(
-        private val sqlBuilder: SqlBuilder
+        override val sqlBuilder: SqlBuilder
     ): TableReferenceVisitor {
 
         override fun visit(table: TableImpl<*, *>, entityProp: EntityProp?) {

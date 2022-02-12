@@ -7,13 +7,14 @@ import kotlin.reflect.KProperty1
 internal class SubQueryImpl<P, PID, E, ID>(
     private val parentQuery: AbstractQueryImpl<P, PID>,
     type: KClass<E>,
-): 
-    AbstractQueryImpl<E, ID>(
+): AbstractQueryImpl<E, ID>(
         parentQuery.tableAliasAllocator,
         parentQuery.sqlClient,
         type
     ), 
-    SqlSubQuery<P, PID, E, ID>
+    SqlSubQuery<P, PID, E, ID>,
+    Renderable,
+    TableReferenceElement
     where
         P: Entity<PID>,
         PID: Comparable<PID>,
@@ -118,4 +119,12 @@ internal class SubQueryImpl<P, PID, E, ID>(
         selection9: Selection<T9>,
     ): TypedSqlSubQuery<P, PID, E, ID, Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> =
         TypedSubQueryImpl(listOf(selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8, selection9), this)
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        parentQuery.accept(visitor)
+    }
+
+    override fun renderTo(builder: SqlBuilder) {
+         parentQuery.renderTo(builder)
+    }
 }

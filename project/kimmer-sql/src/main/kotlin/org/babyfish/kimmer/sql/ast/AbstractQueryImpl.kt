@@ -3,6 +3,7 @@ package org.babyfish.kimmer.sql.ast
 import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
+import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
 import kotlin.reflect.KClass
 
@@ -153,8 +154,41 @@ internal abstract class AbstractQueryImpl<E, ID>(
         predicates.forEach { it.accept(visitor) }
         groupByExpressions.forEach { it.accept(visitor) }
         havingPredicates.forEach { it.accept(visitor) }
-        if (!withoutSortingAndPaging) {
+        if (withoutSortingAndPaging) {
+            UseJoinOfIgnoredOrderClauseVisitor(visitor.sqlBuilder).apply {
+                orders.forEach { it.accept(this) }
+            }
+        } else {
             orders.forEach { it.accept(visitor) }
+        }
+    }
+
+    private class UseJoinOfIgnoredOrderClauseVisitor(
+        override val sqlBuilder: SqlBuilder
+    ): TableReferenceVisitor {
+
+        override fun skipSubQuery(): Boolean = true
+
+        override fun visit(table: TableImpl<*, *>, entityProp: EntityProp?) {
+            entityProp ?: error(
+                "Internal bug: star selection cannot be " +
+                    "visited because sub query is skipped"
+            )
+            handle(table, entityProp.isId)
+        }
+
+        private fun handle(table: TableImpl<*, *>, isId: Boolean) {
+            if (table.destructive !== TableImpl.Destructive.NONE) {
+                if (isId) {
+                    sqlBuilder.useTable(table.parent!!)
+                } else {
+                    sqlBuilder.useTable(table)
+                }
+                return
+            }
+            table.parent?.let {
+                handle(it, false)
+            }
         }
     }
 }

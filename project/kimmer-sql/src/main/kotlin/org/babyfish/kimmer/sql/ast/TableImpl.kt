@@ -445,4 +445,34 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             }
         }
     }
+
+    val destructive: Destructive
+        get() {
+            if (joinProp === null) {
+                return Destructive.NONE
+            }
+            val (prop, jt) =
+                if (isInverse) {
+                    (joinProp.opposite ?: return Destructive.BREAK_REPEATABILITY) to
+                        joinType.reversed()
+                } else {
+                    joinProp to joinType
+                }
+            if (prop.isList || prop.isConnection) {
+                return Destructive.BREAK_REPEATABILITY
+            }
+            if (prop.isNullable && jt == JoinType.LEFT) {
+                return Destructive.NONE
+            }
+            if (!prop.isNullable && (jt == JoinType.LEFT || jt == JoinType.INNER)) {
+                return Destructive.NONE
+            }
+            return Destructive.BREAK_ROW_COUNT
+        }
+
+    enum class Destructive {
+        NONE, // Left join for nullable reference, Left/Inner join for non-null reference
+        BREAK_ROW_COUNT, // inner join for nullable-reference
+        BREAK_REPEATABILITY // Any join for Collection
+    }
 }
