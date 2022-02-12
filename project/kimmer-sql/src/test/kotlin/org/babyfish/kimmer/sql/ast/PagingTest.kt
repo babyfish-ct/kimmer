@@ -41,7 +41,8 @@ class PagingTest: AbstractTest() {
             |left join BOOK_STORE as table_2 on table_1.STORE_ID = table_2.ID 
             |where table_1.PRICE between :1 and :2 
             |order by table_2.NAME asc, table_1.NAME asc 
-            |limit :3 offset :4""".trimMargin().toOneLine()) { sql }
+            |limit :3 offset :4""".trimMargin().toOneLine()
+        ) { sql }
     }
 
     @Test
@@ -76,6 +77,7 @@ class PagingTest: AbstractTest() {
             |inner join BOOK_STORE as table_2 on table_1.STORE_ID = table_2.ID 
             |where table_1.PRICE between :1 and :2 
             |order by table_2.NAME asc, table_1.NAME asc 
-            |limit :3 offset :4""".trimMargin().toOneLine()) { sql }
+            |limit :3 offset :4""".trimMargin().toOneLine()
+        ) { sql }
     }
 }
