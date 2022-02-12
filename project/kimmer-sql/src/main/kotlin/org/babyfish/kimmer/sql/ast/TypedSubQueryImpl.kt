@@ -30,11 +30,12 @@ internal class TypedSubQueryImpl<P, PID, E, ID, R>(
                 (selection as Renderable).renderTo(builder)
             }
         }
-        baseQuery.renderWithoutSelection(builder)
+        baseQuery.renderTo(builder)
         builder.sql(")")
     }
 
     override fun accept(visitor: TableReferenceVisitor) {
         selections.forEach { it.accept(visitor) }
+        baseQuery.accept(visitor)
     }
 }

@@ -3,7 +3,7 @@ package org.babyfish.kimmer.sql.ast
 import org.babyfish.kimmer.sql.meta.EntityProp
 
 internal interface TableReferenceVisitor {
-    fun visit(table: Table<*, *>, entityProp: EntityProp?)
+    fun visit(table: TableImpl<*, *>, entityProp: EntityProp?)
 }
 
 internal interface TableReferenceElement {

@@ -32,7 +32,7 @@ abstract class AbstractTest {
         }
     } as Connection
 
-    private val sqlClient = createSqlClient(
+    protected val sqlClient = createSqlClient(
         r2dbcExecutor = { sql, variables ->
             _sql = sql
             _variables = variables
@@ -54,15 +54,27 @@ abstract class AbstractTest {
         inverseAssociation(Author::books, Book::authors)
     }
 
+    protected val sql: String?
+        get() = _sql
+
+    protected val variables: List<Any?>?
+        get() = _variables
+
+    protected fun <E: Entity<ID>, ID: Comparable<ID>> execute(
+        query: TypedSqlQuery<E, ID, *>
+    ) {
+        runBlocking {
+            query.execute(con)
+        }
+    }
+
     protected fun <E: Entity<ID>, ID: Comparable<ID>, R> testQuery(
         type: KClass<E>,
         sql: String,
         vararg variables: Any?,
         block: SqlQuery<E, ID>.() -> TypedSqlQuery<E, ID, R>
     ) {
-        runBlocking {
-            sqlClient.createQuery(type, block).execute(con)
-        }
+        execute(sqlClient.createQuery(type, block))
         expect(sql) { _sql }
         expect(variables.toList()) { _variables }
     }

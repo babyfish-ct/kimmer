@@ -10,10 +10,20 @@ internal abstract class SqlBuilder {
 
     protected val variables = mutableListOf<Any?>()
 
+    private val usedTables = mutableSetOf<Table<*, *>>()
+
     private val formulaPropStack = // mutableSetOf always is ordered
         mutableSetOf<EntityProp>()
 
-    fun isTableUsed(table: Table<*, *>): Boolean = true
+    fun useTable(table: TableImpl<*, *>) {
+        usedTables += table
+        table.parent?.also {
+            useTable(it)
+        }
+    }
+
+    fun isTableUsed(table: Table<*, *>): Boolean =
+        usedTables.contains(table)
 
     fun sql(sql: String) {
         builder.append(sql)

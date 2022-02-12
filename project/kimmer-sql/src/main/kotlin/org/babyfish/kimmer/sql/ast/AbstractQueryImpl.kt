@@ -10,9 +10,7 @@ internal abstract class AbstractQueryImpl<E, ID>(
     val tableAliasAllocator: TableAliasAllocator,
     val sqlClient: SqlClientImpl,
     type: KClass<E>
-): AbstractSqlQuery<E, ID>,
-    Renderable,
-    TableReferenceElement
+): AbstractSqlQuery<E, ID>
     where E:
           Entity<ID>,
           ID: Comparable<ID> {
@@ -97,11 +95,7 @@ internal abstract class AbstractQueryImpl<E, ID>(
             block()
         }
 
-    override fun renderTo(builder: SqlBuilder) {
-        renderWithoutSelection(builder)
-    }
-
-    fun renderWithoutSelection(builder: SqlBuilder) {
+    fun renderTo(builder: SqlBuilder, withoutSortingAndPaging: Boolean = false) {
         (table as Renderable).renderTo(builder)
         builder.apply {
             if (predicates.isNotEmpty()) {
@@ -140,7 +134,7 @@ internal abstract class AbstractQueryImpl<E, ID>(
                     (predicate as Renderable).renderTo(this)
                 }
             }
-            if (orders.isNotEmpty()) {
+            if (!withoutSortingAndPaging && orders.isNotEmpty()) {
                 sql(" order by ")
                 var separator: String? = null
                 for (order in orders) {
@@ -155,10 +149,12 @@ internal abstract class AbstractQueryImpl<E, ID>(
         }
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    fun accept(visitor: TableReferenceVisitor, withoutSortingAndPaging: Boolean = false) {
         predicates.forEach { it.accept(visitor) }
         groupByExpressions.forEach { it.accept(visitor) }
         havingPredicates.forEach { it.accept(visitor) }
-        orders.forEach { it.accept(visitor) }
+        if (!withoutSortingAndPaging) {
+            orders.forEach { it.accept(visitor) }
+        }
     }
 }
