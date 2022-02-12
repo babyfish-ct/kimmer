@@ -38,7 +38,7 @@ abstract class AbstractTest {
     ) {
 
         inverseProp(BookStore::books, Book::store)
-        prop(BookStore::globalId, Formula.of<BookStore, String, String> {
+        prop(BookStore::fullName, Formula.of<BookStore, String, String> {
             concat {
                 +id
                 +"-"
