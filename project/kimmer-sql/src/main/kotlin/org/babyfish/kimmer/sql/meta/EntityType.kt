@@ -26,4 +26,6 @@ interface EntityType {
     val declaredProps: Map<String, EntityProp>
 
     val props: Map<String, EntityProp>
+
+    val starProps: Map<String, EntityProp>
 }

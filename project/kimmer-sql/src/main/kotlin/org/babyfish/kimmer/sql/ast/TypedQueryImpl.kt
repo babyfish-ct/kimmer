@@ -46,7 +46,11 @@ internal class TypedQueryImpl<E, ID, R>(
             } else {
                 sp = ", "
             }
-            (selection as Renderable).renderTo(builder)
+            if (selection is TableImpl<*, *>) {
+                selection.renderAsSelection(builder)
+            } else {
+                (selection as Renderable).renderTo(builder)
+            }
         }
         baseQuery.renderWithoutSelection(builder)
     }

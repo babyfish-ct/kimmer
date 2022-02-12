@@ -4,6 +4,8 @@ import org.babyfish.kimmer.meta.ImmutableType
 import org.babyfish.kimmer.sql.MappingException
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
+import org.babyfish.kimmer.sql.meta.config.Column
+import org.babyfish.kimmer.sql.meta.config.Formula
 import org.babyfish.kimmer.sql.spi.databaseIdentifier
 
 internal class EntityTypeImpl(
@@ -36,6 +38,7 @@ internal class EntityTypeImpl(
                         "because it has already been set"
                 )
             }
+            _tableName = value
         }
 
     override val superTypes: List<EntityType>
@@ -47,10 +50,21 @@ internal class EntityTypeImpl(
     override val idProp: EntityProp
         get() = _idProp ?: error("Id property has not been resolved")
 
-    override val declaredProps = mutableMapOf<String, EntityPropImpl>()
+    override val declaredProps = sortedMapOf<String, EntityPropImpl>()
 
     override val props: Map<String, EntityProp>
         get() = _props ?: error("Properties have not been resolved")
+
+    override val starProps: Map<String, EntityProp> by lazy {
+        // select * from table
+        props
+            .values
+            .filter {
+                // Ignore middle table because there are expensive
+                it.storage is Column || it.storage is Formula
+            }
+            .associateBy { it.name }
+    }
 
     fun resolve(builder: EntityMappingBuilderImpl, phase: ResolvingPhase) {
         if (shouldResolve(phase)) {
@@ -86,7 +100,7 @@ internal class EntityTypeImpl(
                 if (immutableProp.isAssociation) {
                     throw MappingException(
                         "The property '${immutableProp}' is association " +
-                            "but it is not configured by any EntityAssembler"
+                            "but it is not mapped"
                     )
                 }
                 declaredProps[immutableProp.name] = EntityPropImpl(
@@ -104,7 +118,7 @@ internal class EntityTypeImpl(
         if (_superTypes.isEmpty()) {
             _props = declaredProps
         } else {
-            val map = mutableMapOf<String, EntityProp>()
+            val map = sortedMapOf<String, EntityProp>()
             map += declaredProps
             for (superType in _superTypes) {
                 if (builder[superType.immutableType].isMapped) {

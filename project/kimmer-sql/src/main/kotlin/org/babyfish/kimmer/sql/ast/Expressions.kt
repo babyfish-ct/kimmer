@@ -1,20 +1,18 @@
 package org.babyfish.kimmer.sql.ast
 
-import org.babyfish.kimmer.Immutable
 import kotlin.reflect.KClass
 
 fun <X: Any> sql(
     type: KClass<X>,
     sql: String,
-    block: SqlExpressionContext.() -> Unit
-): Expression<X> {
-    TODO()
-}
+    block: (SqlExpressionBuilder.() -> Unit)? = null
+): Expression<X> =
+    SqlExpressionBuilder().apply {
+        if (block !== null) {
+            block()
+        }
+    }.build(sql)
 
-class SqlExpressionContext {
-    fun expressions(vararg expressions: Expression<*>) {}
-    fun values(vararg value: Any?) {}
-}
 
 @Suppress("UNCHECKED_CAST")
 fun and(

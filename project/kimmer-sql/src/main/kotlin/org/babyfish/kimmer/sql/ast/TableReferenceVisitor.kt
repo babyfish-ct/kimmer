@@ -12,7 +12,11 @@ internal interface TableReferenceElement {
 
 internal fun Selection<*>.accept(visitor: TableReferenceVisitor) {
     when (this) {
-        is JoinableTable<*, *> -> visitor.visit(this, null)
+        is JoinableTable<*, *> -> {
+            if ((this as TableImpl<*, *>).entityType.starProps.size > 1) {
+                visitor.visit(this, null)
+            } else Unit
+        }
         is Expression<*> -> (this as TableReferenceElement).accept(visitor)
     }.apply {
         // This empty "apply" make compiler guarantee all the derived types

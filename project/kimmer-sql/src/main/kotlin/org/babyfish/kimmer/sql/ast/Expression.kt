@@ -1,10 +1,9 @@
 package org.babyfish.kimmer.sql.ast
 
-import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
-import kotlin.reflect.KProperty1
+import kotlin.reflect.KClass
 
 sealed interface Expression<T> : Selection<T>
 
@@ -69,37 +68,31 @@ internal class PropExpression<T>(
     val prop: EntityProp
 ): AbstractExpression<T>() {
 
+    init {
+        if (prop.targetType !== null) {
+            throw IllegalArgumentException(
+                "Can not get '${prop.name}' form table because it's association, " +
+                    "please use joinReference, joinList or joinConnection"
+            )
+        }
+        if (prop.storage === null) {
+            throw IllegalArgumentException(
+                "Can not get '${prop.name}' form table because it's not stored property"
+            )
+        }
+    }
+
     override val precedence: Int
         get() = 0
 
     override fun SqlBuilder.render() {
-        if (prop.isId && table.joinProp !== null) {
-            val middleTable = table.joinProp.storage as? MiddleTable
-            val inverse = table.isInverse
-            if (middleTable !== null) {
-                sql(table.middleTableAlias!!)
-                sql(".")
-                sql(if (inverse) {
-                    middleTable.joinColumnName
-                } else {
-                    middleTable.targetJoinColumnName
-                })
-                return
-            }
-            if (!inverse) {
-                sql(table.parent!!.alias)
-                sql(".")
-                sql((table.joinProp.storage as Column).name)
-                return
-            }
-        }
-        sql(table.alias)
-        sql(".")
-        sql((prop.storage as Column).name)
+        table.renderSelection(prop, this, false)
     }
 
     override fun accept(visitor: TableReferenceVisitor) {
-        visitor.visit(table, prop)
+        if (!prop.isId) {
+            visitor.visit(table, prop)
+        }
     }
 }
 

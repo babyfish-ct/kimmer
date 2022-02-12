@@ -18,13 +18,17 @@ internal class TypedSubQueryImpl<P, PID, E, ID, R>(
     override fun renderTo(builder: SqlBuilder) {
         builder.sql("(select ")
         var sp: String? = null
-        for (expression in selections) {
+        for (selection in selections) {
             if (sp !== null) {
                 builder.sql(sp)
             } else {
                 sp = ", "
             }
-            (expression as Renderable).renderTo(builder)
+            if (selection is TableImpl<*, *>) {
+                selection.renderAsSelection(builder)
+            } else {
+                (selection as Renderable).renderTo(builder)
+            }
         }
         baseQuery.renderWithoutSelection(builder)
         builder.sql(")")

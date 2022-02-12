@@ -10,9 +10,9 @@ class JoinTest: AbstractTest() {
     fun testSimple() {
         testQuery(
             Book::class,
-            "select table_1.NAME from BOOK as table_1"
+            "select table_1.ID, table_1.NAME, table_1.PRICE, table_1.STORE_ID from BOOK as table_1"
         ) {
-            select(table.name)
+            select(table)
         }
     }
 

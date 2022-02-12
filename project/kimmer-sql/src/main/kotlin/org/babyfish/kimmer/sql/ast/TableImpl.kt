@@ -2,9 +2,11 @@ package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.graphql.Connection
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.MappingException
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
 import org.babyfish.kimmer.sql.meta.config.Column
+import org.babyfish.kimmer.sql.meta.config.Formula
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -62,12 +64,6 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
 
     override fun <X> get(prop: KProperty1<E, X?>): Expression<X> {
         val entityProp = entityType.props[prop.name] ?: error("No property '${prop.name}'")
-        if (entityProp.targetType !== null) {
-            throw IllegalArgumentException(
-                "Can not get '${prop.name}' form table because it's association, " +
-                    "please use joinReference, joinList or joinConnection"
-            )
-        }
         if (!entityProp.isId) {
             staticallyUse()
         }
@@ -255,7 +251,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
 
     override fun renderTo(builder: SqlBuilder) {
         builder.renderSelf()
-        if (_staticallyUsed && builder.isTableUsed(this)) {
+        if (isUsedBy(builder)) {
             for (childTable in childTableMap.values) {
                 childTable.renderTo(builder)
             }
@@ -290,7 +286,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 middleTable.joinColumnName,
                 false
             )
-            if (_staticallyUsed && isTableUsed(this@TableImpl)) {
+            if (isUsedBy(this)) {
                 joinImpl(
                     joinType,
                     middleTableAlias!!,
@@ -301,7 +297,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                     false
                 )
             }
-        } else if (_staticallyUsed && isTableUsed(this@TableImpl)) {
+        } else if (isUsedBy(this)) {
             joinImpl(
                 joinType,
                 parent.alias,
@@ -329,7 +325,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 middleTable.targetJoinColumnName,
                 true
             )
-            if (_staticallyUsed && isTableUsed(this@TableImpl)) {
+            if (isUsedBy(this)) {
                 joinImpl(
                     joinType,
                     middleTableAlias!!,
@@ -388,6 +384,65 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         if (!_staticallyUsed) {
             _staticallyUsed = true
             parent?.staticallyUse()
+        }
+    }
+
+    private fun isUsedBy(builder: SqlBuilder): Boolean =
+        parent === null || (_staticallyUsed && builder.isTableUsed(this))
+
+    fun renderAsSelection(builder: SqlBuilder) {
+        var sp: String? = null
+        for (prop in entityType.starProps.values) {
+            if (sp === null) {
+                sp = ", "
+            } else {
+                builder.sql(sp)
+            }
+            renderSelection(prop, builder, true)
+        }
+    }
+
+    fun renderSelection(prop: EntityProp, builder: SqlBuilder, starMode: Boolean) {
+        builder.apply {
+            if (prop.isId && joinProp !== null) {
+                val middleTable = joinProp.storage as? MiddleTable
+                val inverse = isInverse
+                if (middleTable !== null) {
+                    sql(middleTableAlias!!)
+                    sql(".")
+                    sql(
+                        if (inverse) {
+                            middleTable.joinColumnName
+                        } else {
+                            middleTable.targetJoinColumnName
+                        }
+                    )
+                    return
+                }
+                if (!inverse) {
+                    sql(parent!!.alias)
+                    sql(".")
+                    sql((joinProp.storage as Column).name)
+                    return
+                }
+            }
+            val storage = prop.storage
+            if (storage is Formula) {
+                resolveFormula(prop) {
+                    storage.get(this@TableImpl).let {
+                        if (starMode && it is SqlSubQuery<*, *, *, *>) {
+                            throw MappingException(
+                                "Cannot select formula prop implicitly (select whole table) because it's expensive"
+                            )
+                        }
+                        (it as Renderable).renderTo(builder)
+                    }
+                }
+            } else {
+                sql(alias)
+                sql(".")
+                sql((storage as Column).name)
+            }
         }
     }
 }

@@ -1,53 +1,54 @@
 package org.babyfish.kimmer.sql.ast
 
+import org.babyfish.kimmer.sql.MappingException
+import org.babyfish.kimmer.sql.meta.EntityProp
 import java.lang.StringBuilder
 
-internal interface SqlBuilder {
+internal abstract class SqlBuilder {
+
+    protected val builder = StringBuilder()
+
+    protected val variables = mutableListOf<Any?>()
+
+    private val formulaPropStack = // mutableSetOf always is ordered
+        mutableSetOf<EntityProp>()
 
     fun isTableUsed(table: Table<*, *>): Boolean = true
 
-    fun sql(sql: String)
-
-    fun variable(value: Any?)
-
-    fun build(): Pair<String, List<Any?>>
-}
-
-internal class JdbcSqlBuilder : SqlBuilder {
-
-    private val builder = StringBuilder()
-
-    private val variables = mutableListOf<Any?>()
-
-    override fun sql(sql: String) {
+    fun sql(sql: String) {
         builder.append(sql)
     }
+
+    abstract fun variable(value: Any?)
+
+    fun resolveFormula(formulaProp: EntityProp, block: () -> Unit) {
+        if (!formulaPropStack.add(formulaProp)) {
+            throw MappingException("Failed to resolve formula property '$formulaProp', dead recursion found")
+        }
+        try {
+            block()
+        } finally {
+            formulaPropStack.remove(formulaProp)
+        }
+    }
+
+    fun build(): Pair<String, List<Any?>> =
+        Pair(builder.toString(), variables.toList())
+}
+
+internal class JdbcSqlBuilder : SqlBuilder() {
 
     override fun variable(value: Any?) {
         variables += value
         builder.append("?")
     }
-
-    override fun build(): Pair<String, List<Any?>> =
-        Pair(builder.toString(), variables.toList())
 }
 
-internal class R2dbcSqlBuilder: SqlBuilder {
-
-    private val builder = StringBuilder()
-
-    private val variables = mutableListOf<Any?>()
-
-    override fun sql(sql: String) {
-        builder.append(sql)
-    }
+internal class R2dbcSqlBuilder: SqlBuilder() {
 
     override fun variable(value: Any?) {
         variables += value
         builder.append(":")
         builder.append(variables.size)
     }
-
-    override fun build(): Pair<String, List<Any?>> =
-        Pair(builder.toString(), variables.toList())
 }
