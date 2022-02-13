@@ -33,8 +33,8 @@ class JoinTest : AbstractTest() {
             BigDecimal(30),
             "alex"
         ) {
-            where(table.books(JoinType.LEFT).price ge BigDecimal(20))
-            where(table.books(JoinType.RIGHT).price le BigDecimal(30))
+            where(table.`books?`.price ge BigDecimal(20))
+            where(table.books.price le BigDecimal(30))
             where(table.books.authors.firstName ilike "Alex")
             select(constant(1))
         }
@@ -55,8 +55,8 @@ class JoinTest : AbstractTest() {
             BigDecimal(30),
             "manning"
         ) {
-            where(table.books(JoinType.LEFT).price le BigDecimal(20))
-            where(table.books(JoinType.RIGHT).price le BigDecimal(30))
+            where(table.`books?`.price le BigDecimal(20))
+            where(table.books.price le BigDecimal(30))
             where(table.books.store.name ilike "MANNING")
             select(constant(1))
         }
@@ -134,8 +134,8 @@ class JoinTest : AbstractTest() {
         ) {
             where(
                 or(
-                    table.store(JoinType.LEFT).id.isNull(),
-                    table.store(JoinType.LEFT).name ilike "MANNING"
+                    table.`store?`.id.isNull(),
+                    table.`store?`.name ilike "MANNING"
                 )
             )
             select(constant(1))

@@ -24,11 +24,6 @@ class TableSysTypes(
         ?.asStarProjectedType()
         ?: noAstType("Table")
 
-    val joinTypeType: KSType = resolver
-        .getClassDeclarationByName("$KIMMER_SQL_AST_PACKAGE.JoinType")
-        ?.asStarProjectedType()
-        ?: noAstType("JoinType")
-
     private fun noAstType(simpleName: String): Nothing {
         throw GeneratorException(
             "The 'immutable.table' of ksp options is true, " +

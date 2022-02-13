@@ -7,33 +7,51 @@ import kotlin.reflect.KProperty1
 interface JoinableTable<E: Entity<ID>, ID: Comparable<ID>> : Table<E, ID>, Selection<E> {
 
     fun <X: Entity<XID>, XID: Comparable<XID>> joinReference(
-        prop: KProperty1<E, X?>,
-        joinType: JoinType = JoinType.INNER
+        prop: KProperty1<E, X?>
+    ): JoinableTable<X, XID>
+
+    fun <X: Entity<XID>, XID: Comparable<XID>> `joinReference?`(
+        prop: KProperty1<E, X?>
     ): JoinableTable<X, XID>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> joinList(
-        prop: KProperty1<E, List<X>?>,
-        joinType: JoinType = JoinType.INNER
+        prop: KProperty1<E, List<X>?>
+    ): JoinableTable<X, XID>
+
+    fun <X: Entity<XID>, XID: Comparable<XID>> `joinList?`(
+        prop: KProperty1<E, List<X>?>
     ): JoinableTable<X, XID>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> joinConnection(
-        prop: KProperty1<E, Connection<X>?>,
-        joinType: JoinType = JoinType.INNER
+        prop: KProperty1<E, Connection<X>?>
+    ): JoinableTable<X, XID>
+
+    fun <X: Entity<XID>, XID: Comparable<XID>> `joinConnection?`(
+        prop: KProperty1<E, Connection<X>?>
     ): JoinableTable<X, XID>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> `←joinReference`(
-        prop: KProperty1<X, E?>,
-        joinType: JoinType = JoinType.INNER
+        prop: KProperty1<X, E?>
+    ): JoinableTable<X, XID>
+
+    fun <X: Entity<XID>, XID: Comparable<XID>> `←joinReference?`(
+        prop: KProperty1<X, E?>
     ): JoinableTable<X, XID>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> `←joinList`(
-        prop: KProperty1<X, List<E>?>,
-        joinType: JoinType = JoinType.INNER
+        prop: KProperty1<X, List<E>?>
+    ): JoinableTable<X, XID>
+
+    fun <X: Entity<XID>, XID: Comparable<XID>> `←joinList?`(
+        prop: KProperty1<X, List<E>?>
     ): JoinableTable<X, XID>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> `←joinConnection`(
-        prop: KProperty1<X, Connection<E>?>,
-        joinType: JoinType = JoinType.INNER
+        prop: KProperty1<X, Connection<E>?>
+    ): JoinableTable<X, XID>
+
+    fun <X: Entity<XID>, XID: Comparable<XID>> `←joinConnection?`(
+        prop: KProperty1<X, Connection<E>?>
     ): JoinableTable<X, XID>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> listContains(

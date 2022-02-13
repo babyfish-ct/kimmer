@@ -94,26 +94,23 @@ class TableGenerator(
                                     .build()
                             )
                             if (propMeta.targetDeclaration !== null) {
-                                addFunction(
-                                    FunSpec
-                                        .builder(prop.simpleName.asString())
+                                addProperty(
+                                    PropertySpec
+                                        .builder("${prop.simpleName.asString()}?", returnTypeName)
                                         .apply {
-                                            modifiers += KModifier.INLINE
                                             receiver(receiverTypeName)
-                                            addParameter(
-                                                ParameterSpec(
-                                                    "joinType",
-                                                    ClassName(KIMMER_SQL_AST_PACKAGE, "JoinType")
-                                                )
-                                            )
-                                            returns(returnTypeName)
                                             val code = when {
-                                                propMeta.isReference -> "return joinReference(%T::%L, joinType)"
-                                                propMeta.isList -> "return joinList(%T::%L, joinType)"
-                                                propMeta.isConnection -> "return joinConnection(%T::%L, joinType)"
+                                                propMeta.isReference -> "return `joinReference?`(%T::%L)"
+                                                propMeta.isList -> "return `joinList?`(%T::%L)"
+                                                propMeta.isConnection -> "return `joinConnection?`(%T::%L)"
                                                 else -> error("Internal bug")
                                             }
-                                            addCode(code, selfTypeName, prop.simpleName.asString())
+                                            getter(
+                                                FunSpec.getterBuilder().apply {
+                                                    modifiers += KModifier.INLINE
+                                                    addCode(code, selfTypeName, prop.simpleName.asString())
+                                                }.build()
+                                            )
                                         }
                                         .build()
                                 )

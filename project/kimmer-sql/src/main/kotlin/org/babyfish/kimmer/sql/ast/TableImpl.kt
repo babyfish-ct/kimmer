@@ -17,7 +17,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     val parent: TableImpl<*, *>? = null,
     val isInverse: Boolean = false,
     val joinProp: EntityProp? = null,
-    private var joinType: JoinType = JoinType.INNER
+    private var isOuterJoin: Boolean = false
 ): JoinableTable<E, ID>, Renderable {
 
     val alias: String
@@ -47,7 +47,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         entityType: EntityType,
         isInverse: Boolean,
         joinProp: EntityProp,
-        joinType: JoinType
+        isOuterJoin: Boolean
     ): TableImpl<X, XID> =
         TableImpl(
             query,
@@ -55,7 +55,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             this,
             isInverse,
             joinProp,
-            joinType
+            isOuterJoin
         )
 
     override val id: Expression<ID>
@@ -72,75 +72,131 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
 
     @Suppress("UNCHECKED_CAST")
     override fun <X: Entity<XID>, XID: Comparable<XID>> joinReference(
-        prop: KProperty1<E, X?>,
-        joinType: JoinType
+        prop: KProperty1<E, X?>
     ): JoinableTable<X, XID> {
         val entityProp = entityType.props[prop.name]
         if (entityProp?.isReference != true) {
             throw IllegalArgumentException("'$prop' is not reference")
         }
-        return join0(entityProp, joinType, false)
+        return join0(entityProp, false, false)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <X: Entity<XID>, XID: Comparable<XID>> `joinReference?`(
+        prop: KProperty1<E, X?>
+    ): JoinableTable<X, XID> {
+        val entityProp = entityType.props[prop.name]
+        if (entityProp?.isReference != true) {
+            throw IllegalArgumentException("'$prop' is not reference")
+        }
+        return join0(entityProp, true, false)
     }
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> joinList(
-        prop: KProperty1<E, List<X>?>,
-        joinType: JoinType
+        prop: KProperty1<E, List<X>?>
     ): JoinableTable<X, XID> {
         val entityProp = entityType.props[prop.name]
         if (entityProp?.isList != true) {
             throw IllegalArgumentException("'$prop' is not list")
         }
-        return join0(entityProp, joinType, false)
+        return join0(entityProp, false, false)
+    }
+
+    override fun <X: Entity<XID>, XID: Comparable<XID>> `joinList?`(
+        prop: KProperty1<E, List<X>?>
+    ): JoinableTable<X, XID> {
+        val entityProp = entityType.props[prop.name]
+        if (entityProp?.isList != true) {
+            throw IllegalArgumentException("'$prop' is not list")
+        }
+        return join0(entityProp, true, false)
     }
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> joinConnection(
-        prop: KProperty1<E, Connection<X>?>,
-        joinType: JoinType
+        prop: KProperty1<E, Connection<X>?>
     ): JoinableTable<X, XID> {
         val entityProp = entityType.props[prop.name]
         if (entityProp?.isConnection != true) {
             throw IllegalArgumentException("'$prop' is not connection")
         }
-        return join0(entityProp, joinType, false)
+        return join0(entityProp, false, false)
+    }
+
+    override fun <X: Entity<XID>, XID: Comparable<XID>> `joinConnection?`(
+        prop: KProperty1<E, Connection<X>?>
+    ): JoinableTable<X, XID> {
+        val entityProp = entityType.props[prop.name]
+        if (entityProp?.isConnection != true) {
+            throw IllegalArgumentException("'$prop' is not connection")
+        }
+        return join0(entityProp, true, false)
     }
 
     @Suppress("UNCHECKED_CAST")
     override fun <X: Entity<XID>, XID: Comparable<XID>> `←joinReference`(
-        prop: KProperty1<X, E?>,
-        joinType: JoinType
+        prop: KProperty1<X, E?>
     ): JoinableTable<X, XID> {
         val entityProp = reverseType(prop).props[prop.name]
         if (entityProp?.isReference != true) {
             throw IllegalArgumentException("'$prop' is not reference")
         }
-        return join0(entityProp, joinType.reversed(), true)
+        return join0(entityProp, false, true)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <X: Entity<XID>, XID: Comparable<XID>> `←joinReference?`(
+        prop: KProperty1<X, E?>
+    ): JoinableTable<X, XID> {
+        val entityProp = reverseType(prop).props[prop.name]
+        if (entityProp?.isReference != true) {
+            throw IllegalArgumentException("'$prop' is not reference")
+        }
+        return join0(entityProp, true, true)
     }
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> `←joinList`(
-        prop: KProperty1<X, List<E>?>,
-        joinType: JoinType
+        prop: KProperty1<X, List<E>?>
     ): JoinableTable<X, XID> {
         val entityProp = reverseType(prop).props[prop.name]
         if (entityProp?.isList != true) {
             throw IllegalArgumentException("'$prop' is not list")
         }
-        return join0(entityProp, joinType.reversed(), true)
+        return join0(entityProp, false, true)
+    }
+
+    override fun <X: Entity<XID>, XID: Comparable<XID>> `←joinList?`(
+        prop: KProperty1<X, List<E>?>
+    ): JoinableTable<X, XID> {
+        val entityProp = reverseType(prop).props[prop.name]
+        if (entityProp?.isList != true) {
+            throw IllegalArgumentException("'$prop' is not list")
+        }
+        return join0(entityProp, true, true)
     }
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> `←joinConnection`(
-        prop: KProperty1<X, Connection<E>?>,
-        joinType: JoinType
+        prop: KProperty1<X, Connection<E>?>
     ): JoinableTable<X, XID> {
         val entityProp = reverseType(prop).props[prop.name]
         if (entityProp?.isConnection != true) {
             throw IllegalArgumentException("'$prop' is not connection")
         }
-        return join0(entityProp, joinType.reversed(), true)
+        return join0(entityProp, false, true)
+    }
+
+    override fun <X: Entity<XID>, XID: Comparable<XID>> `←joinConnection?`(
+        prop: KProperty1<X, Connection<E>?>
+    ): JoinableTable<X, XID> {
+        val entityProp = reverseType(prop).props[prop.name]
+        if (entityProp?.isConnection != true) {
+            throw IllegalArgumentException("'$prop' is not connection")
+        }
+        return join0(entityProp, true, true)
     }
 
     private fun <X: Entity<XID>, XID: Comparable<XID>> join0(
         entityProp: EntityProp,
-        joinType: JoinType,
+        isOuterJoin: Boolean,
         inverse: Boolean
     ): JoinableTable<X, XID> {
         val joinName = if (!inverse) {
@@ -150,9 +206,9 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 ?: "inverse(${entityProp.kotlinProp})"
         }
         return if (entityProp.mappedBy !== null) {
-            join1(joinName, !inverse, entityProp.mappedBy!!, joinType.reversed())
+            join1(joinName, !inverse, entityProp.mappedBy!!, isOuterJoin)
         } else {
-            join1(joinName, inverse, entityProp, joinType)
+            join1(joinName, inverse, entityProp, isOuterJoin)
         }
     }
 
@@ -160,12 +216,12 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         joinName: String,
         inverse: Boolean,
         joinProp: EntityProp,
-        joinType: JoinType
+        isOuterJoin: Boolean
     ): JoinableTable<X, XID> {
         val existing = childTableMap[joinName]
         if (existing !== null) {
-            if (existing.joinType != joinType) {
-                existing.joinType = JoinType.INNER
+            if (!isOuterJoin) {
+                existing.isOuterJoin = false
             }
             return existing as JoinableTable<X, XID>
         }
@@ -174,7 +230,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             if (inverse) joinProp.declaringType else joinProp.targetType!!,
             inverse,
             joinProp,
-            joinType
+            isOuterJoin
         )
         childTableMap[joinName] = newTable
         staticallyUse()
@@ -274,11 +330,12 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     private fun SqlBuilder.renderJoin() {
 
         val parent = parent!!
+        val isOuterJoin = isOuterJoin
         val middleTable = joinProp!!.storage as? MiddleTable
 
         if (middleTable !== null) {
             joinImpl(
-                joinType,
+                isOuterJoin,
                 parent.alias,
                 (parent.entityType.idProp.storage as Column).name,
                 middleTable.tableName,
@@ -288,7 +345,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             )
             if (isUsedBy(this)) {
                 joinImpl(
-                    joinType,
+                    isOuterJoin,
                     middleTableAlias!!,
                     middleTable.targetJoinColumnName,
                     entityType.tableName,
@@ -299,7 +356,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             }
         } else if (isUsedBy(this)) {
             joinImpl(
-                joinType,
+                isOuterJoin,
                 parent.alias,
                 (joinProp.storage as Column).name,
                 entityType.tableName,
@@ -313,11 +370,12 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     private fun SqlBuilder.renderInverseJoin() {
 
         val parent = parent!!
+        val isOuterJoin = isOuterJoin
         val middleTable = joinProp!!.storage as? MiddleTable
 
         if (middleTable !== null) {
             joinImpl(
-                joinType,
+                isOuterJoin,
                 parent.alias,
                 (parent.entityType.idProp.storage as Column).name,
                 middleTable.tableName,
@@ -327,7 +385,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             )
             if (isUsedBy(this)) {
                 joinImpl(
-                    joinType,
+                    isOuterJoin,
                     middleTableAlias!!,
                     middleTable.joinColumnName,
                     entityType.tableName,
@@ -338,7 +396,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             }
         } else { // One-to-many join cannot be optimized by "_used"
             joinImpl(
-                joinType,
+                isOuterJoin,
                 parent.alias,
                 (parent.entityType.idProp.storage as Column).name,
                 entityType.tableName,
@@ -350,7 +408,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     }
 
     private fun SqlBuilder.joinImpl(
-        joinType: JoinType,
+        isOuterJoin: Boolean,
         previousAlias: String,
         previousColumnName: String,
         newTableName: String,
@@ -358,14 +416,9 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         newColumnName: String,
         inverse: Boolean
     ) {
-        val jt =
-            if (inverse) {
-                joinType.reversed()
-            } else {
-                joinType
-            }
+        val jt = if (isOuterJoin) "left" else "inner"
         sql(" ")
-        sql(jt.name.lowercase())
+        sql(jt)
         sql(" join ")
         sql(newTableName)
         sql(" as ")
@@ -452,23 +505,19 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             if (joinProp === null) {
                 return Destructive.NONE
             }
-            val (prop, jt) =
+            val prop =
                 if (isInverse) {
-                    (joinProp.opposite ?: return Destructive.BREAK_REPEATABILITY) to
-                        joinType.reversed()
+                    (joinProp.opposite ?: return Destructive.BREAK_REPEATABILITY)
                 } else {
-                    joinProp to joinType
+                    joinProp
                 }
             if (prop.isList || prop.isConnection) {
                 return Destructive.BREAK_REPEATABILITY
             }
-            if (prop.isNullable && jt == JoinType.LEFT) {
-                return Destructive.NONE
+            if (prop.isNullable && !isOuterJoin) {
+                return Destructive.BREAK_ROW_COUNT
             }
-            if (!prop.isNullable && (jt == JoinType.LEFT || jt == JoinType.INNER)) {
-                return Destructive.NONE
-            }
-            return Destructive.BREAK_ROW_COUNT
+            return Destructive.NONE
         }
 
     enum class Destructive {

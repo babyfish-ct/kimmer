@@ -1,10 +1,7 @@
 package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.sql.ast.common.AbstractTest
-import org.babyfish.kimmer.sql.ast.model.Book
-import org.babyfish.kimmer.sql.ast.model.name
-import org.babyfish.kimmer.sql.ast.model.price
-import org.babyfish.kimmer.sql.ast.model.store
+import org.babyfish.kimmer.sql.ast.model.*
 import kotlin.test.Test
 import java.math.BigDecimal
 import kotlin.test.expect
@@ -17,7 +14,7 @@ class PagingTest: AbstractTest() {
         val query = sqlClient
             .createQuery(Book::class) {
                 where(table.price.between(BigDecimal(20), BigDecimal(30)))
-                orderBy(table.store(JoinType.LEFT).name)
+                orderBy(table.`store?`.name)
                 orderBy(table.name)
                 select(table)
             }

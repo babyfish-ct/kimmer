@@ -12,14 +12,14 @@ internal class SubQueryTableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     parent: TableImpl<*, *>? = null,
     isInverse: Boolean = false,
     joinProp: EntityProp? = null,
-    joinType: JoinType = JoinType.INNER
+    isOuterJoin: Boolean = false
 ) : TableImpl<E, ID>(
     query,
     entityType,
     parent,
     isInverse,
     joinProp,
-    joinType
+    isOuterJoin
 ), SubQueryTable<E, ID> {
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> createChildTable(
@@ -27,7 +27,7 @@ internal class SubQueryTableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         entityType: EntityType,
         isInverse: Boolean,
         joinProp: EntityProp,
-        joinType: JoinType
+        isOuterJoin: Boolean
     ): SubQueryTableImpl<X, XID> =
         SubQueryTableImpl(
             query,
@@ -35,48 +35,78 @@ internal class SubQueryTableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             this,
             isInverse,
             joinProp,
-            joinType
+            isOuterJoin
         )
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> joinReference(
-        prop: KProperty1<E, X?>,
-        joinType: JoinType
+        prop: KProperty1<E, X?>
     ): SubQueryTable<X, XID> {
-        return super.joinReference(prop, joinType) as SubQueryTable<X, XID>
+        return super.joinReference(prop) as SubQueryTable<X, XID>
+    }
+
+    override fun <X : Entity<XID>, XID : Comparable<XID>> `joinReference?`(
+        prop: KProperty1<E, X?>
+    ): SubQueryTable<X, XID> {
+        return super.`joinReference?`(prop) as SubQueryTable<X, XID>
     }
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> joinList(
-        prop: KProperty1<E, List<X>?>,
-        joinType: JoinType
+        prop: KProperty1<E, List<X>?>
     ): SubQueryTable<X, XID> {
-        return super.joinList(prop, joinType) as SubQueryTable<X, XID>
+        return super.joinList(prop) as SubQueryTable<X, XID>
+    }
+
+    override fun <X : Entity<XID>, XID : Comparable<XID>> `joinList?`(
+        prop: KProperty1<E, List<X>?>
+    ): SubQueryTable<X, XID> {
+        return super.`joinList?`(prop) as SubQueryTable<X, XID>
     }
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> joinConnection(
-        prop: KProperty1<E, Connection<X>?>,
-        joinType: JoinType
+        prop: KProperty1<E, Connection<X>?>
     ): SubQueryTable<X, XID> {
-        return super.joinConnection(prop, joinType) as SubQueryTable<X, XID>
+        return super.joinConnection(prop) as SubQueryTable<X, XID>
+    }
+
+    override fun <X : Entity<XID>, XID : Comparable<XID>> `joinConnection?`(
+        prop: KProperty1<E, Connection<X>?>
+    ): SubQueryTable<X, XID> {
+        return super.`joinConnection?`(prop) as SubQueryTable<X, XID>
     }
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> `←joinReference`(
-        prop: KProperty1<X, E?>,
-        joinType: JoinType
+        prop: KProperty1<X, E?>
     ): SubQueryTable<X, XID> {
-        return super.`←joinReference`(prop, joinType) as SubQueryTable<X, XID>
+        return super.`←joinReference`(prop) as SubQueryTable<X, XID>
+    }
+
+    override fun <X : Entity<XID>, XID : Comparable<XID>> `←joinReference?`(
+        prop: KProperty1<X, E?>
+    ): SubQueryTable<X, XID> {
+        return super.`←joinReference?`(prop) as SubQueryTable<X, XID>
     }
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> `←joinList`(
-        prop: KProperty1<X, List<E>?>,
-        joinType: JoinType
+        prop: KProperty1<X, List<E>?>
     ): SubQueryTable<X, XID> {
-        return super.`←joinList`(prop, joinType) as SubQueryTable<X, XID>
+        return super.`←joinList`(prop) as SubQueryTable<X, XID>
+    }
+
+    override fun <X : Entity<XID>, XID : Comparable<XID>> `←joinList?`(
+        prop: KProperty1<X, List<E>?>
+    ): SubQueryTable<X, XID> {
+        return super.`←joinList?`(prop) as SubQueryTable<X, XID>
     }
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> `←joinConnection`(
-        prop: KProperty1<X, Connection<E>?>,
-        joinType: JoinType
+        prop: KProperty1<X, Connection<E>?>
     ): SubQueryTable<X, XID> {
-        return super.`←joinConnection`(prop, joinType) as SubQueryTable<X, XID>
+        return super.`←joinConnection`(prop) as SubQueryTable<X, XID>
+    }
+
+    override fun <X : Entity<XID>, XID : Comparable<XID>> `←joinConnection?`(
+        prop: KProperty1<X, Connection<E>?>
+    ): SubQueryTable<X, XID> {
+        return super.`←joinConnection?`(prop) as SubQueryTable<X, XID>
     }
 }

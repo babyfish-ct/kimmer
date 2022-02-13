@@ -4,7 +4,6 @@ import org.babyfish.kimmer.sql.ast.common.*
 import org.babyfish.kimmer.sql.ast.model.Author
 import org.babyfish.kimmer.sql.ast.model.Book
 import org.babyfish.kimmer.sql.ast.model.BookStore
-import java.util.*
 import kotlin.test.Test
 
 class ContainsTest: AbstractTest() {

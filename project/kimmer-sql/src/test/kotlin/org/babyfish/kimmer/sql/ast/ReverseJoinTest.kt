@@ -82,10 +82,10 @@ class ReverseJoinTest: AbstractTest() {
             where(
                 or(
                     table
-                        .`←joinReference`(Book::store, JoinType.LEFT)
-                        .`←joinList`(Author::books, JoinType.LEFT)
+                        .`←joinReference?`(Book::store)
+                        .`←joinList?`(Author::books)
                         [Author::firstName] eq "Alex",
-                    table.books(JoinType.LEFT).authors(JoinType.LEFT).firstName eq "Tim"
+                    table.`books?`.`authors?`.firstName eq "Tim"
                 )
             )
             select(constant(1))
@@ -107,10 +107,10 @@ class ReverseJoinTest: AbstractTest() {
             where(
                 or(
                     table
-                        .`←joinReference`(Book::store, JoinType.LEFT)
-                        .`←joinList`(Author::books, JoinType.LEFT)
+                        .`←joinReference?`(Book::store)
+                        .`←joinList?`(Author::books)
                         [Author::firstName] eq "Alex",
-                    table.books(JoinType.RIGHT).authors(JoinType.RIGHT).firstName eq "Tim"
+                    table.books.authors.firstName eq "Tim"
                 )
             )
             select(constant(1))
