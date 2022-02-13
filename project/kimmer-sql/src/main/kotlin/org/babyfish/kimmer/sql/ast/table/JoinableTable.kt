@@ -11,7 +11,7 @@ interface JoinableTable<E: Entity<ID>, ID: Comparable<ID>> : Table<E, ID>, Selec
 
     fun <X: Entity<XID>, XID: Comparable<XID>> joinReference(
         prop: KProperty1<E, X?>
-    ): JoinableTable<X, XID>
+    ): NonNullJoinableTable<X, XID>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> `joinReference?`(
         prop: KProperty1<E, X?>
@@ -19,7 +19,7 @@ interface JoinableTable<E: Entity<ID>, ID: Comparable<ID>> : Table<E, ID>, Selec
 
     fun <X: Entity<XID>, XID: Comparable<XID>> joinList(
         prop: KProperty1<E, List<X>>
-    ): JoinableTable<X, XID>
+    ): NonNullJoinableTable<X, XID>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> `joinList?`(
         prop: KProperty1<E, List<X>>
@@ -27,7 +27,7 @@ interface JoinableTable<E: Entity<ID>, ID: Comparable<ID>> : Table<E, ID>, Selec
 
     fun <X: Entity<XID>, XID: Comparable<XID>> joinConnection(
         prop: KProperty1<E, Connection<X>>
-    ): JoinableTable<X, XID>
+    ): NonNullJoinableTable<X, XID>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> `joinConnection?`(
         prop: KProperty1<E, Connection<X>>
@@ -35,7 +35,7 @@ interface JoinableTable<E: Entity<ID>, ID: Comparable<ID>> : Table<E, ID>, Selec
 
     fun <X: Entity<XID>, XID: Comparable<XID>> `←joinReference`(
         prop: KProperty1<X, E?>
-    ): JoinableTable<X, XID>
+    ): NonNullJoinableTable<X, XID>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> `←joinReference?`(
         prop: KProperty1<X, E?>
@@ -43,7 +43,7 @@ interface JoinableTable<E: Entity<ID>, ID: Comparable<ID>> : Table<E, ID>, Selec
 
     fun <X: Entity<XID>, XID: Comparable<XID>> `←joinList`(
         prop: KProperty1<X, List<E>>
-    ): JoinableTable<X, XID>
+    ): NonNullJoinableTable<X, XID>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> `←joinList?`(
         prop: KProperty1<X, List<E>>
@@ -51,7 +51,7 @@ interface JoinableTable<E: Entity<ID>, ID: Comparable<ID>> : Table<E, ID>, Selec
 
     fun <X: Entity<XID>, XID: Comparable<XID>> `←joinConnection`(
         prop: KProperty1<X, Connection<E>>
-    ): JoinableTable<X, XID>
+    ): NonNullJoinableTable<X, XID>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> `←joinConnection?`(
         prop: KProperty1<X, Connection<E>>

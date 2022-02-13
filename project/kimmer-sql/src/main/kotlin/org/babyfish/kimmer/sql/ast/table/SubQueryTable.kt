@@ -8,7 +8,7 @@ interface SubQueryTable<E: Entity<ID>, ID: Comparable<ID>>: JoinableTable<E, ID>
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> joinReference(
         prop: KProperty1<E, X?>
-    ): SubQueryTable<X, XID>
+    ): NonNullSubQueryTable<X, XID>
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> `joinReference?`(
         prop: KProperty1<E, X?>
@@ -16,7 +16,7 @@ interface SubQueryTable<E: Entity<ID>, ID: Comparable<ID>>: JoinableTable<E, ID>
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> joinList(
         prop: KProperty1<E, List<X>>
-    ): SubQueryTable<X, XID>
+    ): NonNullSubQueryTable<X, XID>
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> `joinList?`(
         prop: KProperty1<E, List<X>>
@@ -24,7 +24,7 @@ interface SubQueryTable<E: Entity<ID>, ID: Comparable<ID>>: JoinableTable<E, ID>
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> joinConnection(
         prop: KProperty1<E, Connection<X>>
-    ): SubQueryTable<X, XID>
+    ): NonNullSubQueryTable<X, XID>
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> `joinConnection?`(
         prop: KProperty1<E, Connection<X>>
@@ -32,7 +32,7 @@ interface SubQueryTable<E: Entity<ID>, ID: Comparable<ID>>: JoinableTable<E, ID>
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> `←joinReference`(
         prop: KProperty1<X, E?>
-    ): SubQueryTable<X, XID>
+    ): NonNullSubQueryTable<X, XID>
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> `←joinReference?`(
         prop: KProperty1<X, E?>
@@ -40,7 +40,7 @@ interface SubQueryTable<E: Entity<ID>, ID: Comparable<ID>>: JoinableTable<E, ID>
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> `←joinList`(
         prop: KProperty1<X, List<E>>
-    ): SubQueryTable<X, XID>
+    ): NonNullSubQueryTable<X, XID>
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> `←joinList?`(
         prop: KProperty1<X, List<E>>
@@ -48,7 +48,7 @@ interface SubQueryTable<E: Entity<ID>, ID: Comparable<ID>>: JoinableTable<E, ID>
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> `←joinConnection`(
         prop: KProperty1<X, Connection<E>>
-    ): SubQueryTable<X, XID>
+    ): NonNullSubQueryTable<X, XID>
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> `←joinConnection?`(
         prop: KProperty1<X, Connection<E>>

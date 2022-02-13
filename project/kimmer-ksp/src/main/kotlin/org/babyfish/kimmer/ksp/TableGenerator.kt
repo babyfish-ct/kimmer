@@ -70,7 +70,22 @@ class TableGenerator(
                         }
                         for ((prop, propMeta) in nonIdMap) {
                             if (propMeta.targetDeclaration !== null) {
-                                addJoinProps(classDeclaration, prop, propMeta, entityIDTypeNameProvider)
+                                addJoinProps(
+                                    classDeclaration,
+                                    prop,
+                                    propMeta,
+                                    entityIDTypeNameProvider,
+                                    true
+                                )
+                                if (!collectionJoinOnlyForSubQuery || propMeta.isReference) {
+                                    addJoinProps(
+                                        classDeclaration,
+                                        prop,
+                                        propMeta,
+                                        entityIDTypeNameProvider,
+                                        false
+                                    )
+                                }
                             }
                         }
                     }
@@ -144,11 +159,12 @@ class TableGenerator(
         classDeclaration: KSClassDeclaration,
         prop: KSPropertyDeclaration,
         propMeta: PropMeta,
-        entityIDTypeNameProvider: EntityIDTypeNameProvider
+        entityIDTypeNameProvider: EntityIDTypeNameProvider,
+        forSubQuery: Boolean
     ) {
         val selfTypeName = classDeclaration.asClassName()
         val nonNullReceiverTypeName =
-            if (collectionJoinOnlyForSubQuery && (propMeta.isList || propMeta.isConnection)) {
+            if (forSubQuery) {
                 sysTypes.nonNullSubQueryTableType
             } else {
                 sysTypes.nonNullJoinableTableType
@@ -157,7 +173,7 @@ class TableGenerator(
                 entityIDTypeNameProvider[classDeclaration]
             )
         val receiverTypeName =
-            if (collectionJoinOnlyForSubQuery && (propMeta.isList || propMeta.isConnection)) {
+            if (forSubQuery) {
                 sysTypes.subQueryTableType
             } else {
                 sysTypes.joinableTableType
@@ -166,41 +182,35 @@ class TableGenerator(
                 entityIDTypeNameProvider[classDeclaration]
             )
         val tgt = propMeta.targetDeclaration!!
-        val nonNullReturnTypeName = sysTypes.nonNullJoinableTableType.asClassName()
-            .parameterizedBy(
-                tgt.asClassName(),
-                entityIDTypeNameProvider[tgt]
-            )
-        val returnTypeName = sysTypes.joinableTableType.asClassName()
-            .parameterizedBy(
-                tgt.asClassName(),
-                entityIDTypeNameProvider[tgt]
-            )
+        val nonNullReturnTypeName =
+            if (forSubQuery) {
+                sysTypes.nonNullSubQueryTableType
+            } else {
+                sysTypes.nonNullJoinableTableType
+            }.asClassName()
+                .parameterizedBy(
+                    tgt.asClassName(),
+                    entityIDTypeNameProvider[tgt]
+                )
+        val returnTypeName =
+            if (forSubQuery) {
+                sysTypes.subQueryTableType
+            } else {
+                sysTypes.joinableTableType
+            }.asClassName()
+                .parameterizedBy(
+                    tgt.asClassName(),
+                    entityIDTypeNameProvider[tgt]
+                )
         val joinFunName = when {
             propMeta.isReference -> "joinReference"
             propMeta.isList -> "joinList"
             propMeta.isConnection -> "joinConnection"
             else -> error("Internal bug")
         }
-        if (!propMeta.isNullable) {
-            addProperty(
-                PropertySpec
-                    .builder(prop.simpleName.asString(), nonNullReturnTypeName)
-                    .apply {
-                        receiver(nonNullReceiverTypeName)
-                        getter(
-                            FunSpec.getterBuilder().apply {
-                                modifiers += KModifier.INLINE
-                                addCode("return $joinFunName(%T::%L)", selfTypeName, prop.simpleName.asString())
-                            }.build()
-                        )
-                    }
-                    .build()
-            )
-        }
         addProperty(
             PropertySpec
-                .builder(prop.simpleName.asString(), returnTypeName)
+                .builder(prop.simpleName.asString(), nonNullReturnTypeName)
                 .apply {
                     receiver(receiverTypeName)
                     getter(
