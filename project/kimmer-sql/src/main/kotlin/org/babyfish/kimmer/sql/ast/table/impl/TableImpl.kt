@@ -9,7 +9,7 @@ import org.babyfish.kimmer.sql.ast.ContainsExpression
 import org.babyfish.kimmer.sql.ast.PropExpression
 import org.babyfish.kimmer.sql.ast.Renderable
 import org.babyfish.kimmer.sql.ast.SqlBuilder
-import org.babyfish.kimmer.sql.ast.query.SqlSubQuery
+import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
 import org.babyfish.kimmer.sql.ast.table.JoinableTable
 import org.babyfish.kimmer.sql.ast.table.NonNullJoinableTable
 import org.babyfish.kimmer.sql.meta.EntityProp
@@ -69,10 +69,10 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
 
     override val id: NonNullExpression<ID>
         get() =
-            PropExpression<ID>(this, entityType.idProp).asNonNull()
+            PropExpression<ID>(this, entityType.idProp).`!`
 
     override fun <X : Any> get(prop: KProperty1<E, X>): NonNullExpression<X> =
-        `get?`(prop).asNonNull()
+        `get?`(prop).`!`
 
     override fun <X: Any> `get?`(prop: KProperty1<E, X?>): Expression<X> {
         val entityProp = entityType.props[prop.name] ?: error("No property '${prop.name}'")
@@ -317,7 +317,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             ContainsExpression(this, prop.mappedBy!!, xIds, !inverse)
         } else {
             ContainsExpression(this, prop, xIds, inverse)
-        }.asNonNull()
+        }
 
     override fun renderTo(builder: SqlBuilder) {
         builder.renderSelf()
@@ -498,7 +498,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             if (storage is Formula<*, *, *>) {
                 resolveFormula(prop) {
                     (storage as Formula<E, ID, Any>).get(this@TableImpl).let {
-                        if (starMode && it is SqlSubQuery<*, *, *, *>) {
+                        if (starMode && it is MutableSubQuery<*, *, *, *>) {
                             throw MappingException(
                                 "Cannot select formula prop implicitly (select whole table) because it's expensive"
                             )

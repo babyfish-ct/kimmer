@@ -7,17 +7,17 @@ class SqlExpressionBuilder internal constructor() {
 
     private var expressions: List<Expression<*>> = emptyList()
 
-    private var values: List<Any?> = emptyList()
+    private var values: List<Any> = emptyList()
 
     fun expressions(vararg expressions: Expression<*>) {
         this.expressions = expressions.toList()
     }
 
-    fun values(vararg values: Any?) {
+    fun values(vararg values: Any) {
         this.values = values.toList()
     }
 
-    internal fun <T: Any> build(sql: String): Expression<T> {
+    internal fun <T: Any> build(sql: String): NonNullExpression<T> {
 
         if (sql.indexOf('\'') != -1) {
             throw IllegalArgumentException("SQL template cannot contains \"'\"")

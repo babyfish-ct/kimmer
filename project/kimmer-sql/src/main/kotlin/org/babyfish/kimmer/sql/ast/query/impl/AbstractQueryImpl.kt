@@ -6,9 +6,9 @@ import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.Order
 import org.babyfish.kimmer.sql.ast.Renderable
 import org.babyfish.kimmer.sql.ast.SqlBuilder
-import org.babyfish.kimmer.sql.ast.query.AbstractSqlQuery
-import org.babyfish.kimmer.sql.ast.query.SqlSubQuery
-import org.babyfish.kimmer.sql.ast.query.SubQueryImpl
+import org.babyfish.kimmer.sql.ast.query.MutableQuery
+import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
+import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
 import org.babyfish.kimmer.sql.ast.table.TableAliasAllocator
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
@@ -22,7 +22,7 @@ internal abstract class AbstractQueryImpl<E, ID>(
     val tableAliasAllocator: TableAliasAllocator,
     val sqlClient: SqlClientImpl,
     type: KClass<E>
-): AbstractSqlQuery<E, ID>
+): MutableQuery<E, ID>
     where E:
           Entity<ID>,
           ID: Comparable<ID> {
@@ -38,14 +38,16 @@ internal abstract class AbstractQueryImpl<E, ID>(
 
     private val orders = mutableListOf<Order>()
 
-    override val table: TableImpl<E, ID> = createTable(type)
+    override val table: TableImpl<E, ID> = createTable0(type)
 
-    protected open fun createTable(type: KClass<E>): TableImpl<E, ID> =
-        TableImpl(
-            this,
+    private fun createTable0(type: KClass<E>): TableImpl<E, ID> =
+        createTable(
             entityTypeMap[type]
                 ?: throw IllegalArgumentException("Cannot create query for unmapped type '${type.qualifiedName}'")
         )
+
+    protected open fun createTable(entityType: EntityType): TableImpl<E, ID> =
+        TableImpl(this, entityType)
 
     override fun where(vararg predicates: Expression<Boolean>?) {
         for (predicate in predicates) {
@@ -91,8 +93,8 @@ internal abstract class AbstractQueryImpl<E, ID>(
 
     override fun <X, XID, R> subQuery(
         type: KClass<X>,
-        block: SqlSubQuery<E, ID, X, XID>.() -> TypedSqlSubQuery<E, ID, X, XID, R>
-    ): TypedSqlSubQuery<E, ID, X, XID, R>
+        block: MutableSubQuery<E, ID, X, XID>.() -> TypedSubQuery<E, ID, X, XID, R>
+    ): TypedSubQuery<E, ID, X, XID, R>
     where X: Entity<XID>, XID: Comparable<XID> =
         SubQueryImpl(this, type).run {
             block()
@@ -100,8 +102,8 @@ internal abstract class AbstractQueryImpl<E, ID>(
 
     override fun <X, XID> untypedSubQuery(
         type: KClass<X>,
-        block: SqlSubQuery<E, ID, X, XID>.() -> Unit
-    ): SqlSubQuery<E, ID, X, XID>
+        block: MutableSubQuery<E, ID, X, XID>.() -> Unit
+    ): MutableSubQuery<E, ID, X, XID>
     where X: Entity<XID>, XID: Comparable<XID> =
         SubQueryImpl(this, type).apply {
             block()

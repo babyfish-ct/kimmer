@@ -20,20 +20,17 @@ class PagingTest: AbstractTest() {
             }
 
         val countQuery = query
-            .creator {
+            .reselect {
                 select(table.id.count())
-            }.create {
-                withoutSortingAndPaging()
             }
+            .withoutSortingAndPaging()
 
         execute(countQuery)
         expect("""select count(tb_1_.ID) from BOOK as tb_1_ 
             |where tb_1_.PRICE between $1 and $2""".trimMargin().toOneLine()
         ) { sql }
 
-        execute(query.create {
-            limit(10, 20)
-        })
+        execute(query.limit(10, 20))
         expect("""select tb_1_.EDITION, tb_1_.ID, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
             |from BOOK as tb_1_ 
             |left join BOOK_STORE as tb_2_ on tb_1_.STORE_ID = tb_2_.ID 
@@ -55,11 +52,10 @@ class PagingTest: AbstractTest() {
             }
 
         val countQuery = query
-            .creator {
+            .reselect {
                 select(table.id.count())
-            }.create {
-                withoutSortingAndPaging()
             }
+            .withoutSortingAndPaging()
 
         execute(countQuery)
         expect("""select count(tb_1_.ID) from BOOK as tb_1_ 
@@ -67,9 +63,7 @@ class PagingTest: AbstractTest() {
             |where tb_1_.PRICE between $1 and $2""".trimMargin().toOneLine()
         ) { sql }
 
-        execute(query.create {
-            limit(10, 20)
-        })
+        execute(query.limit(10, 20))
         expect("""select tb_1_.EDITION, tb_1_.ID, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
             |from BOOK as tb_1_ 
             |inner join BOOK_STORE as tb_2_ on tb_1_.STORE_ID = tb_2_.ID 

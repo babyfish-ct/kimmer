@@ -54,7 +54,7 @@ class SubQueryTest: AbstractTest() {
             where(
                 tuple(table.name, table.price) valueIn subQuery(Book::class) {
                     groupBy(table.name)
-                    select(table.name, table.price.max())
+                    select(table.name, table.price.max().`!`)
                 }
             )
             select(table)

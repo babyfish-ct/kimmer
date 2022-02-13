@@ -1,55 +1,50 @@
 package org.babyfish.kimmer.sql.ast.query.impl
 
 import org.babyfish.kimmer.sql.Entity
-import org.babyfish.kimmer.sql.Selection
 import org.babyfish.kimmer.sql.ast.*
-import org.babyfish.kimmer.sql.ast.query.SqlQuery
-import org.babyfish.kimmer.sql.ast.query.TypedQueryImpl
-import org.babyfish.kimmer.sql.ast.query.TypedSqlQuery
+import org.babyfish.kimmer.sql.ast.query.MutableRootQuery
+import org.babyfish.kimmer.sql.ast.query.SelectableTypedRootQuery
+import org.babyfish.kimmer.sql.ast.query.TypedRootQuery
+import org.babyfish.kimmer.sql.ast.query.selectable.RootSelectable
 import org.babyfish.kimmer.sql.ast.table.TableAliasAllocator
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
-internal class QueryImpl<E, ID>(
-    val sql: SqlClientImpl,
+internal class RootQueryImpl<E, ID>(
+    sqlClient: SqlClientImpl,
     type: KClass<E>
-): AbstractQueryImpl<E, ID>(TableAliasAllocator(), sql, type),
-    SqlQuery<E, ID>
+): AbstractQueryImpl<E, ID>(TableAliasAllocator(), sqlClient, type),
+    MutableRootQuery<E, ID>
     where E:
           Entity<ID>,
           ID: Comparable<ID> {
 
     override fun <R> select(
-        prop: KProperty1<E, R?>
-    ): TypedSqlQuery<E, ID, R> =
-        TypedQueryImpl(listOf(table.`get?`(prop as KProperty1<E, Any>)), this)
-
-    override fun <R> select(
         selection: Selection<R>
-    ): TypedSqlQuery<E, ID, R> =
-        TypedQueryImpl(listOf(selection), this)
+    ): SelectableTypedRootQuery<E, ID, R> =
+        SelectableTypedRootQueryImpl.select(this, selection)
 
     override fun <A, B> select(
         selection1: Selection<A>,
         selection2: Selection<B>
-    ): TypedSqlQuery<E, ID, Pair<A, B>> =
-        TypedQueryImpl(listOf(selection1, selection2), this)
+    ): SelectableTypedRootQuery<E, ID, Pair<A, B>> =
+        SelectableTypedRootQueryImpl.select(this, selection1, selection2)
 
     override fun <A, B, C> select(
         selection1: Selection<A>,
         selection2: Selection<B>,
         selection3: Selection<C>
-    ): TypedSqlQuery<E, ID, Triple<A, B, C>> =
-        TypedQueryImpl(listOf(selection1, selection2, selection3), this)
+    ): SelectableTypedRootQuery<E, ID, Triple<A, B, C>> =
+        SelectableTypedRootQueryImpl.select(this, selection1, selection2, selection3)
 
     override fun <T1, T2, T3, T4> select(
         selection1: Selection<T1>,
         selection2: Selection<T2>,
         selection3: Selection<T3>,
         selection4: Selection<T4>,
-    ): TypedSqlQuery<E, ID, Tuple4<T1, T2, T3, T4>> =
-        TypedQueryImpl(listOf(selection1, selection2, selection3, selection4), this)
+    ): SelectableTypedRootQuery<E, ID, Tuple4<T1, T2, T3, T4>> =
+        SelectableTypedRootQueryImpl.select(this, selection1, selection2, selection3, selection4)
 
     override fun <T1, T2, T3, T4, T5> select(
         selection1: Selection<T1>,
@@ -57,8 +52,8 @@ internal class QueryImpl<E, ID>(
         selection3: Selection<T3>,
         selection4: Selection<T4>,
         selection5: Selection<T5>,
-    ): TypedSqlQuery<E, ID, Tuple5<T1, T2, T3, T4, T5>> =
-        TypedQueryImpl(listOf(selection1, selection2, selection3, selection4, selection5), this)
+    ): SelectableTypedRootQuery<E, ID, Tuple5<T1, T2, T3, T4, T5>> =
+        SelectableTypedRootQueryImpl.select(this, selection1, selection2, selection3, selection4, selection5)
 
     override fun <T1, T2, T3, T4, T5, T6> select(
         selection1: Selection<T1>,
@@ -67,8 +62,8 @@ internal class QueryImpl<E, ID>(
         selection4: Selection<T4>,
         selection5: Selection<T5>,
         selection6: Selection<T6>,
-    ): TypedSqlQuery<E, ID, Tuple6<T1, T2, T3, T4, T5, T6>> =
-        TypedQueryImpl(listOf(selection1, selection2, selection3, selection4, selection5, selection6), this)
+    ): SelectableTypedRootQuery<E, ID, Tuple6<T1, T2, T3, T4, T5, T6>> =
+        SelectableTypedRootQueryImpl.select(this, selection1, selection2, selection3, selection4, selection5, selection6)
 
     override fun <T1, T2, T3, T4, T5, T6, T7> select(
         selection1: Selection<T1>,
@@ -78,8 +73,8 @@ internal class QueryImpl<E, ID>(
         selection5: Selection<T5>,
         selection6: Selection<T6>,
         selection7: Selection<T7>
-    ): TypedSqlQuery<E, ID, Tuple7<T1, T2, T3, T4, T5, T6, T7>> =
-        TypedQueryImpl(listOf(selection1, selection2, selection3, selection4, selection5, selection6, selection7), this)
+    ): SelectableTypedRootQuery<E, ID, Tuple7<T1, T2, T3, T4, T5, T6, T7>> =
+        SelectableTypedRootQueryImpl.select(this, selection1, selection2, selection3, selection4, selection5, selection6, selection7)
 
     override fun <T1, T2, T3, T4, T5, T6, T7, T8> select(
         selection1: Selection<T1>,
@@ -90,8 +85,8 @@ internal class QueryImpl<E, ID>(
         selection6: Selection<T6>,
         selection7: Selection<T7>,
         selection8: Selection<T8>,
-    ): TypedSqlQuery<E, ID, Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> =
-        TypedQueryImpl(listOf(selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8), this)
+    ): SelectableTypedRootQuery<E, ID, Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> =
+        SelectableTypedRootQueryImpl.select(this, selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8)
 
     override fun <T1, T2, T3, T4, T5, T6, T7, T8, T9> select(
         selection1: Selection<T1>,
@@ -103,6 +98,6 @@ internal class QueryImpl<E, ID>(
         selection7: Selection<T7>,
         selection8: Selection<T8>,
         selection9: Selection<T9>,
-    ): TypedSqlQuery<E, ID, Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> =
-        TypedQueryImpl(listOf(selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8, selection9), this)
+    ): SelectableTypedRootQuery<E, ID, Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> =
+        SelectableTypedRootQueryImpl.select(this, selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8, selection9)
 }

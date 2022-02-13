@@ -1,6 +1,5 @@
 package org.babyfish.kimmer.sql.ast
 
-import org.babyfish.kimmer.sql.Selection
 import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
 import org.babyfish.kimmer.sql.ast.table.accept
 

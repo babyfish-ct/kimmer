@@ -28,7 +28,7 @@ class ConcatContext internal constructor() {
         parts += value(this)
     }
 
-    internal fun createExpression(): Expression<String> {
+    internal fun createExpression(): NonNullExpression<String> {
         terminated = true
         return if (executionRequired) {
             ConcatExpression(parts)

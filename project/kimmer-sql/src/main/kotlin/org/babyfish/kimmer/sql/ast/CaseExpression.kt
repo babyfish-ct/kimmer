@@ -4,33 +4,33 @@ import org.babyfish.kimmer.sql.ast.table.TableReferenceElement
 import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
 import org.babyfish.kimmer.sql.ast.table.accept
 
-interface SimpleCaseStartBuilder<C> {
+interface SimpleCaseStartBuilder<C: Any> {
 
-    fun <T> match(
+    fun <T: Any> match(
         cond: C,
         value: T
     ): SimpleCaseBuilder<C, T> =
         match(value(cond), value(value))
 
-    fun <T> match(
+    fun <T: Any> match(
         cond: Expression<C>,
         value: T
     ): SimpleCaseBuilder<C, T> =
         match(cond, value(value))
 
-    fun <T> match(
+    fun <T: Any> match(
         cond: C,
-        value: Expression<T>
+        value: NonNullExpression<T>
     ): SimpleCaseBuilder<C, T> =
         match(value(cond), value)
 
-    fun <T> match(
+    fun <T: Any> match(
         cond: Expression<C>,
-        value: Expression<T>
+        value: NonNullExpression<T>
     ): SimpleCaseBuilder<C, T>
 }
 
-interface SimpleCaseBuilder<C, T> {
+interface SimpleCaseBuilder<C: Any, T: Any> {
 
     fun match(
         cond: C,
@@ -46,71 +46,71 @@ interface SimpleCaseBuilder<C, T> {
 
     fun match(
         cond: C,
-        value: Expression<T>
+        value: NonNullExpression<T>
     ): SimpleCaseBuilder<C, T> =
         match(value(cond), value)
 
     fun match(
         cond: Expression<C>,
-        value: Expression<T>
+        value: NonNullExpression<T>
     ): SimpleCaseBuilder<C, T>
 
     fun otherwise(
         value: T
-    ): Expression<T> =
+    ): NonNullExpression<T> =
         otherwise(value(value))
 
     fun otherwise(
-        expression: Expression<T>
-    ): Expression<T>
+        expression: NonNullExpression<T>
+    ): NonNullExpression<T>
 }
 
 interface CaseStartBuilder {
 
-    fun <T> match(
-        cond: Expression<Boolean>,
+    fun <T: Any> match(
+        cond: NonNullExpression<Boolean>,
         value: T
     ): CaseBuilder<T> =
         match(cond, value(value))
 
-    fun <T> match(
-        cond: Expression<Boolean>,
-        value: Expression<T>
+    fun <T: Any> match(
+        cond: NonNullExpression<Boolean>,
+        value: NonNullExpression<T>
     ): CaseBuilder<T>
 }
 
-interface CaseBuilder<T> {
+interface CaseBuilder<T: Any> {
 
     fun match(
-        cond: Expression<Boolean>,
+        cond: NonNullExpression<Boolean>,
         value: T
     ): CaseBuilder<T> =
         match(cond, value(value))
 
     fun match(
-        cond: Expression<Boolean>,
-        value: Expression<T>
+        cond: NonNullExpression<Boolean>,
+        value: NonNullExpression<T>
     ): CaseBuilder<T>
 
     fun otherwise(
         value: T
-    ): Expression<T> =
+    ): NonNullExpression<T> =
         otherwise(value(value))
 
     fun otherwise(
         expression: Expression<T>
-    ): Expression<T>
+    ): NonNullExpression<T>
 }
 
 internal interface CaseChainNode: Renderable, TableReferenceElement
 
-internal class SimpleCaseStartBuilderImpl<C>(
+internal class SimpleCaseStartBuilderImpl<C: Any>(
     private val expression: Expression<C>
 ) : SimpleCaseStartBuilder<C>, CaseChainNode {
 
-    override fun <T> match(
+    override fun <T: Any> match(
         cond: Expression<C>,
-        value: Expression<T>
+        value: NonNullExpression<T>
     ): SimpleCaseBuilder<C, T> =
         SimpleCaseBuilderImpl(this, cond, value)
 
@@ -124,19 +124,19 @@ internal class SimpleCaseStartBuilderImpl<C>(
     }
 }
 
-internal class SimpleCaseBuilderImpl<C, T>(
+internal class SimpleCaseBuilderImpl<C: Any, T: Any>(
     private val parent: CaseChainNode,
     private val cond: Expression<C>,
-    private val value: Expression<T>
+    private val value: NonNullExpression<T>
 ): SimpleCaseBuilder<C, T>, CaseChainNode {
 
     override fun match(
         cond: Expression<C>,
-        value: Expression<T>
+        value: NonNullExpression<T>
     ): SimpleCaseBuilder<C, T> =
         SimpleCaseBuilderImpl(this, cond, value)
 
-    override fun otherwise(expression: Expression<T>): Expression<T> =
+    override fun otherwise(expression: NonNullExpression<T>): NonNullExpression<T> =
         CaseExpression(this, expression)
 
     override fun renderTo(builder: SqlBuilder) {
@@ -156,9 +156,9 @@ internal class SimpleCaseBuilderImpl<C, T>(
 
 internal class CaseStartBuilderImpl: CaseStartBuilder, CaseChainNode {
 
-    override fun <T> match(
-        cond: Expression<Boolean>,
-        value: Expression<T>
+    override fun <T: Any> match(
+        cond: NonNullExpression<Boolean>,
+        value: NonNullExpression<T>
     ): CaseBuilder<T> =
         CaseBuilderImpl(this, cond, value)
 
@@ -169,21 +169,21 @@ internal class CaseStartBuilderImpl: CaseStartBuilder, CaseChainNode {
     override fun accept(visitor: TableReferenceVisitor) {}
 }
 
-internal class CaseBuilderImpl<T>(
+internal class CaseBuilderImpl<T: Any>(
     private val parent: CaseChainNode,
-    private val cond: Expression<Boolean>,
-    private val value: Expression<T>
+    private val cond: NonNullExpression<Boolean>,
+    private val value: NonNullExpression<T>
 ): CaseBuilder<T>, CaseChainNode {
 
     override fun match(
-        cond: Expression<Boolean>,
-        value: Expression<T>
+        cond: NonNullExpression<Boolean>,
+        value: NonNullExpression<T>
     ): CaseBuilder<T> =
         CaseBuilderImpl(this, cond, value)
 
     override fun otherwise(
         expression: Expression<T>
-    ): Expression<T> =
+    ): NonNullExpression<T> =
         CaseExpression(this, expression)
 
     override fun renderTo(builder: SqlBuilder) {

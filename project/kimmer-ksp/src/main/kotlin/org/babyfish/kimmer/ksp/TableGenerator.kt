@@ -132,7 +132,7 @@ class TableGenerator(
                         getter(
                             FunSpec.getterBuilder().apply {
                                 modifiers += KModifier.INLINE
-                                addCode("return this.get(%T::%L)", selfTypeName, prop.simpleName.asString())
+                                addCode("return get(%T::%L)", selfTypeName, prop.simpleName.asString())
                             }.build()
                         )
                     }
@@ -147,7 +147,7 @@ class TableGenerator(
                     getter(
                         FunSpec.getterBuilder().apply {
                             modifiers += KModifier.INLINE
-                            addCode("return this.`get?`(%T::%L)", selfTypeName, prop.simpleName.asString())
+                            addCode("return `get?`(%T::%L)", selfTypeName, prop.simpleName.asString())
                         }.build()
                     )
                 }

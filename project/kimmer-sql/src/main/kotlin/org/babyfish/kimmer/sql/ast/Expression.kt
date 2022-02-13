@@ -1,7 +1,7 @@
 package org.babyfish.kimmer.sql.ast
 
-import org.babyfish.kimmer.sql.Selection
-import org.babyfish.kimmer.sql.ast.query.SqlSubQuery
+import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
+import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.ast.table.TableReferenceElement
 import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
@@ -10,14 +10,18 @@ import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
 
-interface Expression<T> : Selection<T> {
-    fun asNonNull(): NonNullExpression<T> =
-        this as NonNullExpression<T>
+interface Expression<T> {
+
+    @Suppress("UNCHECKED_CAST")
+    val `!`: NonNullExpression<T>
+        get() = this as NonNullExpression<T>
+
+    @Suppress("UNCHECKED_CAST")
+    val `?`: Selection<T?>
+        get() = this as Selection<T?>
 }
 
-interface NonNullExpression<T>: Expression<T> {
-    fun asNullable(): Expression<T> = this
-}
+interface NonNullExpression<T>: Expression<T>, Selection<T>
 
 internal abstract class AbstractExpression<T>: NonNullExpression<T>, Renderable, TableReferenceElement {
 
@@ -44,7 +48,19 @@ internal abstract class AbstractExpression<T>: NonNullExpression<T>, Renderable,
      */
     protected abstract val precedence: Int
 
-    protected fun SqlBuilder.render(selection: Selection<*>) {
+    protected fun SqlBuilder.render(selection: NonNullExpression<*>) {
+        (selection as Renderable).let {
+            if (it !is AbstractExpression<*> || it.precedence <= precedence) {
+                it.renderTo(this)
+            } else {
+                sql("(")
+                it.renderTo(this)
+                sql(")")
+            }
+        }
+    }
+
+    protected fun SqlBuilder.render(selection: Expression<*>) {
         (selection as Renderable).let {
             if (it !is AbstractExpression<*> || it.precedence <= precedence) {
                 it.renderTo(this)
@@ -78,7 +94,7 @@ internal abstract class AbstractExpression<T>: NonNullExpression<T>, Renderable,
     }
 }
 
-internal class PropExpression<T>(
+internal class PropExpression<T: Any>(
     val table: TableImpl<*, *>,
     val prop: EntityProp
 ): AbstractExpression<T>() {
@@ -363,7 +379,7 @@ internal class InListExpression<T>(
 internal class InSubQueryExpression<T>(
     private val negative: Boolean,
     private val expression: Expression<T>,
-    private val subQuery: TypedSqlSubQuery<*, *, *, *, T>
+    private val subQuery: TypedSubQuery<*, *, *, *, T>
 ): AbstractExpression<Boolean>() {
 
     override val precedence: Int
@@ -383,7 +399,7 @@ internal class InSubQueryExpression<T>(
 
 internal class ExistsExpression(
     private val negative: Boolean,
-    private val subQuery: SqlSubQuery<*, *, *, *>
+    private val subQuery: MutableSubQuery<*, *, *, *>
 ): AbstractExpression<Boolean>() {
 
     override val precedence: Int
@@ -402,7 +418,7 @@ internal class ExistsExpression(
 
 internal class OperatorSubQueryExpression<T>(
     private val operator: String,
-    private val subQuery: TypedSqlSubQuery<*, *, *, *, T>
+    private val subQuery: TypedSubQuery<*, *, *, *, T>
 ): AbstractExpression<T>() {
 
     override val precedence: Int

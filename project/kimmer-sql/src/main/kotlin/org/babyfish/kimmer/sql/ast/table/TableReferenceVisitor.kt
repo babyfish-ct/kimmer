@@ -1,8 +1,10 @@
 package org.babyfish.kimmer.sql.ast.table
 
-import org.babyfish.kimmer.sql.Selection
 import org.babyfish.kimmer.sql.ast.Expression
+import org.babyfish.kimmer.sql.ast.NonNullExpression
+import org.babyfish.kimmer.sql.ast.Selection
 import org.babyfish.kimmer.sql.ast.SqlBuilder
+import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.meta.EntityProp
 
@@ -19,14 +21,22 @@ internal interface TableReferenceElement {
     fun accept(visitor: TableReferenceVisitor)
 }
 
+internal fun TypedSubQuery<*, *, *, *, *>.accept(visitor: TableReferenceVisitor) {
+    (this as TableReferenceElement).accept(visitor)
+}
+
+internal fun NonNullExpression<*>.accept(visitor: TableReferenceVisitor) {
+    (this as TableReferenceElement).accept(visitor)
+}
+
+internal fun Expression<*>.accept(visitor: TableReferenceVisitor) {
+    (this as TableReferenceElement).accept(visitor)
+}
+
 internal fun Selection<*>.accept(visitor: TableReferenceVisitor) {
-    when (this) {
-        is JoinableTable<*, *> -> {
-            if ((this as TableImpl<*, *>).entityType.starProps.size > 1) {
-                visitor.visit(this, null)
-            } else Unit
-        }
-        is Expression<*> -> (this as TableReferenceElement).accept(visitor)
-        else -> error("Internal bug")
+    if (this is TableImpl<*, *>) {
+        visitor.visit(this, null)
+    } else {
+        (this as TableReferenceElement).accept(visitor)
     }
 }

@@ -5,7 +5,7 @@ import org.babyfish.kimmer.sql.ast.Expression
 import org.babyfish.kimmer.sql.ast.Filterable
 import kotlin.reflect.KProperty1
 
-interface AbstractSqlQuery<E, ID>: Filterable<E, ID>
+interface MutableQuery<E, ID>: Filterable<E, ID>
     where E:
           Entity<ID>,
           ID: Comparable<ID> {

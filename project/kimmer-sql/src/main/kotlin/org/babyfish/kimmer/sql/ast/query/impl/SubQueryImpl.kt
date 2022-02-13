@@ -1,16 +1,18 @@
-package org.babyfish.kimmer.sql.ast.query
+package org.babyfish.kimmer.sql.ast.query.impl
 
 import org.babyfish.kimmer.sql.Entity
-import org.babyfish.kimmer.sql.Selection
 import org.babyfish.kimmer.sql.ast.*
-import org.babyfish.kimmer.sql.ast.query.impl.AbstractQueryImpl
 import org.babyfish.kimmer.sql.ast.Renderable
 import org.babyfish.kimmer.sql.ast.SqlBuilder
-import org.babyfish.kimmer.sql.ast.table.JoinableTable
+import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
+import org.babyfish.kimmer.sql.ast.query.SelectableTypedSubQuery
+import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
 import org.babyfish.kimmer.sql.ast.table.Table
 import org.babyfish.kimmer.sql.ast.table.impl.SubQueryTableImpl
 import org.babyfish.kimmer.sql.ast.table.TableReferenceElement
 import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
+import org.babyfish.kimmer.sql.meta.EntityType
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
@@ -22,7 +24,7 @@ internal class SubQueryImpl<P, PID, E, ID>(
         parentQuery.sqlClient,
         type
     ),
-    SqlSubQuery<P, PID, E, ID>,
+    MutableSubQuery<P, PID, E, ID>,
     Renderable,
     TableReferenceElement
     where
@@ -34,46 +36,45 @@ internal class SubQueryImpl<P, PID, E, ID>(
     override val table: SubQueryTableImpl<E, ID>
         get() = super.table as SubQueryTableImpl<E, ID>
 
+    override fun createTable(entityType: EntityType): TableImpl<E, ID> =
+        SubQueryTableImpl(this, entityType)
+
     override val parentTable: Table<P, PID>
         get() = parentQuery.table
 
-    override fun createTable(type: KClass<E>): SubQueryTableImpl<E, ID> =
-        SubQueryTableImpl(
-            this,
-            entityTypeMap[type]
-                ?: throw IllegalArgumentException("Cannot create query for unmapped type '${type.qualifiedName}'")
-        )
+    override fun accept(visitor: TableReferenceVisitor) {
+        accept(visitor, false)
+    }
 
-    override fun <R> select(
-        prop: KProperty1<E, R?>
-    ): TypedSqlSubQuery<P, PID, E, ID, R> =
-        TypedSubQueryImpl(listOf(table.`get?`(prop as KProperty1<E, Any>)), this)
+    override fun renderTo(builder: SqlBuilder) {
+         renderTo(builder, false)
+    }
 
     override fun <R> select(
         selection: Selection<R>
-    ): TypedSqlSubQuery<P, PID, E, ID, R> =
-        TypedSubQueryImpl(listOf(selection), this)
+    ): SelectableTypedSubQuery<P, PID, E, ID, R> =
+        SelectableTypedSubQueryImpl.select(this, selection)
 
     override fun <A, B> select(
         selection1: Selection<A>,
         selection2: Selection<B>
-    ): TypedSqlSubQuery<P, PID, E, ID, Pair<A, B>> =
-        TypedSubQueryImpl(listOf(selection1, selection2), this)
+    ): SelectableTypedSubQuery<P, PID, E, ID, Pair<A, B>> =
+        SelectableTypedSubQueryImpl.select(this, selection1, selection2)
 
     override fun <A, B, C> select(
         selection1: Selection<A>,
         selection2: Selection<B>,
         selection3: Selection<C>
-    ): TypedSqlSubQuery<P, PID, E, ID, Triple<A, B, C>> =
-        TypedSubQueryImpl(listOf(selection1, selection2, selection3), this)
+    ): SelectableTypedSubQuery<P, PID, E, ID, Triple<A, B, C>> =
+        SelectableTypedSubQueryImpl.select(this, selection1, selection2, selection3)
 
     override fun <T1, T2, T3, T4> select(
         selection1: Selection<T1>,
         selection2: Selection<T2>,
         selection3: Selection<T3>,
         selection4: Selection<T4>,
-    ): TypedSqlSubQuery<P, PID, E, ID, Tuple4<T1, T2, T3, T4>> =
-        TypedSubQueryImpl(listOf(selection1, selection2, selection3, selection4), this)
+    ): SelectableTypedSubQuery<P, PID, E, ID, Tuple4<T1, T2, T3, T4>> =
+        SelectableTypedSubQueryImpl.select(this, selection1, selection2, selection3, selection4)
 
     override fun <T1, T2, T3, T4, T5> select(
         selection1: Selection<T1>,
@@ -81,8 +82,8 @@ internal class SubQueryImpl<P, PID, E, ID>(
         selection3: Selection<T3>,
         selection4: Selection<T4>,
         selection5: Selection<T5>,
-    ): TypedSqlSubQuery<P, PID, E, ID, Tuple5<T1, T2, T3, T4, T5>> =
-        TypedSubQueryImpl(listOf(selection1, selection2, selection3, selection4, selection5), this)
+    ): SelectableTypedSubQuery<P, PID, E, ID, Tuple5<T1, T2, T3, T4, T5>> =
+        SelectableTypedSubQueryImpl.select(this, selection1, selection2, selection3, selection4, selection5)
 
     override fun <T1, T2, T3, T4, T5, T6> select(
         selection1: Selection<T1>,
@@ -91,8 +92,8 @@ internal class SubQueryImpl<P, PID, E, ID>(
         selection4: Selection<T4>,
         selection5: Selection<T5>,
         selection6: Selection<T6>,
-    ): TypedSqlSubQuery<P, PID, E, ID, Tuple6<T1, T2, T3, T4, T5, T6>> =
-        TypedSubQueryImpl(listOf(selection1, selection2, selection3, selection4, selection5, selection6), this)
+    ): SelectableTypedSubQuery<P, PID, E, ID, Tuple6<T1, T2, T3, T4, T5, T6>> =
+        SelectableTypedSubQueryImpl.select(this, selection1, selection2, selection3, selection4, selection5, selection6)
 
     override fun <T1, T2, T3, T4, T5, T6, T7> select(
         selection1: Selection<T1>,
@@ -102,8 +103,8 @@ internal class SubQueryImpl<P, PID, E, ID>(
         selection5: Selection<T5>,
         selection6: Selection<T6>,
         selection7: Selection<T7>
-    ): TypedSqlSubQuery<P, PID, E, ID, Tuple7<T1, T2, T3, T4, T5, T6, T7>> =
-        TypedSubQueryImpl(listOf(selection1, selection2, selection3, selection4, selection5, selection6, selection7), this)
+    ): SelectableTypedSubQuery<P, PID, E, ID, Tuple7<T1, T2, T3, T4, T5, T6, T7>> =
+        SelectableTypedSubQueryImpl.select(this, selection1, selection2, selection3, selection4, selection5, selection6, selection7)
 
     override fun <T1, T2, T3, T4, T5, T6, T7, T8> select(
         selection1: Selection<T1>,
@@ -114,8 +115,8 @@ internal class SubQueryImpl<P, PID, E, ID>(
         selection6: Selection<T6>,
         selection7: Selection<T7>,
         selection8: Selection<T8>,
-    ): TypedSqlSubQuery<P, PID, E, ID, Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> =
-        TypedSubQueryImpl(listOf(selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8), this)
+    ): SelectableTypedSubQuery<P, PID, E, ID, Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> =
+        SelectableTypedSubQueryImpl.select(this, selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8)
 
     override fun <T1, T2, T3, T4, T5, T6, T7, T8, T9> select(
         selection1: Selection<T1>,
@@ -127,14 +128,6 @@ internal class SubQueryImpl<P, PID, E, ID>(
         selection7: Selection<T7>,
         selection8: Selection<T8>,
         selection9: Selection<T9>,
-    ): TypedSqlSubQuery<P, PID, E, ID, Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> =
-        TypedSubQueryImpl(listOf(selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8, selection9), this)
-
-    override fun accept(visitor: TableReferenceVisitor) {
-        accept(visitor, false)
-    }
-
-    override fun renderTo(builder: SqlBuilder) {
-         renderTo(builder, false)
-    }
+    ): SelectableTypedSubQuery<P, PID, E, ID, Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> =
+        SelectableTypedSubQueryImpl.select(this, selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8, selection9)
 }

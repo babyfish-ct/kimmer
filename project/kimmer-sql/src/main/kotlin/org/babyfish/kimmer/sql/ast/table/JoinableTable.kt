@@ -2,12 +2,10 @@ package org.babyfish.kimmer.sql.ast.table
 
 import org.babyfish.kimmer.graphql.Connection
 import org.babyfish.kimmer.sql.Entity
-import org.babyfish.kimmer.sql.Selection
-import org.babyfish.kimmer.sql.ast.Expression
 import org.babyfish.kimmer.sql.ast.NonNullExpression
 import kotlin.reflect.KProperty1
 
-interface JoinableTable<E: Entity<ID>, ID: Comparable<ID>> : Table<E, ID>, Selection<E> {
+interface JoinableTable<E: Entity<ID>, ID: Comparable<ID>> : Table<E, ID> {
 
     fun <X: Entity<XID>, XID: Comparable<XID>> joinReference(
         prop: KProperty1<E, X?>

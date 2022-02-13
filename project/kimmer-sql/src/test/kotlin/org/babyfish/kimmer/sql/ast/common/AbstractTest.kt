@@ -6,10 +6,11 @@ import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.babyfish.kimmer.sql.Entity
-import org.babyfish.kimmer.sql.ast.query.SqlQuery
-import org.babyfish.kimmer.sql.ast.query.TypedSqlQuery
+import org.babyfish.kimmer.sql.ast.query.MutableRootQuery
+import org.babyfish.kimmer.sql.ast.query.TypedRootQuery
 import org.babyfish.kimmer.sql.ast.concat
 import org.babyfish.kimmer.sql.ast.model.*
+import org.babyfish.kimmer.sql.ast.query.SelectableTypedRootQuery
 import org.babyfish.kimmer.sql.meta.config.Formula
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import org.babyfish.kimmer.sql.runtime.defaultR2dbcExecutor
@@ -62,7 +63,7 @@ abstract class AbstractTest {
         get() = _variables
 
     protected fun <E: Entity<ID>, ID: Comparable<ID>> execute(
-        query: TypedSqlQuery<E, ID, *>
+        query: TypedRootQuery<E, ID, *>
     ) {
         runBlocking {
             query.execute(con ?: error("No connection"))
@@ -73,7 +74,7 @@ abstract class AbstractTest {
         type: KClass<E>,
         sql: String,
         vararg variables: Any?,
-        block: SqlQuery<E, ID>.() -> TypedSqlQuery<E, ID, R>
+        block: MutableRootQuery<E, ID>.() -> SelectableTypedRootQuery<E, ID, R>
     ) {
         execute(sqlClient.createQuery(type, block))
         expect(sql) { _sql }
