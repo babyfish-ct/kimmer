@@ -1,6 +1,16 @@
-package org.babyfish.kimmer.sql.ast
+package org.babyfish.kimmer.sql.ast.query
 
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.Selection
+import org.babyfish.kimmer.sql.ast.*
+import org.babyfish.kimmer.sql.ast.query.impl.AbstractQueryImpl
+import org.babyfish.kimmer.sql.ast.Renderable
+import org.babyfish.kimmer.sql.ast.SqlBuilder
+import org.babyfish.kimmer.sql.ast.table.JoinableTable
+import org.babyfish.kimmer.sql.ast.table.Table
+import org.babyfish.kimmer.sql.ast.table.impl.SubQueryTableImpl
+import org.babyfish.kimmer.sql.ast.table.TableReferenceElement
+import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
@@ -11,7 +21,7 @@ internal class SubQueryImpl<P, PID, E, ID>(
         parentQuery.tableAliasAllocator,
         parentQuery.sqlClient,
         type
-    ), 
+    ),
     SqlSubQuery<P, PID, E, ID>,
     Renderable,
     TableReferenceElement
@@ -24,7 +34,7 @@ internal class SubQueryImpl<P, PID, E, ID>(
     override val table: SubQueryTableImpl<E, ID>
         get() = super.table as SubQueryTableImpl<E, ID>
 
-    override val parentTable: JoinableTable<P, PID>
+    override val parentTable: Table<P, PID>
         get() = parentQuery.table
 
     override fun createTable(type: KClass<E>): SubQueryTableImpl<E, ID> =
@@ -37,7 +47,7 @@ internal class SubQueryImpl<P, PID, E, ID>(
     override fun <R> select(
         prop: KProperty1<E, R?>
     ): TypedSqlSubQuery<P, PID, E, ID, R> =
-        TypedSubQueryImpl(listOf(table[prop]), this)
+        TypedSubQueryImpl(listOf(table.`get?`(prop as KProperty1<E, Any>)), this)
 
     override fun <R> select(
         selection: Selection<R>

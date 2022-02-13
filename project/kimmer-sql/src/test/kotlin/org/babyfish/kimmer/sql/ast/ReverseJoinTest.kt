@@ -84,7 +84,7 @@ class ReverseJoinTest: AbstractTest() {
                     table
                         .`←joinReference?`(Book::store)
                         .`←joinList?`(Author::books)
-                        [Author::firstName] eq "Alex",
+                        .get(Author::firstName) eq "Alex",
                     table.`books?`.`authors?`.firstName eq "Tim"
                 )
             )
@@ -109,7 +109,7 @@ class ReverseJoinTest: AbstractTest() {
                     table
                         .`←joinReference?`(Book::store)
                         .`←joinList?`(Author::books)
-                        [Author::firstName] eq "Alex",
+                        .get(Author::firstName) eq "Alex",
                     table.books.authors.firstName eq "Tim"
                 )
             )

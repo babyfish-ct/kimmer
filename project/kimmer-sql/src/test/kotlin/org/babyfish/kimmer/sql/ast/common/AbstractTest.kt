@@ -6,8 +6,8 @@ import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.babyfish.kimmer.sql.Entity
-import org.babyfish.kimmer.sql.ast.SqlQuery
-import org.babyfish.kimmer.sql.ast.TypedSqlQuery
+import org.babyfish.kimmer.sql.ast.query.SqlQuery
+import org.babyfish.kimmer.sql.ast.query.TypedSqlQuery
 import org.babyfish.kimmer.sql.ast.concat
 import org.babyfish.kimmer.sql.ast.model.*
 import org.babyfish.kimmer.sql.meta.config.Formula

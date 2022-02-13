@@ -1,9 +1,14 @@
-package org.babyfish.kimmer.sql.ast
+package org.babyfish.kimmer.sql.ast.query
 
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.Selection
+import org.babyfish.kimmer.sql.ast.*
+import org.babyfish.kimmer.sql.ast.table.NonNullSubQueryTable
+import org.babyfish.kimmer.sql.ast.table.SubQueryTable
+import org.babyfish.kimmer.sql.ast.table.Table
 import kotlin.reflect.KProperty1
 
-interface SqlSubQuery<P, PID, E, ID>: 
+interface SqlSubQuery<P, PID, E, ID>:
     AbstractSqlQuery<E, ID>
     where
         P: Entity<PID>,
@@ -11,7 +16,7 @@ interface SqlSubQuery<P, PID, E, ID>:
         E: Entity<ID>,
         ID: Comparable<ID> {
 
-    override val table: SubQueryTable<E, ID>
+    override val table: NonNullSubQueryTable<E, ID>
 
     val parentTable: Table<P, PID>
 

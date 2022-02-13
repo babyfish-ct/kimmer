@@ -11,7 +11,7 @@ import java.sql.Connection
 
 data class PropMeta(
     val prop: KSPropertyDeclaration,
-    val nullable: Boolean,
+    val isNullable: Boolean,
     val targetDeclaration: KSClassDeclaration? = null,
     val isConnection: Boolean = false,
     val isList: Boolean = false,

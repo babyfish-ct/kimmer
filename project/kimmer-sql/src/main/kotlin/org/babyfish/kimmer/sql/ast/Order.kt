@@ -1,5 +1,9 @@
 package org.babyfish.kimmer.sql.ast
 
+import org.babyfish.kimmer.sql.ast.table.TableReferenceElement
+import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.table.accept
+
 internal class Order(
     private val expression: Expression<*>,
     private val descending: Boolean

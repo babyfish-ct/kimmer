@@ -1,8 +1,18 @@
-package org.babyfish.kimmer.sql.ast
+package org.babyfish.kimmer.sql.ast.query
 
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.Selection
+import org.babyfish.kimmer.sql.ast.*
+import org.babyfish.kimmer.sql.ast.JdbcSqlBuilder
+import org.babyfish.kimmer.sql.ast.R2dbcSqlBuilder
+import org.babyfish.kimmer.sql.ast.Renderable
+import org.babyfish.kimmer.sql.ast.SqlBuilder
+import org.babyfish.kimmer.sql.ast.query.impl.QueryImpl
+import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
+import org.babyfish.kimmer.sql.ast.table.TableReferenceElement
+import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.table.accept
 import org.babyfish.kimmer.sql.meta.EntityProp
-import org.babyfish.kimmer.sql.runtime.R2dbcExecutor
 import org.babyfish.kimmer.sql.runtime.R2dbcExecutorContext
 
 internal class TypedQueryImpl<E, ID, R>(

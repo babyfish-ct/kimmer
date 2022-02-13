@@ -15,14 +15,34 @@ class TableSysTypes(
         ?: error("Internal bug")
 
     val tableType: KSType = resolver
-        .getClassDeclarationByName("$KIMMER_SQL_AST_PACKAGE.Table")
+        .getClassDeclarationByName("$KIMMER_SQL_AST_TABLE_PACKAGE.Table")
+        ?.asStarProjectedType()
+        ?: noAstType("Table")
+
+    val nonNullTableType: KSType = resolver
+        .getClassDeclarationByName("$KIMMER_SQL_AST_TABLE_PACKAGE.NonNullTable")
         ?.asStarProjectedType()
         ?: noAstType("Table")
 
     val joinableTableType: KSType = resolver
-        .getClassDeclarationByName("$KIMMER_SQL_AST_PACKAGE.JoinableTable")
+        .getClassDeclarationByName("$KIMMER_SQL_AST_TABLE_PACKAGE.JoinableTable")
         ?.asStarProjectedType()
-        ?: noAstType("Table")
+        ?: noAstType("JoinableTable")
+
+    val nonNullJoinableTableType: KSType = resolver
+        .getClassDeclarationByName("$KIMMER_SQL_AST_TABLE_PACKAGE.NonNullJoinableTable")
+        ?.asStarProjectedType()
+        ?: noAstType("NonNullJoinableTable")
+
+    val subQueryTableType: KSType = resolver
+        .getClassDeclarationByName("$KIMMER_SQL_AST_TABLE_PACKAGE.SubQueryTable")
+        ?.asStarProjectedType()
+        ?: noAstType("SubQueryTable")
+
+    val nonNullSubQueryTableType: KSType = resolver
+        .getClassDeclarationByName("$KIMMER_SQL_AST_TABLE_PACKAGE.NonNullSubQueryTable")
+        ?.asStarProjectedType()
+        ?: noAstType("NonNullSubQueryTable")
 
     private fun noAstType(simpleName: String): Nothing {
         throw GeneratorException(

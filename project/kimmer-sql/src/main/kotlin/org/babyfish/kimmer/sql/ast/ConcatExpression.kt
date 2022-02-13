@@ -1,5 +1,8 @@
 package org.babyfish.kimmer.sql.ast
 
+import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.table.accept
+
 class ConcatContext internal constructor() {
 
     private val parts = mutableListOf<Expression<String>>()

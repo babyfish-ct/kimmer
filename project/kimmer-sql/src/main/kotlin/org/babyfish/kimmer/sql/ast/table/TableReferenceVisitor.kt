@@ -1,5 +1,9 @@
-package org.babyfish.kimmer.sql.ast
+package org.babyfish.kimmer.sql.ast.table
 
+import org.babyfish.kimmer.sql.Selection
+import org.babyfish.kimmer.sql.ast.Expression
+import org.babyfish.kimmer.sql.ast.SqlBuilder
+import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.meta.EntityProp
 
 internal interface TableReferenceVisitor {
@@ -23,8 +27,6 @@ internal fun Selection<*>.accept(visitor: TableReferenceVisitor) {
             } else Unit
         }
         is Expression<*> -> (this as TableReferenceElement).accept(visitor)
-    }.apply {
-        // This empty "apply" make compiler guarantee all the derived types
-        // of the sealed super interface have been checked by the 'when' statement
+        else -> error("Internal bug")
     }
 }

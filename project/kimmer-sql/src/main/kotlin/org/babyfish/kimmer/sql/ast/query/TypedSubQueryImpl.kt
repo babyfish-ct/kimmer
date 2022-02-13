@@ -1,6 +1,15 @@
-package org.babyfish.kimmer.sql.ast
+package org.babyfish.kimmer.sql.ast.query
 
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.Selection
+import org.babyfish.kimmer.sql.ast.NonNullExpression
+import org.babyfish.kimmer.sql.ast.Renderable
+import org.babyfish.kimmer.sql.ast.SqlBuilder
+import org.babyfish.kimmer.sql.ast.TypedSqlSubQuery
+import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
+import org.babyfish.kimmer.sql.ast.table.TableReferenceElement
+import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.table.accept
 
 internal class TypedSubQueryImpl<P, PID, E, ID, R>(
     private val selections: List<Selection<*>>,

@@ -1,5 +1,7 @@
 package org.babyfish.kimmer.sql.ast
 
+import org.babyfish.kimmer.sql.Selection
+import org.babyfish.kimmer.sql.ast.query.SqlSubQuery
 import kotlin.reflect.KClass
 
 fun <X: Any> sql(

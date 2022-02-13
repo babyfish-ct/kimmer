@@ -1,6 +1,8 @@
-package org.babyfish.kimmer.sql.ast
+package org.babyfish.kimmer.sql.ast.query
 
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.ast.Expression
+import org.babyfish.kimmer.sql.ast.TypedSqlQueryCreator
 
 interface TypedSqlQuery<E, ID, R>:
     SqlQuery<E, ID>,

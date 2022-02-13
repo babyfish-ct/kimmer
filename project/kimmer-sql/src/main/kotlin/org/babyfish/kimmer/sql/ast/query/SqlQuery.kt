@@ -1,6 +1,8 @@
-package org.babyfish.kimmer.sql.ast
+package org.babyfish.kimmer.sql.ast.query
 
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.Selection
+import org.babyfish.kimmer.sql.ast.*
 import kotlin.reflect.KProperty1
 
 interface SqlQuery<E, ID>: AbstractSqlQuery<E, ID>

@@ -1,6 +1,8 @@
 package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.sql.MappingException
+import org.babyfish.kimmer.sql.ast.table.Table
+import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.meta.EntityProp
 import java.lang.StringBuilder
 

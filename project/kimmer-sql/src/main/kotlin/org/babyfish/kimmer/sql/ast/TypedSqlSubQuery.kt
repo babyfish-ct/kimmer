@@ -1,6 +1,7 @@
 package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.ast.query.SqlSubQuery
 
 interface TypedSqlSubQuery<P, PID, E, ID, R> :
     SqlSubQuery<P, PID, E, ID>,

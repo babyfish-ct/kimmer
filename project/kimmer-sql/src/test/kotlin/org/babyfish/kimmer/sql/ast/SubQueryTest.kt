@@ -145,6 +145,7 @@ class SubQueryTest: AbstractTest() {
             """select 
                 |tb_1_.ID, 
                 |tb_1_.NAME, 
+                |tb_1_.WEBSITE, 
                 |(
                     |select avg(tb_2_.PRICE) 
                     |from BOOK as tb_2_ 

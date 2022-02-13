@@ -1,6 +1,7 @@
 package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.ast.query.TypedSqlQuery
 
 interface TypedSqlQueryCreator<E: Entity<ID>, ID: Comparable<ID>, R> {
 

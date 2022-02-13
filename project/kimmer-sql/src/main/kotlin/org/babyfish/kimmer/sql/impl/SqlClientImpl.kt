@@ -3,9 +3,9 @@ package org.babyfish.kimmer.sql.impl
 import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.SqlClient
-import org.babyfish.kimmer.sql.ast.QueryImpl
-import org.babyfish.kimmer.sql.ast.SqlQuery
-import org.babyfish.kimmer.sql.ast.TypedSqlQuery
+import org.babyfish.kimmer.sql.ast.query.impl.QueryImpl
+import org.babyfish.kimmer.sql.ast.query.SqlQuery
+import org.babyfish.kimmer.sql.ast.query.TypedSqlQuery
 import org.babyfish.kimmer.sql.meta.EntityType
 import org.babyfish.kimmer.sql.runtime.R2dbcExecutor
 import org.babyfish.kimmer.sql.runtime.defaultR2dbcExecutor

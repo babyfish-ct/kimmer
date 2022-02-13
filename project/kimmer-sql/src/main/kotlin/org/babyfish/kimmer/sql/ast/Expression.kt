@@ -1,14 +1,25 @@
 package org.babyfish.kimmer.sql.ast
 
+import org.babyfish.kimmer.sql.Selection
+import org.babyfish.kimmer.sql.ast.query.SqlSubQuery
+import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
+import org.babyfish.kimmer.sql.ast.table.TableReferenceElement
+import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.table.accept
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
-import java.util.regex.Pattern
-import kotlin.reflect.KClass
 
-sealed interface Expression<T> : Selection<T>
+interface Expression<T> : Selection<T> {
+    fun asNonNull(): NonNullExpression<T> =
+        this as NonNullExpression<T>
+}
 
-internal abstract class AbstractExpression<T>: Expression<T>, Renderable, TableReferenceElement {
+interface NonNullExpression<T>: Expression<T> {
+    fun asNullable(): Expression<T> = this
+}
+
+internal abstract class AbstractExpression<T>: NonNullExpression<T>, Renderable, TableReferenceElement {
 
     protected abstract fun SqlBuilder.render()
 

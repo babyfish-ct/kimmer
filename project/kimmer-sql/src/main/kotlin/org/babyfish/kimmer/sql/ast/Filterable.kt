@@ -1,19 +1,22 @@
 package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.ast.query.SqlSubQuery
+import org.babyfish.kimmer.sql.ast.table.JoinableTable
+import org.babyfish.kimmer.sql.ast.table.NonNullJoinableTable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 interface Filterable<E: Entity<ID>, ID: Comparable<ID>> {
 
-    val table: JoinableTable<E, ID>
+    val table: NonNullJoinableTable<E, ID>
 
     fun where(vararg predicates: Expression<Boolean>?)
 
     fun orderBy(expression: Expression<*>?, descending: Boolean = false)
 
     fun orderBy(prop: KProperty1<E, *>, descending: Boolean = false) {
-        orderBy(table[prop], descending)
+        orderBy(table.`get?`(prop), descending)
     }
 
     fun <X, XID, R> subQuery(

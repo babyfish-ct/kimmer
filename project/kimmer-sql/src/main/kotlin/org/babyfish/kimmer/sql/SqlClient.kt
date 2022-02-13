@@ -1,8 +1,8 @@
 package org.babyfish.kimmer.sql
 
 import org.babyfish.kimmer.Immutable
-import org.babyfish.kimmer.sql.ast.SqlQuery
-import org.babyfish.kimmer.sql.ast.TypedSqlQuery
+import org.babyfish.kimmer.sql.ast.query.SqlQuery
+import org.babyfish.kimmer.sql.ast.query.TypedSqlQuery
 import org.babyfish.kimmer.sql.meta.EntityType
 import kotlin.reflect.KClass
 

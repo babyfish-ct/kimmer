@@ -1,6 +1,7 @@
 create table book_store(
     id uuid not null,
-    name varchar(50) not null
+    name varchar(50) not null,
+    website varchar(100)
 );
 alter table book_store
     add constraint pk_book_store

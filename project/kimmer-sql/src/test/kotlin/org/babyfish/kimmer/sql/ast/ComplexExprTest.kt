@@ -70,6 +70,7 @@ class ComplexExprTest: AbstractTest() {
             """select 
                 |tb_1_.ID, 
                 |tb_1_.NAME, 
+                |tb_1_.WEBSITE, 
                 |case tb_1_.NAME 
                     |when $1 then $2 
                     |when $3 then $4 

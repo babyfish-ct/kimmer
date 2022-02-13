@@ -39,6 +39,7 @@ class DraftGenerator(
                             .builder(Suppress::class)
                             .apply {
                                 addMember("\"RedundantVisibilityModifier\"")
+                                addMember("\"Unused\"")
                             }
                             .build()
                     )

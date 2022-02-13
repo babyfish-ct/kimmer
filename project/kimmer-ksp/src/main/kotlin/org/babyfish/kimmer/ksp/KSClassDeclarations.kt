@@ -1,7 +1,11 @@
 package org.babyfish.kimmer.ksp
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSType
 import com.squareup.kotlinpoet.ClassName
+
+fun KSType.asClassName(): ClassName =
+    (declaration as KSClassDeclaration).asClassName()
 
 fun KSClassDeclaration.asClassName(simpleNameMapper: ((String) -> String)? = null): ClassName {
     val simpleName = simpleName.asString()

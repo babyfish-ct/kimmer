@@ -1,13 +1,18 @@
-package org.babyfish.kimmer.sql.ast
+package org.babyfish.kimmer.sql.ast.table
 
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.ast.Expression
 import kotlin.reflect.KProperty1
 
 sealed interface Table<E: Entity<ID>, ID: Comparable<ID>> {
 
     val id: Expression<ID>
 
-    operator fun <X> get(
+    fun <X: Any> get(
+        prop: KProperty1<E, X>
+    ): Expression<X>
+
+    fun <X: Any> `get?`(
         prop: KProperty1<E, X?>
     ): Expression<X>
 }

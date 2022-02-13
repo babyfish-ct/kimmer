@@ -1,8 +1,17 @@
-package org.babyfish.kimmer.sql.ast
+package org.babyfish.kimmer.sql.ast.table.impl
 
 import org.babyfish.kimmer.graphql.Connection
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.MappingException
+import org.babyfish.kimmer.sql.ast.*
+import org.babyfish.kimmer.sql.ast.query.impl.AbstractQueryImpl
+import org.babyfish.kimmer.sql.ast.ContainsExpression
+import org.babyfish.kimmer.sql.ast.PropExpression
+import org.babyfish.kimmer.sql.ast.Renderable
+import org.babyfish.kimmer.sql.ast.SqlBuilder
+import org.babyfish.kimmer.sql.ast.query.SqlSubQuery
+import org.babyfish.kimmer.sql.ast.table.JoinableTable
+import org.babyfish.kimmer.sql.ast.table.NonNullJoinableTable
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
 import org.babyfish.kimmer.sql.meta.config.Column
@@ -15,10 +24,10 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     private val query: AbstractQueryImpl<*, *>,
     val entityType: EntityType,
     val parent: TableImpl<*, *>? = null,
-    val isInverse: Boolean = false,
-    val joinProp: EntityProp? = null,
+    private val isInverse: Boolean = false,
+    private val joinProp: EntityProp? = null,
     private var isOuterJoin: Boolean = false
-): JoinableTable<E, ID>, Renderable {
+): NonNullJoinableTable<E, ID>, Renderable {
 
     val alias: String
 
@@ -47,7 +56,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         entityType: EntityType,
         isInverse: Boolean,
         joinProp: EntityProp,
-        isOuterJoin: Boolean
+        outerJoin: Boolean
     ): TableImpl<X, XID> =
         TableImpl(
             query,
@@ -55,14 +64,17 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             this,
             isInverse,
             joinProp,
-            isOuterJoin
+            outerJoin
         )
 
-    override val id: Expression<ID>
+    override val id: NonNullExpression<ID>
         get() =
-            PropExpression(this, entityType.idProp)
+            PropExpression<ID>(this, entityType.idProp).asNonNull()
 
-    override fun <X> get(prop: KProperty1<E, X?>): Expression<X> {
+    override fun <X : Any> get(prop: KProperty1<E, X>): NonNullExpression<X> =
+        `get?`(prop).asNonNull()
+
+    override fun <X: Any> `get?`(prop: KProperty1<E, X?>): Expression<X> {
         val entityProp = entityType.props[prop.name] ?: error("No property '${prop.name}'")
         if (!entityProp.isId) {
             staticallyUse()
@@ -73,7 +85,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     @Suppress("UNCHECKED_CAST")
     override fun <X: Entity<XID>, XID: Comparable<XID>> joinReference(
         prop: KProperty1<E, X?>
-    ): JoinableTable<X, XID> {
+    ): NonNullJoinableTable<X, XID> {
         val entityProp = entityType.props[prop.name]
         if (entityProp?.isReference != true) {
             throw IllegalArgumentException("'$prop' is not reference")
@@ -93,8 +105,8 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     }
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> joinList(
-        prop: KProperty1<E, List<X>?>
-    ): JoinableTable<X, XID> {
+        prop: KProperty1<E, List<X>>
+    ): NonNullJoinableTable<X, XID> {
         val entityProp = entityType.props[prop.name]
         if (entityProp?.isList != true) {
             throw IllegalArgumentException("'$prop' is not list")
@@ -103,7 +115,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     }
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> `joinList?`(
-        prop: KProperty1<E, List<X>?>
+        prop: KProperty1<E, List<X>>
     ): JoinableTable<X, XID> {
         val entityProp = entityType.props[prop.name]
         if (entityProp?.isList != true) {
@@ -113,8 +125,8 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     }
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> joinConnection(
-        prop: KProperty1<E, Connection<X>?>
-    ): JoinableTable<X, XID> {
+        prop: KProperty1<E, Connection<X>>
+    ): NonNullJoinableTable<X, XID> {
         val entityProp = entityType.props[prop.name]
         if (entityProp?.isConnection != true) {
             throw IllegalArgumentException("'$prop' is not connection")
@@ -123,7 +135,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     }
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> `joinConnection?`(
-        prop: KProperty1<E, Connection<X>?>
+        prop: KProperty1<E, Connection<X>>
     ): JoinableTable<X, XID> {
         val entityProp = entityType.props[prop.name]
         if (entityProp?.isConnection != true) {
@@ -135,7 +147,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     @Suppress("UNCHECKED_CAST")
     override fun <X: Entity<XID>, XID: Comparable<XID>> `←joinReference`(
         prop: KProperty1<X, E?>
-    ): JoinableTable<X, XID> {
+    ): NonNullJoinableTable<X, XID> {
         val entityProp = reverseType(prop).props[prop.name]
         if (entityProp?.isReference != true) {
             throw IllegalArgumentException("'$prop' is not reference")
@@ -155,8 +167,8 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     }
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> `←joinList`(
-        prop: KProperty1<X, List<E>?>
-    ): JoinableTable<X, XID> {
+        prop: KProperty1<X, List<E>>
+    ): NonNullJoinableTable<X, XID> {
         val entityProp = reverseType(prop).props[prop.name]
         if (entityProp?.isList != true) {
             throw IllegalArgumentException("'$prop' is not list")
@@ -165,7 +177,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     }
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> `←joinList?`(
-        prop: KProperty1<X, List<E>?>
+        prop: KProperty1<X, List<E>>
     ): JoinableTable<X, XID> {
         val entityProp = reverseType(prop).props[prop.name]
         if (entityProp?.isList != true) {
@@ -175,8 +187,8 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     }
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> `←joinConnection`(
-        prop: KProperty1<X, Connection<E>?>
-    ): JoinableTable<X, XID> {
+        prop: KProperty1<X, Connection<E>>
+    ): NonNullJoinableTable<X, XID> {
         val entityProp = reverseType(prop).props[prop.name]
         if (entityProp?.isConnection != true) {
             throw IllegalArgumentException("'$prop' is not connection")
@@ -185,7 +197,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     }
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> `←joinConnection?`(
-        prop: KProperty1<X, Connection<E>?>
+        prop: KProperty1<X, Connection<E>>
     ): JoinableTable<X, XID> {
         val entityProp = reverseType(prop).props[prop.name]
         if (entityProp?.isConnection != true) {
@@ -196,9 +208,9 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
 
     private fun <X: Entity<XID>, XID: Comparable<XID>> join0(
         entityProp: EntityProp,
-        isOuterJoin: Boolean,
+        outerJoin: Boolean,
         inverse: Boolean
-    ): JoinableTable<X, XID> {
+    ): NonNullJoinableTable<X, XID> {
         val joinName = if (!inverse) {
             entityProp.name
         } else {
@@ -206,32 +218,34 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 ?: "inverse(${entityProp.kotlinProp})"
         }
         return if (entityProp.mappedBy !== null) {
-            join1(joinName, !inverse, entityProp.mappedBy!!, isOuterJoin)
+            join1(joinName, !inverse, entityProp.mappedBy!!, outerJoin)
         } else {
-            join1(joinName, inverse, entityProp, isOuterJoin)
+            join1(joinName, inverse, entityProp, outerJoin)
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun <X: Entity<XID>, XID: Comparable<XID>> join1(
         joinName: String,
         inverse: Boolean,
         joinProp: EntityProp,
-        isOuterJoin: Boolean
-    ): JoinableTable<X, XID> {
+        outerJoin: Boolean
+    ): NonNullJoinableTable<X, XID> {
         val existing = childTableMap[joinName]
         if (existing !== null) {
-            if (!isOuterJoin) {
+            if (!outerJoin) {
                 existing.isOuterJoin = false
             }
-            return existing as JoinableTable<X, XID>
+            return existing as NonNullJoinableTable<X, XID>
         }
-        val newTable = this.createChildTable<X, XID>(
-            query,
-            if (inverse) joinProp.declaringType else joinProp.targetType!!,
-            inverse,
-            joinProp,
-            isOuterJoin
-        )
+        val newTable =
+            this.createChildTable<X, XID>(
+                query,
+                if (inverse) joinProp.declaringType else joinProp.targetType!!,
+                inverse,
+                joinProp,
+                outerJoin
+            )
         childTableMap[joinName] = newTable
         staticallyUse()
         return newTable
@@ -251,9 +265,9 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             } ?: error("The declaring type of reversed prop is not mapped entity")
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> listContains(
-        prop: KProperty1<E, List<X>?>,
+        prop: KProperty1<E, List<X>>,
         xIds: Collection<XID>
-    ): Expression<Boolean> {
+    ): NonNullExpression<Boolean> {
         val entityProp = entityType.props[prop.name]
         if (entityProp?.isList != true) {
             throw IllegalArgumentException("'$prop' is not list")
@@ -262,9 +276,9 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     }
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> connectionContains(
-        prop: KProperty1<E, Connection<X>?>,
+        prop: KProperty1<E, Connection<X>>,
         xIds: Collection<XID>
-    ): Expression<Boolean> {
+    ): NonNullExpression<Boolean> {
         val entityProp = entityType.props[prop.name]
         if (entityProp?.isConnection != true) {
             throw IllegalArgumentException("'$prop' is not connection")
@@ -273,9 +287,9 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     }
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> `←listContains`(
-        prop: KProperty1<X, List<E>?>,
+        prop: KProperty1<X, List<E>>,
         xIds: Collection<XID>
-    ): Expression<Boolean> {
+    ): NonNullExpression<Boolean> {
         val entityProp = reverseType(prop).props[prop.name]
         if (entityProp?.isList != true) {
             throw IllegalArgumentException("'$prop' is not list")
@@ -284,9 +298,9 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     }
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> `←connectionContains`(
-        prop: KProperty1<X, Connection<E>?>,
+        prop: KProperty1<X, Connection<E>>,
         xIds: Collection<XID>
-    ): Expression<Boolean> {
+    ): NonNullExpression<Boolean> {
         val entityProp = reverseType(prop).props[prop.name]
         if (entityProp?.isConnection != true) {
             throw IllegalArgumentException("'$prop' is not connection")
@@ -298,12 +312,12 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         prop: EntityProp,
         xIds: Collection<Any>,
         inverse: Boolean
-    ): Expression<Boolean> =
+    ): NonNullExpression<Boolean> =
         if (prop.mappedBy !== null) {
             ContainsExpression(this, prop.mappedBy!!, xIds, !inverse)
         } else {
             ContainsExpression(this, prop, xIds, inverse)
-        }
+        }.asNonNull()
 
     override fun renderTo(builder: SqlBuilder) {
         builder.renderSelf()

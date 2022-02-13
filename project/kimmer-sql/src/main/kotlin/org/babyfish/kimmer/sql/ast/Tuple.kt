@@ -1,5 +1,9 @@
 package org.babyfish.kimmer.sql.ast
 
+import org.babyfish.kimmer.sql.Selection
+import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.table.accept
+
 data class Tuple4<T1, T2, T3, T4>(
     val _1: T1,
     val _2: T2,

@@ -1,7 +1,18 @@
-package org.babyfish.kimmer.sql.ast
+package org.babyfish.kimmer.sql.ast.query.impl
 
 import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.ast.*
+import org.babyfish.kimmer.sql.ast.Order
+import org.babyfish.kimmer.sql.ast.Renderable
+import org.babyfish.kimmer.sql.ast.SqlBuilder
+import org.babyfish.kimmer.sql.ast.query.AbstractSqlQuery
+import org.babyfish.kimmer.sql.ast.query.SqlSubQuery
+import org.babyfish.kimmer.sql.ast.query.SubQueryImpl
+import org.babyfish.kimmer.sql.ast.table.TableAliasAllocator
+import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
+import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.table.accept
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType

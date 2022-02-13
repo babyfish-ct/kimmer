@@ -1,6 +1,12 @@
-package org.babyfish.kimmer.sql.ast
+package org.babyfish.kimmer.sql.ast.query.impl
 
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.Selection
+import org.babyfish.kimmer.sql.ast.*
+import org.babyfish.kimmer.sql.ast.query.SqlQuery
+import org.babyfish.kimmer.sql.ast.query.TypedQueryImpl
+import org.babyfish.kimmer.sql.ast.query.TypedSqlQuery
+import org.babyfish.kimmer.sql.ast.table.TableAliasAllocator
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -8,7 +14,7 @@ import kotlin.reflect.KProperty1
 internal class QueryImpl<E, ID>(
     val sql: SqlClientImpl,
     type: KClass<E>
-): AbstractQueryImpl<E, ID>(TableAliasAllocator(), sql, type), 
+): AbstractQueryImpl<E, ID>(TableAliasAllocator(), sql, type),
     SqlQuery<E, ID>
     where E:
           Entity<ID>,
@@ -17,7 +23,7 @@ internal class QueryImpl<E, ID>(
     override fun <R> select(
         prop: KProperty1<E, R?>
     ): TypedSqlQuery<E, ID, R> =
-        TypedQueryImpl(listOf(table[prop]), this)
+        TypedQueryImpl(listOf(table.`get?`(prop as KProperty1<E, Any>)), this)
 
     override fun <R> select(
         selection: Selection<R>

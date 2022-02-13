@@ -1,4 +1,4 @@
-package org.babyfish.kimmer.sql.ast
+package org.babyfish.kimmer.sql.ast.table
 
 @JvmInline
 value class TableAliasAllocator(

@@ -1,6 +1,7 @@
 package org.babyfish.kimmer.sql.ast
 
-import kotlin.reflect.KClass
+import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.table.accept
 
 class SqlExpressionBuilder internal constructor() {
 
