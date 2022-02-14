@@ -19,15 +19,14 @@ interface SimpleCaseStartBuilder<C: Any> {
         match(cond, value(value))
 
     fun <T: Any> match(
-        cond: C,
-        value: NonNullExpression<T>
-    ): SimpleCaseBuilder<C, T> =
-        match(value(cond), value)
-
-    fun <T: Any> match(
         cond: Expression<C>,
         value: NonNullExpression<T>
     ): SimpleCaseBuilder<C, T>
+
+    fun <T: Any> match(
+        cond: Expression<C>,
+        value: Expression<T>
+    ): NullableSimpleCaseBuilder<C, T>
 }
 
 interface SimpleCaseBuilder<C: Any, T: Any> {
@@ -39,12 +38,6 @@ interface SimpleCaseBuilder<C: Any, T: Any> {
         match(value(cond), value(value))
 
     fun match(
-        cond: Expression<C>,
-        value: T
-    ): SimpleCaseBuilder<C, T> =
-        match(cond, value(value))
-
-    fun match(
         cond: C,
         value: NonNullExpression<T>
     ): SimpleCaseBuilder<C, T> =
@@ -55,6 +48,17 @@ interface SimpleCaseBuilder<C: Any, T: Any> {
         value: NonNullExpression<T>
     ): SimpleCaseBuilder<C, T>
 
+    fun match(
+        cond: C,
+        value: Expression<T>
+    ): NullableSimpleCaseBuilder<C, T> =
+        match(value(cond), value)
+
+    fun match(
+        cond: Expression<C>,
+        value: Expression<T>
+    ): NullableSimpleCaseBuilder<C, T>
+
     fun otherwise(
         value: T
     ): NonNullExpression<T> =
@@ -63,6 +67,52 @@ interface SimpleCaseBuilder<C: Any, T: Any> {
     fun otherwise(
         expression: NonNullExpression<T>
     ): NonNullExpression<T>
+
+    fun otherwise(
+        expression: Expression<T>
+    ): Expression<T>
+}
+
+interface NullableSimpleCaseBuilder<C: Any, T: Any> : SimpleCaseBuilder<C, T> {
+
+    override fun match(
+        cond: C,
+        value: T
+    ): SimpleCaseBuilder<C, T> =
+        match(value(cond), value(value))
+
+    override fun match(
+        cond: C,
+        value: NonNullExpression<T>
+    ): SimpleCaseBuilder<C, T> =
+        match(value(cond), value)
+
+    override fun match(
+        cond: Expression<C>,
+        value: NonNullExpression<T>
+    ): SimpleCaseBuilder<C, T>
+
+    @Deprecated(
+        "'NullableCaseBuilder.otherwise' returns bad type",
+        replaceWith = ReplaceWith("nullableOtherwise")
+    )
+    override fun otherwise(
+        value: T
+    ): NonNullExpression<T> =
+        otherwise(value(value))
+
+    @Deprecated(
+        "'NullableCaseBuilder.otherwise' returns bad type",
+        replaceWith = ReplaceWith("nullableOtherwise")
+    )
+    override fun otherwise(
+        expression: NonNullExpression<T>
+    ): NonNullExpression<T>
+
+    fun nullableOtherwise(value: T): Expression<T> =
+        nullableOtherwise(value(value))
+
+    fun nullableOtherwise(expression: Expression<T>): Expression<T>
 }
 
 interface CaseStartBuilder {
@@ -77,20 +127,30 @@ interface CaseStartBuilder {
         cond: NonNullExpression<Boolean>,
         value: NonNullExpression<T>
     ): CaseBuilder<T>
+
+    fun <T: Any> match(
+        cond: NonNullExpression<Boolean>,
+        value: Expression<T>
+    ): NullableCaseBuilder<T>
 }
 
 interface CaseBuilder<T: Any> {
 
     fun match(
-        cond: NonNullExpression<Boolean>,
+        cond: Expression<Boolean>,
         value: T
     ): CaseBuilder<T> =
         match(cond, value(value))
 
     fun match(
-        cond: NonNullExpression<Boolean>,
+        cond: Expression<Boolean>,
         value: NonNullExpression<T>
     ): CaseBuilder<T>
+
+    fun match(
+        cond: Expression<Boolean>,
+        value: Expression<T>
+    ): NullableCaseBuilder<T>
 
     fun otherwise(
         value: T
@@ -98,8 +158,52 @@ interface CaseBuilder<T: Any> {
         otherwise(value(value))
 
     fun otherwise(
-        expression: Expression<T>
+        expression: NonNullExpression<T>
     ): NonNullExpression<T>
+
+    fun otherwise(
+        expression: Expression<T>
+    ): Expression<T>
+}
+
+interface NullableCaseBuilder<T: Any>: CaseBuilder<T> {
+
+    override fun match(
+        cond: Expression<Boolean>,
+        value: T
+    ): NullableCaseBuilder<T> =
+        match(cond, value(value))
+
+    override fun match(
+        cond: Expression<Boolean>,
+        value: NonNullExpression<T>
+    ): NullableCaseBuilder<T>
+
+    @Deprecated(
+        "'NullableCaseBuilder.otherwise' returns bad type",
+        replaceWith = ReplaceWith("nullableOtherwise")
+    )
+    override fun otherwise(
+        value: T
+    ): NonNullExpression<T> =
+        otherwise(value(value))
+
+    @Deprecated(
+        "'NullableCaseBuilder.otherwise' returns bad type",
+        replaceWith = ReplaceWith("nullableOtherwise")
+    )
+    override fun otherwise(
+        expression: NonNullExpression<T>
+    ): NonNullExpression<T>
+
+    fun nullableOtherwise(
+        value: T
+    ): Expression<T> =
+        nullableOtherwise(value(value))
+
+    fun nullableOtherwise(
+        expression: NonNullExpression<T>
+    ): Expression<T>
 }
 
 internal interface CaseChainNode: Renderable, TableReferenceElement
@@ -112,6 +216,12 @@ internal class SimpleCaseStartBuilderImpl<C: Any>(
         cond: Expression<C>,
         value: NonNullExpression<T>
     ): SimpleCaseBuilder<C, T> =
+        SimpleCaseBuilderImpl(this, cond, value)
+
+    override fun <T : Any> match(
+        cond: Expression<C>,
+        value: Expression<T>
+    ): NullableSimpleCaseBuilder<C, T> =
         SimpleCaseBuilderImpl(this, cond, value)
 
     override fun renderTo(builder: SqlBuilder) {
@@ -127,8 +237,18 @@ internal class SimpleCaseStartBuilderImpl<C: Any>(
 internal class SimpleCaseBuilderImpl<C: Any, T: Any>(
     private val parent: CaseChainNode,
     private val cond: Expression<C>,
-    private val value: NonNullExpression<T>
-): SimpleCaseBuilder<C, T>, CaseChainNode {
+    val value: Expression<T>
+): NullableSimpleCaseBuilder<C, T>, CaseChainNode {
+
+    init {
+        if (parent is SimpleCaseBuilderImpl<*, *>) {
+            if (value.selectedType !== parent.value.selectedType) {
+                throw IllegalArgumentException(
+                    "The value type of branch is different with type of previous branch"
+                )
+            }
+        }
+    }
 
     override fun match(
         cond: Expression<C>,
@@ -136,7 +256,19 @@ internal class SimpleCaseBuilderImpl<C: Any, T: Any>(
     ): SimpleCaseBuilder<C, T> =
         SimpleCaseBuilderImpl(this, cond, value)
 
+    override fun match(
+        cond: Expression<C>,
+        value: Expression<T>
+    ): NullableSimpleCaseBuilder<C, T> =
+        SimpleCaseBuilderImpl(this, cond, value)
+
     override fun otherwise(expression: NonNullExpression<T>): NonNullExpression<T> =
+        CaseExpression(this, expression)
+
+    override fun otherwise(expression: Expression<T>): Expression<T> =
+        CaseExpression(this, expression)
+
+    override fun nullableOtherwise(expression: Expression<T>): Expression<T> =
         CaseExpression(this, expression)
 
     override fun renderTo(builder: SqlBuilder) {
@@ -162,6 +294,12 @@ internal class CaseStartBuilderImpl: CaseStartBuilder, CaseChainNode {
     ): CaseBuilder<T> =
         CaseBuilderImpl(this, cond, value)
 
+    override fun <T : Any> match(
+        cond: NonNullExpression<Boolean>,
+        value: Expression<T>
+    ): NullableCaseBuilder<T> =
+        CaseBuilderImpl(this, cond, value)
+
     override fun renderTo(builder: SqlBuilder) {
         builder.sql("case")
     }
@@ -171,19 +309,45 @@ internal class CaseStartBuilderImpl: CaseStartBuilder, CaseChainNode {
 
 internal class CaseBuilderImpl<T: Any>(
     private val parent: CaseChainNode,
-    private val cond: NonNullExpression<Boolean>,
-    private val value: NonNullExpression<T>
-): CaseBuilder<T>, CaseChainNode {
+    private val cond: Expression<Boolean>,
+    val value: Expression<T>
+): NullableCaseBuilder<T>, CaseChainNode {
+
+    init {
+        if (parent is CaseBuilderImpl<*>) {
+            if (value.selectedType !== parent.value.selectedType) {
+                throw IllegalArgumentException(
+                    "The value type of branch is different with type of previous branch"
+                )
+            }
+        }
+    }
 
     override fun match(
-        cond: NonNullExpression<Boolean>,
+        cond: Expression<Boolean>,
         value: NonNullExpression<T>
-    ): CaseBuilder<T> =
+    ): NullableCaseBuilder<T> =
         CaseBuilderImpl(this, cond, value)
+
+    override fun match(
+        cond: Expression<Boolean>,
+        value: Expression<T>
+    ): NullableCaseBuilder<T> =
+        CaseBuilderImpl(this, cond, value)
+
+    override fun otherwise(
+        expression: NonNullExpression<T>
+    ): NonNullExpression<T> =
+        CaseExpression(this, expression)
 
     override fun otherwise(
         expression: Expression<T>
     ): NonNullExpression<T> =
+        CaseExpression(this, expression)
+
+    override fun nullableOtherwise(
+        expression: NonNullExpression<T>
+    ): Expression<T> =
         CaseExpression(this, expression)
 
     override fun renderTo(builder: SqlBuilder) {
@@ -201,10 +365,14 @@ internal class CaseBuilderImpl<T: Any>(
     }
 }
 
-internal class CaseExpression<T>(
+internal class CaseExpression<T: Any>(
     private val parent: CaseChainNode,
     private val otherwise: Expression<T>
-): AbstractExpression<T>() {
+): AbstractExpression<T>(when (parent) {
+    is SimpleCaseBuilderImpl<*, *> -> parent.value.selectedType
+    is CaseBuilderImpl<*> -> parent.value.selectedType
+    else -> error("Internal bug, bad parent for case expression")
+}) {
 
     override val precedence: Int
         get() = 0

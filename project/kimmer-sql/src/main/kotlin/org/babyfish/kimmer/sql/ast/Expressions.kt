@@ -10,7 +10,7 @@ fun <X: Any> sql(
     sql: String,
     block: (SqlExpressionBuilder.() -> Unit)? = null
 ): NonNullExpression<X> =
-    SqlExpressionBuilder().apply {
+    SqlExpressionBuilder(type).apply {
         if (block !== null) {
             block()
         }
@@ -278,20 +278,20 @@ fun Expression<*>.isNull(): NonNullExpression<Boolean> =
 fun Expression<*>.isNotNull(): NonNullExpression<Boolean> =
     NullityExpression(false, this)
 
-fun <A, B> tuple(
+fun <A: Any, B: Any> tuple(
     a: Selection<A>,
     b: Selection<B>
 ): NonNullExpression<Pair<A, B>> =
     PairExpression(a, b)
 
-fun <A, B, C> tuple(
+fun <A: Any, B: Any, C: Any> tuple(
     a: Selection<A>,
     b: Selection<B>,
     c: Selection<C>
 ): NonNullExpression<Triple<A, B, C>> =
     TripleExpression(a, b, c)
 
-fun <T1, T2, T3, T4> tuple(
+fun <T1: Any, T2: Any, T3: Any, T4: Any> tuple(
     selection1: Selection<T1>,
     selection2: Selection<T2>,
     selection3: Selection<T3>,
@@ -299,7 +299,7 @@ fun <T1, T2, T3, T4> tuple(
 ): NonNullExpression<Tuple4<T1, T2, T3, T4>> =
     Tuple4Expression(selection1, selection2, selection3, selection4)
 
-fun <T1, T2, T3, T4, T5> tuple(
+fun <T1: Any, T2: Any, T3: Any, T4: Any, T5: Any> tuple(
     selection1: Selection<T1>,
     selection2: Selection<T2>,
     selection3: Selection<T3>,
@@ -308,7 +308,7 @@ fun <T1, T2, T3, T4, T5> tuple(
 ): NonNullExpression<Tuple5<T1, T2, T3, T4, T5>> =
     Tuple5Expression(selection1, selection2, selection3, selection4, selection5)
 
-fun <T1, T2, T3, T4, T5, T6> tuple(
+fun <T1: Any, T2: Any, T3: Any, T4: Any, T5: Any, T6: Any> tuple(
     selection1: Selection<T1>,
     selection2: Selection<T2>,
     selection3: Selection<T3>,
@@ -318,7 +318,7 @@ fun <T1, T2, T3, T4, T5, T6> tuple(
 ): NonNullExpression<Tuple6<T1, T2, T3, T4, T5, T6>> =
     Tuple6Expression(selection1, selection2, selection3, selection4, selection5, selection6)
 
-fun <T1, T2, T3, T4, T5, T6, T7> tuple(
+fun <T1: Any, T2: Any, T3: Any, T4: Any, T5: Any, T6: Any, T7: Any> tuple(
     selection1: Selection<T1>,
     selection2: Selection<T2>,
     selection3: Selection<T3>,
@@ -329,7 +329,7 @@ fun <T1, T2, T3, T4, T5, T6, T7> tuple(
 ): NonNullExpression<Tuple7<T1, T2, T3, T4, T5, T6, T7>> =
     Tuple7Expression(selection1, selection2, selection3, selection4, selection5, selection6, selection7)
 
-fun <T1, T2, T3, T4, T5, T6, T7, T8> tuple(
+fun <T1: Any, T2: Any, T3: Any, T4: Any, T5: Any, T6: Any, T7: Any, T8: Any> tuple(
     selection1: Selection<T1>,
     selection2: Selection<T2>,
     selection3: Selection<T3>,
@@ -341,7 +341,7 @@ fun <T1, T2, T3, T4, T5, T6, T7, T8> tuple(
 ): NonNullExpression<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> =
     Tuple8Expression(selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8)
 
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9> tuple(
+fun <T1: Any, T2: Any, T3: Any, T4: Any, T5: Any, T6: Any, T7: Any, T8: Any, T9: Any> tuple(
     selection1: Selection<T1>,
     selection2: Selection<T2>,
     selection3: Selection<T3>,
@@ -355,23 +355,23 @@ fun <T1, T2, T3, T4, T5, T6, T7, T8, T9> tuple(
     Tuple9Expression(selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8, selection9)
 
 
-infix fun <T> Expression<T>.valueIn(
+infix fun <T: Any> Expression<T>.valueIn(
     values: Collection<T>
 ): NonNullExpression<Boolean> =
     InListExpression(false, this, values)
 
-infix fun <T> Expression<T>.valueNotIn(
+infix fun <T: Any> Expression<T>.valueNotIn(
     values: Collection<T>
 ): NonNullExpression<Boolean> =
     InListExpression(true, this, values)
 
 
-infix fun <T> Expression<T>.valueIn(
+infix fun <T: Any> Expression<T>.valueIn(
     subQuery: TypedSubQuery<*, *, *, *, T>
 ): NonNullExpression<Boolean> =
     InSubQueryExpression(false, this, subQuery)
 
-infix fun <T> Expression<T>.valueNotIn(
+infix fun <T: Any> Expression<T>.valueNotIn(
     subQuery: TypedSubQuery<*, *, *, *, T>
 ): NonNullExpression<Boolean> =
     InSubQueryExpression(true, this, subQuery)
@@ -399,17 +399,17 @@ fun notExists(
     notExists((subQuery as TypedSubQueryImplementor<*, *, *, *>).baseQuery)
 
 
-fun <T> all(
+fun <T: Any> all(
     subQuery: TypedSubQuery<*, *, *, *, T>
 ): Expression<T> =
     OperatorSubQueryExpression("all", subQuery)
 
-fun <T> any(
+fun <T: Any> any(
     subQuery: TypedSubQuery<*, *, *, *, T>
 ): Expression<T> =
     OperatorSubQueryExpression("any", subQuery)
 
-fun <T> some(
+fun <T: Any> some(
     subQuery: TypedSubQuery<*, *, *, *, T>
 ): Expression<T> =
     OperatorSubQueryExpression("some", subQuery)
@@ -417,6 +417,9 @@ fun <T> some(
 
 fun <T: Any> value(value: T): NonNullExpression<T> =
     ValueExpression(value)
+
+fun <T: Any> nullValue(type: KClass<T>): Expression<T> =
+    NullValueExpression(type)
 
 fun <T: Number> constant(value: T): NonNullExpression<T> =
     ConstantExpression(value)
@@ -445,19 +448,20 @@ fun <T: Any> coalesce(expression: Expression<T>, defaultValue: T): NonNullExpres
 
 fun Expression<*>.count(distinct: Boolean = false): NonNullExpression<Long> =
     AggregationExpression(
+        Long::class.java,
         "count",
         this,
         if (distinct) "distinct" else null
     )
 
 fun <T: Number> Expression<T>.min(): Expression<T> =
-    AggregationExpression("min", this)
+    AggregationExpression(selectedType, "min", this)
 
 fun <T: Number> Expression<T>.max(): Expression<T> =
-    AggregationExpression("max", this)
+    AggregationExpression(selectedType, "max", this)
 
 fun <T: Number> Expression<T>.sum(): Expression<T> =
-    AggregationExpression("sum", this)
+    AggregationExpression(selectedType, "sum", this)
 
 fun <T: Number> Expression<T>.avg(): Expression<T> =
-    AggregationExpression("avg", this)
+    AggregationExpression(selectedType, "avg", this)

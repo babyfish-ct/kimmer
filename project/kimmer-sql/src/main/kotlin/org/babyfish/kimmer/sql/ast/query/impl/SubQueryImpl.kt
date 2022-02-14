@@ -50,7 +50,7 @@ internal class SubQueryImpl<P, PID, E, ID>(
          renderTo(builder, false)
     }
 
-    override fun <R> select(
+    override fun <R: Any> select(
         selection: Selection<R>
     ): SelectableTypedSubQuery<P, PID, E, ID, R> =
         SelectableTypedSubQueryImpl.select(this, selection)

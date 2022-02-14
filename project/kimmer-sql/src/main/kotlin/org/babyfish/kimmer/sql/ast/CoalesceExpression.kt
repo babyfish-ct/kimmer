@@ -41,9 +41,9 @@ internal class CoalesceBuilderImpl<T: Any>(
         CoalesceExpression(expressions)
 }
 
-internal class CoalesceExpression<T>(
+internal class CoalesceExpression<T: Any>(
     private val expressions: List<Expression<T>>
-): AbstractExpression<T>() {
+): AbstractExpression<T>(expressions.first().selectedType) {
 
     override val precedence: Int
         get() = 0

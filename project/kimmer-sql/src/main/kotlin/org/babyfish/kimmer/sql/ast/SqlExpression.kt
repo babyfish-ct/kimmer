@@ -2,8 +2,11 @@ package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
 import org.babyfish.kimmer.sql.ast.table.accept
+import kotlin.reflect.KClass
 
-class SqlExpressionBuilder internal constructor() {
+class SqlExpressionBuilder internal constructor(
+    private val type: KClass<*>
+) {
 
     private var expressions: List<Expression<*>> = emptyList()
 
@@ -70,13 +73,14 @@ class SqlExpressionBuilder internal constructor() {
         if (index + 1 < sqlLen) {
             parts += sql.substring(index)
         }
-        return SqlExpression(parts)
+        return SqlExpression(type.java, parts)
     }
 }
 
 internal class SqlExpression<T: Any>(
+    selectedType: Class<*>,
     private val parts: List<Any>
-): AbstractExpression<T>() {
+): AbstractExpression<T>(selectedType) {
 
     override val precedence: Int
         get() = 0

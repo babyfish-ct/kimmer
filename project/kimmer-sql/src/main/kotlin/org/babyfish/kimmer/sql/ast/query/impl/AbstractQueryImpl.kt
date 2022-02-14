@@ -91,7 +91,7 @@ internal abstract class AbstractQueryImpl<E, ID>(
         orders.clear()
     }
 
-    override fun <X, XID, R> subQuery(
+    override fun <X, XID, R: Any> subQuery(
         type: KClass<X>,
         block: MutableSubQuery<E, ID, X, XID>.() -> TypedSubQuery<E, ID, X, XID, R>
     ): TypedSubQuery<E, ID, X, XID, R>

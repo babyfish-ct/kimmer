@@ -19,7 +19,7 @@ interface Filterable<E: Entity<ID>, ID: Comparable<ID>> {
         orderBy(table.`get?`(prop), descending)
     }
 
-    fun <X, XID, R> subQuery(
+    fun <X, XID, R: Any> subQuery(
         type: KClass<X>,
         block: MutableSubQuery<E, ID, X, XID>.() -> TypedSubQuery<E, ID, X, XID, R>
     ): TypedSubQuery<E, ID, X, XID, R>

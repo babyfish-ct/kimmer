@@ -9,8 +9,9 @@ import org.babyfish.kimmer.sql.ast.table.accept
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
+import kotlin.reflect.KClass
 
-interface Expression<T> {
+interface Expression<T: Any> {
 
     @Suppress("UNCHECKED_CAST")
     val `!`: NonNullExpression<T>
@@ -19,11 +20,29 @@ interface Expression<T> {
     @Suppress("UNCHECKED_CAST")
     val `?`: Selection<T?>
         get() = this as Selection<T?>
+
+    val isSelectable: Boolean
+
+    val selectedType: Class<T>
 }
 
-interface NonNullExpression<T>: Expression<T>, Selection<T>
+interface NonNullExpression<T: Any>: Expression<T>, Selection<T>
 
-internal abstract class AbstractExpression<T>: NonNullExpression<T>, Renderable, TableReferenceElement {
+internal abstract class AbstractExpression<T: Any>(
+    selectedType: Class<*>?
+): NonNullExpression<T>, Renderable, TableReferenceElement {
+
+    private val _selectedType: Class<T>? = selectedType?.let { convertType(it) }
+
+    override val isSelectable: Boolean
+        get() = _selectedType !== null
+
+    override val selectedType: Class<T>
+        get() = _selectedType ?: error("The expression '${this::class.qualifiedName}' does not support runtime type")
+
+    @Suppress("UNCHECKED_CAST")
+    private fun convertType(javaType: Class<*>): Class<T> =
+        javaType as Class<T>
 
     protected abstract fun SqlBuilder.render()
 
@@ -85,7 +104,7 @@ internal abstract class AbstractExpression<T>: NonNullExpression<T>, Renderable,
 internal class PropExpression<T: Any>(
     val table: TableImpl<*, *>,
     val prop: EntityProp
-): AbstractExpression<T>() {
+): AbstractExpression<T>(prop.returnType.java) {
 
     init {
         if (prop.targetType !== null) {
@@ -118,7 +137,7 @@ internal class PropExpression<T: Any>(
 internal class CombinedExpression(
     private val operator: String,
     private val predicates: List<Expression<*>>
-) : AbstractExpression<Boolean>() {
+) : AbstractExpression<Boolean>(Boolean::class.java) {
 
     init {
         predicates
@@ -152,7 +171,7 @@ internal class CombinedExpression(
 
 internal class NotExpression(
     private val predicate: Expression<Boolean>
-): AbstractExpression<Boolean>() {
+): AbstractExpression<Boolean>(Boolean::class.java) {
 
     override val precedence: Int
         get() = 5
@@ -173,7 +192,7 @@ internal class LikeExpression(
     pattern: String,
     private val insensitive: Boolean,
     mode: LikeMode
-) : AbstractExpression<Boolean>() {
+) : AbstractExpression<Boolean>(Boolean::class.java) {
 
     private val pattern: String? =
         pattern
@@ -223,7 +242,7 @@ internal class ComparisonExpression<T: Comparable<T>>(
     private val operator: String,
     private val left: Expression<T>,
     private val right: Expression<T>
-) : AbstractExpression<Boolean>() {
+) : AbstractExpression<Boolean>(Boolean::class.java) {
 
     override val precedence: Int
         get() = 4
@@ -246,7 +265,7 @@ internal class BetweenExpression<T: Comparable<T>>(
     private val expression: Expression<T>,
     private val min: Expression<T>,
     private val max: Expression<T>
-): AbstractExpression<Boolean>() {
+): AbstractExpression<Boolean>(Boolean::class.java) {
 
     override val precedence: Int
         get() = 7
@@ -270,7 +289,7 @@ internal class BinaryExpression<T: Number>(
     private val operator: String,
     private val left: Expression<T>,
     private val right: Expression<T>
-): AbstractExpression<T>() {
+): AbstractExpression<T>(left.selectedType) {
 
     override val precedence: Int
         get() = when (operator) {
@@ -294,7 +313,7 @@ internal class BinaryExpression<T: Number>(
 internal class ConcatExpression(
     private val first: NonNullExpression<String>,
     private val others: Array<NonNullExpression<String>>
-): AbstractExpression<String>() {
+): AbstractExpression<String>(String::class.java) {
 
     override val precedence: Int
         get() = 0
@@ -318,7 +337,7 @@ internal class ConcatExpression(
 internal class UnaryExpression<T: Number>(
     private val operator: String,
     private val target: Expression<T>
-): AbstractExpression<T>() {
+): AbstractExpression<T>(target.selectedType) {
 
     override val precedence: Int
         get() = 3
@@ -336,7 +355,7 @@ internal class UnaryExpression<T: Number>(
 internal class NullityExpression(
     private val isNull: Boolean,
     private val expression: Expression<*>
-): AbstractExpression<Boolean>() {
+): AbstractExpression<Boolean>(Boolean::class.java) {
 
     override val precedence: Int
         get() = 0
@@ -355,11 +374,11 @@ internal class NullityExpression(
     }
 }
 
-internal class InListExpression<T>(
+internal class InListExpression<T: Any>(
     private val negative: Boolean,
     private val expression: Expression<T>,
     private val values: Collection<T>
-): AbstractExpression<Boolean>() {
+): AbstractExpression<Boolean>(Boolean::class.java) {
 
     override val precedence: Int
         get() = 7
@@ -388,11 +407,11 @@ internal class InListExpression<T>(
     }
 }
 
-internal class InSubQueryExpression<T>(
+internal class InSubQueryExpression<T: Any>(
     private val negative: Boolean,
     private val expression: Expression<T>,
     private val subQuery: TypedSubQuery<*, *, *, *, T>
-): AbstractExpression<Boolean>() {
+): AbstractExpression<Boolean>(Boolean::class.java) {
 
     override val precedence: Int
         get() = 7
@@ -412,7 +431,7 @@ internal class InSubQueryExpression<T>(
 internal class ExistsExpression(
     private val negative: Boolean,
     private val subQuery: MutableSubQuery<*, *, *, *>
-): AbstractExpression<Boolean>() {
+): AbstractExpression<Boolean>(Boolean::class.java) {
 
     override val precedence: Int
         get() = 0
@@ -428,10 +447,10 @@ internal class ExistsExpression(
     }
 }
 
-internal class OperatorSubQueryExpression<T>(
+internal class OperatorSubQueryExpression<T: Any>(
     private val operator: String,
     private val subQuery: TypedSubQuery<*, *, *, *, T>
-): AbstractExpression<T>() {
+): AbstractExpression<T>(subQuery.selectedType) {
 
     override val precedence: Int
         get() = 0
@@ -448,9 +467,9 @@ internal class OperatorSubQueryExpression<T>(
     }
 }
 
-internal class ValueExpression<T>(
+internal class ValueExpression<T: Any>(
     val value: T
-): AbstractExpression<T>() {
+): AbstractExpression<T>(value::class.java) {
 
     override val precedence: Int
         get() = 0
@@ -462,9 +481,24 @@ internal class ValueExpression<T>(
     override fun accept(visitor: TableReferenceVisitor) {}
 }
 
+internal class NullValueExpression<T: Any>(
+    val type: KClass<*>
+): AbstractExpression<T>(type.java) {
+
+    override val precedence: Int
+        get() = 0
+
+    override fun SqlBuilder.render() {
+        nullVariable(type)
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {}
+}
+
+
 internal class ConstantExpression<T: Number>(
     private val value: T
-): AbstractExpression<T>() {
+): AbstractExpression<T>(value::class.java) {
 
     override val precedence: Int
         get() = 0
@@ -476,11 +510,12 @@ internal class ConstantExpression<T: Number>(
     override fun accept(visitor: TableReferenceVisitor) {}
 }
 
-internal class AggregationExpression<T>(
+internal class AggregationExpression<T: Any>(
+    javaType: Class<*>,
     private val funName: String,
     private val base: Expression<*>,
     private val prefix: String? = null
-): AbstractExpression<T>() {
+): AbstractExpression<T>(javaType) {
 
     override val precedence: Int
         get() = 0
@@ -506,7 +541,7 @@ internal class ContainsExpression(
     prop: EntityProp,
     private val targetIds: Collection<Any>,
     inverse: Boolean
-): AbstractExpression<Boolean>() {
+): AbstractExpression<Boolean>(Boolean::class.java) {
 
     private val tableName: String
 

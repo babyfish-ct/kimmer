@@ -11,7 +11,7 @@ interface RootSelectable<E: Entity<ID>, ID: Comparable<ID>> {
 
     val table: NonNullJoinableTable<E, ID>
 
-    fun <R> select(
+    fun <R: Any> select(
         selection: Selection<R>
     ): SelectableTypedRootQuery<E, ID, R>
 

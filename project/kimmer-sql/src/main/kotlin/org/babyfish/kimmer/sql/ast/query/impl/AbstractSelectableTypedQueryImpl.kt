@@ -3,13 +3,10 @@ package org.babyfish.kimmer.sql.ast.query.impl
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.Renderable
-import org.babyfish.kimmer.sql.ast.query.SelectableTypedRootQuery
-import org.babyfish.kimmer.sql.ast.query.TypedRootQuery
 import org.babyfish.kimmer.sql.ast.table.TableReferenceElement
 import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
 import org.babyfish.kimmer.sql.ast.table.accept
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
-import org.babyfish.kimmer.sql.meta.EntityProp
 
 internal abstract class AbstractSelectableTypedQueryImpl<E, ID, R>(
     val data: TypedQueryData,
@@ -18,7 +15,24 @@ internal abstract class AbstractSelectableTypedQueryImpl<E, ID, R>(
     TableReferenceElement
     where E:
           Entity<ID>,
-          ID: Comparable<ID> {
+          ID: Comparable<ID>,
+          R: Any {
+
+    init {
+        data.selections.forEach {
+            when (it) {
+                is TableImpl<*, *> -> {}
+                is Expression<*> -> if (!it.isSelectable) {
+                    throw IllegalArgumentException(
+                        "Expression '${it::class.qualifiedName}' is not selectable"
+                    )
+                } else ->
+                    throw IllegalArgumentException(
+                        "Expression '${it::class.qualifiedName}' is not selectable"
+                    )
+            }
+        }
+    }
 
     override fun renderTo(builder: SqlBuilder) {
         builder.sql("select ")

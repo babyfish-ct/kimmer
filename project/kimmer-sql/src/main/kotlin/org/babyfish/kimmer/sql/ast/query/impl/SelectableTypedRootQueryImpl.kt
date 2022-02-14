@@ -19,12 +19,12 @@ internal class SelectableTypedRootQueryImpl<E, ID, R>(
     data,
     baseQuery
 ), SelectableTypedRootQuery<E, ID, R>
-    where E: Entity<ID>, ID: Comparable<ID> {
+    where E: Entity<ID>, ID: Comparable<ID>, R: Any {
 
     override val baseQuery: RootQueryImpl<E, ID>
         get() = super.baseQuery as RootQueryImpl<E, ID>
     
-    override fun <X>  reselect(
+    override fun <X: Any> reselect(
         block: RootSelectable<E, ID>.() -> SelectableTypedRootQuery<E, ID, X>
     ): SelectableTypedRootQuery<E, ID, X> {
         val reselected = baseQuery.block()
@@ -72,7 +72,7 @@ internal class SelectableTypedRootQueryImpl<E, ID, R>(
         return executor(R2dbcExecutorContext(con, sql, variables)) as List<R>
     }
 
-    private fun preExecute(builder: SqlBuilder): Pair<String, List<Any?>> {
+    private fun preExecute(builder: SqlBuilder): Pair<String, List<Any>> {
         val visitor = UseTableVisitor(builder)
         accept(visitor)
         renderTo(builder)
@@ -98,7 +98,7 @@ internal class SelectableTypedRootQueryImpl<E, ID, R>(
 
         @JvmStatic
         @Suppress("UNCHECKED_CAST")
-        fun <E: Entity<ID>, ID: Comparable<ID>, R> select(
+        fun <E: Entity<ID>, ID: Comparable<ID>, R: Any> select(
             query: RootQueryImpl<E, ID>,
             vararg selections: Selection<*>
         ): SelectableTypedRootQuery<E, ID, R> =

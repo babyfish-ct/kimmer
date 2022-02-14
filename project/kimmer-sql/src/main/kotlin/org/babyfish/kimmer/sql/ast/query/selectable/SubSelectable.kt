@@ -11,7 +11,7 @@ interface SubSelectable<P: Entity<PID>, PID: Comparable<PID>, E: Entity<ID>, ID:
 
     val table: NonNullSubQueryTable<E, ID>
 
-    fun <R> select(
+    fun <R: Any> select(
         selection: Selection<R>
     ): SelectableTypedSubQuery<P, PID, E, ID, R>
 

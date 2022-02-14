@@ -20,7 +20,7 @@ internal class RootQueryImpl<E, ID>(
           Entity<ID>,
           ID: Comparable<ID> {
 
-    override fun <R> select(
+    override fun <R: Any> select(
         selection: Selection<R>
     ): SelectableTypedRootQuery<E, ID, R> =
         SelectableTypedRootQueryImpl.select(this, selection)

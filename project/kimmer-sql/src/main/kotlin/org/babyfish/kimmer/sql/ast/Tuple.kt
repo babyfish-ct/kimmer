@@ -63,7 +63,7 @@ data class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>(
 internal class PairExpression<A, B>(
     private val a: Selection<A>,
     private val b: Selection<B>
-): AbstractExpression<Pair<A, B>>() {
+): AbstractExpression<Pair<A, B>>(null) {
 
     override val precedence: Int
         get() = 0
@@ -86,7 +86,7 @@ internal class TripleExpression<A, B, C>(
     private val a: Selection<A>,
     private val b: Selection<B>,
     private val c: Selection<C>
-): AbstractExpression<Triple<A, B, C>>() {
+): AbstractExpression<Triple<A, B, C>>(null) {
 
     override val precedence: Int
         get() = 0
@@ -114,7 +114,7 @@ internal class Tuple4Expression<T1, T2, T3, T4>(
     private val selection2: Selection<T2>,
     private val selection3: Selection<T3>,
     private val selection4: Selection<T4>,
-): AbstractExpression<Tuple4<T1, T2, T3, T4>>() {
+): AbstractExpression<Tuple4<T1, T2, T3, T4>>(null) {
 
     override val precedence: Int
         get() = 0
@@ -146,7 +146,7 @@ internal class Tuple5Expression<T1, T2, T3, T4, T5>(
     private val selection3: Selection<T3>,
     private val selection4: Selection<T4>,
     private val selection5: Selection<T5>,
-): AbstractExpression<Tuple5<T1, T2, T3, T4, T5>>() {
+): AbstractExpression<Tuple5<T1, T2, T3, T4, T5>>(null) {
 
     override val precedence: Int
         get() = 0
@@ -182,7 +182,7 @@ internal class Tuple6Expression<T1, T2, T3, T4, T5, T6>(
     private val selection4: Selection<T4>,
     private val selection5: Selection<T5>,
     private val selection6: Selection<T6>,
-): AbstractExpression<Tuple6<T1, T2, T3, T4, T5, T6>>() {
+): AbstractExpression<Tuple6<T1, T2, T3, T4, T5, T6>>(null) {
 
     override val precedence: Int
         get() = 0
@@ -222,7 +222,7 @@ internal class Tuple7Expression<T1, T2, T3, T4, T5, T6, T7>(
     private val selection5: Selection<T5>,
     private val selection6: Selection<T6>,
     private val selection7: Selection<T7>,
-): AbstractExpression<Tuple7<T1, T2, T3, T4, T5, T6, T7>>() {
+): AbstractExpression<Tuple7<T1, T2, T3, T4, T5, T6, T7>>(null) {
 
     override val precedence: Int
         get() = 0
@@ -266,7 +266,7 @@ internal class Tuple8Expression<T1, T2, T3, T4, T5, T6, T7, T8>(
     private val selection6: Selection<T6>,
     private val selection7: Selection<T7>,
     private val selection8: Selection<T8>,
-): AbstractExpression<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>>() {
+): AbstractExpression<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>>(null) {
 
     override val precedence: Int
         get() = 0
@@ -314,7 +314,7 @@ internal class Tuple9Expression<T1, T2, T3, T4, T5, T6, T7, T8, T9>(
     private val selection7: Selection<T7>,
     private val selection8: Selection<T8>,
     private val selection9: Selection<T9>,
-): AbstractExpression<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>>() {
+): AbstractExpression<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>>(null) {
 
     override val precedence: Int
         get() = 0
