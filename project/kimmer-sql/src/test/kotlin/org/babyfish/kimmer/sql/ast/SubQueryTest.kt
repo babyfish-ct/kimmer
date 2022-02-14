@@ -2,6 +2,7 @@ package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.sql.ast.common.AbstractTest
 import org.babyfish.kimmer.sql.ast.model.*
+import java.math.BigDecimal
 import kotlin.test.Test
 
 class SubQueryTest: AbstractTest() {
@@ -128,11 +129,12 @@ class SubQueryTest: AbstractTest() {
                     |tb_1_.EDITION, tb_1_.ID, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
                 |from BOOK as tb_1_ 
                 |where tb_1_.PRICE > (
-                    |select avg(tb_2_.PRICE) from BOOK as tb_2_
-                |)""".trimMargin().toOneLine()
+                    |select coalesce(avg(tb_2_.PRICE), $1) from BOOK as tb_2_
+                |)""".trimMargin().toOneLine(),
+            BigDecimal.ZERO
         ) {
             where(table.price gt subQuery(Book::class) {
-                select(table.price.avg())
+                select(coalesce(table.price.avg(), BigDecimal.ZERO))
             })
             select(table)
         }
@@ -147,20 +149,22 @@ class SubQueryTest: AbstractTest() {
                 |tb_1_.NAME, 
                 |tb_1_.WEBSITE, 
                 |(
-                    |select avg(tb_2_.PRICE) 
+                    |select coalesce(avg(tb_2_.PRICE), $1) 
                     |from BOOK as tb_2_ 
                     |where tb_1_.ID = tb_2_.STORE_ID
                 |) 
                 |from BOOK_STORE as tb_1_ 
                 |order by (
-                    |select avg(tb_2_.PRICE) 
+                    |select coalesce(avg(tb_2_.PRICE), $2) 
                     |from BOOK as tb_2_ 
                     |where tb_1_.ID = tb_2_.STORE_ID
                 |) desc""".trimMargin().toOneLine(),
+            BigDecimal.ZERO,
+            BigDecimal.ZERO
         ) {
             val subQuery = subQuery(Book::class) {
                 where(parentTable.id eq table.store.id)
-                select(table.price.avg())
+                select(coalesce(table.price.avg(), BigDecimal.ZERO))
             }
             orderBy(subQuery, true)
             select(table, subQuery)

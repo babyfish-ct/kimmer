@@ -48,18 +48,6 @@ internal abstract class AbstractExpression<T>: NonNullExpression<T>, Renderable,
      */
     protected abstract val precedence: Int
 
-    protected fun SqlBuilder.render(selection: NonNullExpression<*>) {
-        (selection as Renderable).let {
-            if (it !is AbstractExpression<*> || it.precedence <= precedence) {
-                it.renderTo(this)
-            } else {
-                sql("(")
-                it.renderTo(this)
-                sql(")")
-            }
-        }
-    }
-
     protected fun SqlBuilder.render(selection: Expression<*>) {
         (selection as Renderable).let {
             if (it !is AbstractExpression<*> || it.precedence <= precedence) {
@@ -300,6 +288,30 @@ internal class BinaryExpression<T: Number>(
     override fun accept(visitor: TableReferenceVisitor) {
         left.accept(visitor)
         right.accept(visitor)
+    }
+}
+
+internal class ConcatExpression(
+    private val first: NonNullExpression<String>,
+    private val others: Array<NonNullExpression<String>>
+): AbstractExpression<String>() {
+
+    override val precedence: Int
+        get() = 0
+
+    override fun SqlBuilder.render() {
+        sql("concat(")
+        render(first)
+        others.forEach {
+            sql(", ")
+            render(it)
+        }
+        sql(")")
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        first.accept(visitor)
+        others.forEach { it.accept(visitor) }
     }
 }
 

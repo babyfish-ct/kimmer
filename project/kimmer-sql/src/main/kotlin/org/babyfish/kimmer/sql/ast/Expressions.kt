@@ -414,11 +414,13 @@ fun <T> some(
 ): Expression<T> =
     OperatorSubQueryExpression("some", subQuery)
 
+
 fun <T: Any> value(value: T): NonNullExpression<T> =
     ValueExpression(value)
 
 fun <T: Number> constant(value: T): NonNullExpression<T> =
     ConstantExpression(value)
+
 
 fun <C: Any> case(expression: Expression<C>): SimpleCaseStartBuilder<C> =
     SimpleCaseStartBuilderImpl(expression)
@@ -426,11 +428,20 @@ fun <C: Any> case(expression: Expression<C>): SimpleCaseStartBuilder<C> =
 fun case(): CaseStartBuilder =
     CaseStartBuilderImpl()
 
-fun concat(block: ConcatContext.() -> Unit): NonNullExpression<String> =
-    ConcatContext().let {
-        it.block()
-        it.createExpression()
-    }
+
+@Suppress("UNCHECKED_CAST")
+fun concat(first: NonNullExpression<String>, vararg others: NonNullExpression<String>): NonNullExpression<String> =
+    ConcatExpression(first, others as Array<NonNullExpression<String>>)
+
+
+fun <T: Any> coalesce(expression: NonNullExpression<T>): NonNullCoalesceBuilder<T> =
+    CoalesceBuilderImpl(expression)
+
+fun <T: Any> coalesce(expression: Expression<T>): CoalesceBuilder<T> =
+    CoalesceBuilderImpl(expression)
+
+fun <T: Any> coalesce(expression: Expression<T>, defaultValue: T): NonNullExpression<T> =
+    coalesce(expression).or(defaultValue).end()
 
 fun Expression<*>.count(distinct: Boolean = false): NonNullExpression<Long> =
     AggregationExpression(
@@ -445,8 +456,8 @@ fun <T: Number> Expression<T>.min(): Expression<T> =
 fun <T: Number> Expression<T>.max(): Expression<T> =
     AggregationExpression("max", this)
 
-fun <T: Number> Expression<T>.sum(): NonNullExpression<T> =
+fun <T: Number> Expression<T>.sum(): Expression<T> =
     AggregationExpression("sum", this)
 
-fun <T: Number> Expression<T>.avg(): NonNullExpression<T> =
+fun <T: Number> Expression<T>.avg(): Expression<T> =
     AggregationExpression("avg", this)

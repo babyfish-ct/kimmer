@@ -11,6 +11,7 @@ import org.babyfish.kimmer.sql.ast.query.TypedRootQuery
 import org.babyfish.kimmer.sql.ast.concat
 import org.babyfish.kimmer.sql.ast.model.*
 import org.babyfish.kimmer.sql.ast.query.SelectableTypedRootQuery
+import org.babyfish.kimmer.sql.ast.value
 import org.babyfish.kimmer.sql.meta.config.Formula
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import org.babyfish.kimmer.sql.runtime.defaultR2dbcExecutor
@@ -48,11 +49,7 @@ abstract class AbstractTest {
 
         inverseProp(Author::books, Book::authors)
         prop(Author::fullName, Formula.of<Author, UUID, String> {
-            concat {
-                +firstName
-                +" "
-                +lastName
-            }
+            concat(firstName, value("="), lastName)
         })
     }
 
