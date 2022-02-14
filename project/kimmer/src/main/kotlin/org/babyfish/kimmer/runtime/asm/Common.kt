@@ -163,9 +163,8 @@ internal fun MethodVisitor.visitStore(type: Class<*>, local: Int) {
     }
 }
 
-internal fun MethodVisitor.visitReturn(type: Class<*>) {
-    visitInsn(
-        when {
+internal fun MethodVisitor.visitReturn(type: Class<*>, cast: Boolean = false) {
+    var opcode = when {
             type === Void::class.javaPrimitiveType -> Opcodes.RETURN
             type === Double::class.javaPrimitiveType -> Opcodes.DRETURN
             type === Float::class.javaPrimitiveType -> Opcodes.FRETURN
@@ -173,7 +172,10 @@ internal fun MethodVisitor.visitReturn(type: Class<*>) {
             type.isPrimitive -> Opcodes.IRETURN
             else -> Opcodes.ARETURN
         }
-    )
+    if (opcode == Opcodes.ARETURN && cast) {
+        visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(type))
+    }
+    visitInsn(opcode)
 }
 
 internal fun MethodVisitor.visitPropNameSwitch(

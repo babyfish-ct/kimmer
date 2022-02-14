@@ -1,16 +1,16 @@
 package org.babyfish.kimmer.sql.ast
 
-import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
-import org.babyfish.kimmer.sql.ast.table.accept
+import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.table.impl.accept
 
-data class Tuple4<T1, T2, T3, T4>(
+data class Tuple4<out T1, out T2, out T3, out T4>(
     val _1: T1,
     val _2: T2,
     val _3: T3,
     val _4: T4
 )
 
-data class Tuple5<T1, T2, T3, T4, T5>(
+data class Tuple5<out T1, out T2, out T3, out T4, out T5>(
     val _1: T1,
     val _2: T2,
     val _3: T3,
@@ -18,7 +18,7 @@ data class Tuple5<T1, T2, T3, T4, T5>(
     val _5: T5
 )
 
-data class Tuple6<T1, T2, T3, T4, T5, T6>(
+data class Tuple6<out T1, out T2, out T3, out T4, out T5, out T6>(
     val _1: T1,
     val _2: T2,
     val _3: T3,
@@ -27,7 +27,7 @@ data class Tuple6<T1, T2, T3, T4, T5, T6>(
     val _6: T6
 )
 
-data class Tuple7<T1, T2, T3, T4, T5, T6, T7>(
+data class Tuple7<out T1, out T2, out T3, out T4, out T5, out T6, out T7>(
     val _1: T1,
     val _2: T2,
     val _3: T3,
@@ -37,7 +37,7 @@ data class Tuple7<T1, T2, T3, T4, T5, T6, T7>(
     val _7: T7
 )
 
-data class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>(
+data class Tuple8<out T1, out T2, out T3, out T4, out T5, out T6, out T7, out T8>(
     val _1: T1,
     val _2: T2,
     val _3: T3,
@@ -48,7 +48,7 @@ data class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>(
     val _8: T8
 )
 
-data class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>(
+data class Tuple9<out T1, out T2, out T3, out T4, out T5, out T6, out T7, out T8, out T9>(
     val _1: T1,
     val _2: T2,
     val _3: T3,

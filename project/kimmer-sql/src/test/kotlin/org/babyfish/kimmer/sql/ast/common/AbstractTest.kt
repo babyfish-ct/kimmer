@@ -1,41 +1,44 @@
 package org.babyfish.kimmer.sql.ast.common
 
-import io.r2dbc.spi.Connection
 import io.r2dbc.spi.ConnectionFactories
+import io.r2dbc.spi.ConnectionFactory
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
-import org.babyfish.kimmer.sql.Entity
-import org.babyfish.kimmer.sql.ast.query.MutableRootQuery
 import org.babyfish.kimmer.sql.ast.query.TypedRootQuery
 import org.babyfish.kimmer.sql.ast.concat
 import org.babyfish.kimmer.sql.ast.model.*
-import org.babyfish.kimmer.sql.ast.query.SelectableTypedRootQuery
 import org.babyfish.kimmer.sql.ast.value
 import org.babyfish.kimmer.sql.meta.config.Formula
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
+import org.babyfish.kimmer.sql.runtime.defaultJdbcExecutor
 import org.babyfish.kimmer.sql.runtime.defaultR2dbcExecutor
 import org.babyfish.kimmer.sql.spi.createSqlClient
 import java.io.InputStreamReader
+import java.sql.DriverManager
 import java.util.*
-import kotlin.reflect.KClass
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.expect
 
 abstract class AbstractTest {
 
-    private var _sql: String? = null
-
-    private var _variables: List<Any?>? = null
-
-    private var con: Connection? = null
-
     protected val sqlClient = createSqlClient(
+        jdbcExecutor = {
+            println("jdbc: $sql")
+            var index = 0
+            _sql = sql.replace(JDBC_PARAMETER_REGEX) {
+                "$${++index}" // replace jdbc '?' to '$1', '$2', ..., '$N'
+            }
+            _variables = variables
+            defaultJdbcExecutor().also {
+                _rows = it
+            }
+        },
         r2dbcExecutor = {
             _sql = sql
             _variables = variables
-            defaultR2dbcExecutor()
+            defaultR2dbcExecutor().also {
+                _rows = it
+            }
         }
     ) {
 
@@ -53,74 +56,129 @@ abstract class AbstractTest {
         })
     }
 
-    protected val sql: String?
-        get() = _sql
+    private var _sql: String? = null
 
-    protected val variables: List<Any?>?
-        get() = _variables
+    private var _variables: List<Any?>? = null
 
-    protected fun <E: Entity<ID>, ID: Comparable<ID>> execute(
-        query: TypedRootQuery<E, ID, *>
+    private var _rows: List<Any?>? = null
+
+    protected fun <R: Any> TypedRootQuery<*, *, R>.executeAndExpect(
+        testWay: TestWay = TestWay.BOTH,
+        block: QueryTestContext<R>.() -> Unit
     ) {
-        runBlocking {
-            query.execute(con ?: error("No connection"))
-        }
-    }
-
-    protected fun <E: Entity<ID>, ID: Comparable<ID>, R> testQuery(
-        type: KClass<E>,
-        sql: String,
-        vararg variables: Any?,
-        block: MutableRootQuery<E, ID>.() -> SelectableTypedRootQuery<E, ID, R>
-    ) {
-        execute(sqlClient.createQuery(type, block))
-        expect(sql) { _sql }
-        expect(variables.toList()) { _variables }
-    }
-
-    @BeforeTest
-    fun createConnection() {
-        con = runBlocking {
-            connectionFactory.create().awaitSingle()
-        }
-    }
-
-    @AfterTest
-    fun closeConnection() {
-        con?.let {
-            con = null
-            runBlocking {
-                it.close()
+        if (testWay.forJdbc) {
+            jdbc {
+                execute(this)
             }
+            QueryTestContext<R>().block()
+        }
+        if (testWay.forR2dbc) {
+            runBlocking {
+                r2dbc {
+                    execute(this)
+                }
+                QueryTestContext<R>().block()
+            }
+        }
+    }
+
+    protected enum class TestWay(
+        val forJdbc: Boolean,
+        val forR2dbc: Boolean
+    ) {
+        JDBC(true, false),
+        R2DBC(false, true),
+        BOTH(true, true)
+    }
+
+    protected inner class QueryTestContext<R> {
+
+        fun sql(block: () -> String) {
+            expect(
+                block()
+                    .replace("\r", "")
+                    .replace("\n", "")
+            ) {
+                _sql
+            }
+        }
+
+        fun variables(vararg values: Any?) {
+            expect(values.toList()) {
+                _variables
+            }
+        }
+
+        @Suppress("UNCHECK_CAST")
+        fun rows(block: List<R>.() -> Unit) {
+            (_rows as List<R>).block()
         }
     }
 
     companion object {
 
-        @JvmStatic
-        protected fun String.toOneLine(): String =
-            replace("\r", "")
-                .replace("\n", "")
+        private const val JDBC_URL = "jdbc:h2:~/test_db"
 
-        private val connectionFactory =
-            ConnectionFactories.get("r2dbc:h2:mem:///test_db")
+        private const val R2DBC_URL = "r2dbc:h2:mem:///r2dbc_db"
+
+        private val JDBC_PARAMETER_REGEX = Regex("\\?")
+
+        @JvmStatic
+        private val connectionFactory: ConnectionFactory
 
         init {
+
+            // Init JDBC
+            Class.forName("org.h2.Driver")
+
+            // Init R2DBC
+            connectionFactory = ConnectionFactories.get(R2DBC_URL)
+
+            jdbc {
+                AbstractTest::class.java.classLoader.getResourceAsStream("TestDatabase.sql").use { stream ->
+                    val text = InputStreamReader(stream).readText()
+                    text
+                        .split(";")
+                        .filter { it.isNotBlank() }
+                        .forEach {
+                            createStatement().executeUpdate(it)
+                        }
+                }
+            }
+
             runBlocking {
-                val con = connectionFactory.create().awaitSingle()
-                try {
+                r2dbc {
                     AbstractTest::class.java.classLoader.getResourceAsStream("TestDatabase.sql").use { stream ->
                         val text = InputStreamReader(stream).readText()
                         text
                             .split(";")
                             .filter { it.isNotBlank() }
                             .forEach {
-                                con.createStatement(it).execute().awaitFirst()
+                                createStatement(it).execute().awaitFirst()
                             }
                     }
-                } finally {
-                    con.close()
                 }
+            }
+        }
+
+        @JvmStatic
+        protected fun jdbc(
+            block: java.sql.Connection.() -> Unit
+        ) {
+            DriverManager.getConnection("jdbc:h2:~/test_db").use {
+                it.block()
+            }
+        }
+
+        @JvmStatic
+        protected suspend fun r2dbc(
+            block: suspend io.r2dbc.spi.Connection.() -> Unit
+        ) {
+            val con = connectionFactory.create().awaitSingle()
+            try {
+                block(con)
+            } finally {
+                con.close()
             }
         }
     }

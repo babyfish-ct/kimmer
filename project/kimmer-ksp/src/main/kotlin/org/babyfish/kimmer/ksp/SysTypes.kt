@@ -38,6 +38,11 @@ open class SysTypes internal constructor(
         ?.asStarProjectedType()
         ?: error("Internal bug")
 
+    val entityType: KSType = resolver
+        .getClassDeclarationByName("$KIMMER_PACKAGE.sql.Entity")
+        ?.asStarProjectedType()
+        ?: error("Internal bug")
+
     companion object {
         fun of(resolver: Resolver, table: Boolean): SysTypes? {
             val immutableType = resolver

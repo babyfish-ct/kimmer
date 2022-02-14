@@ -3,9 +3,9 @@ package org.babyfish.kimmer.sql.ast.query.impl
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.Renderable
-import org.babyfish.kimmer.sql.ast.table.TableReferenceElement
-import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
-import org.babyfish.kimmer.sql.ast.table.accept
+import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceElement
+import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.table.impl.accept
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 
 internal abstract class AbstractSelectableTypedQueryImpl<E, ID, R>(

@@ -5,11 +5,9 @@ import org.babyfish.kimmer.sql.ast.Expression
 import org.babyfish.kimmer.sql.ast.Renderable
 import org.babyfish.kimmer.sql.ast.Selection
 import org.babyfish.kimmer.sql.ast.SqlBuilder
-import org.babyfish.kimmer.sql.ast.query.MutableRootQuery
 import org.babyfish.kimmer.sql.ast.query.SelectableTypedSubQuery
-import org.babyfish.kimmer.sql.ast.query.selectable.SubSelectable
-import org.babyfish.kimmer.sql.ast.table.TableReferenceElement
-import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceElement
+import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
 
 internal class SelectableTypedSubQueryImpl<P, PID, E, ID, R>(
     data: TypedQueryData,

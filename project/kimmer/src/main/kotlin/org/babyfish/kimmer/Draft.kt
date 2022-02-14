@@ -2,6 +2,7 @@ package org.babyfish.kimmer
 
 import org.babyfish.kimmer.meta.ImmutableProp
 import org.babyfish.kimmer.runtime.DraftSpi
+import org.babyfish.kimmer.sql.Entity
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 

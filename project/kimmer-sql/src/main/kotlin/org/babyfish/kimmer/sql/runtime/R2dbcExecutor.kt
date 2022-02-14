@@ -5,11 +5,13 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
 import org.babyfish.kimmer.sql.ast.DbNull
+import org.babyfish.kimmer.sql.ast.Selection
 
-typealias R2dbcExecutor = suspend R2dbcExecutorContext.() -> List<Any>
+typealias R2dbcExecutor = suspend R2dbcExecutorContext.() -> List<Any?>
 
 data class R2dbcExecutorContext(
     val connection: Connection,
+    val selections: List<Selection<*>>,
     val sql: String,
     val variables: List<Any>
 )
@@ -18,7 +20,7 @@ val defaultR2dbcExecutor: R2dbcExecutor = {
     defaultImpl()
 }
 
-private suspend fun R2dbcExecutorContext.defaultImpl(): List<Any> {
+private suspend fun R2dbcExecutorContext.defaultImpl(): List<Any?> {
     val statement = connection.createStatement(sql)
     for (index in variables.indices) {
         val variable = variables[index]
@@ -31,10 +33,13 @@ private suspend fun R2dbcExecutorContext.defaultImpl(): List<Any> {
     return statement
         .execute()
         .awaitSingle()
-        .map { row, _ -> row }
+        .map { row, _ ->
+            R2dbcResultMapper(row).map(selections)
+                ?: Null // Why "asFlow" requires "T: Any"?
+        }
         .asFlow()
         .toList()
-        .also {
-            println(it)
-        }
+        .map { if (it === Null) null else it }
 }
+
+object Null

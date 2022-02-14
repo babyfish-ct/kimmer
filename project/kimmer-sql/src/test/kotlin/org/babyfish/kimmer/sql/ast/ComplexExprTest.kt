@@ -4,55 +4,55 @@ import org.babyfish.kimmer.sql.ast.common.AbstractTest
 import org.babyfish.kimmer.sql.ast.model.*
 import kotlin.test.Test
 import java.math.BigDecimal
+import kotlin.test.expect
 
 class ComplexExprTest: AbstractTest() {
 
     @Test
     fun testSqlExpression() {
-        testQuery(
-            Book::class,
-            """select 
+        sqlClient.createQuery(Book::class) {
+            select(
+                table,
+                sql(Int::class, "rank() over(order by %e desc)") {
+                    expressions(table.price)
+                },
+                sql(Int::class, "rank() over(partition by %e order by %e desc)") {
+                    expressions(table.store.id, table.price)
+                }
+            )
+        }.executeAndExpect {
+            sql {
+                """select 
                     |tb_1_.ID, 
                     |tb_1_.EDITION, 
                     |tb_1_.NAME, 
                     |tb_1_.PRICE, 
                     |tb_1_.STORE_ID, 
                     |rank() over(
-                       |order by tb_1_.PRICE desc
+                        |order by tb_1_.PRICE desc
                     |), 
                     |rank() over(
                         |partition by tb_1_.STORE_ID 
                         |order by tb_1_.PRICE desc
                     |) 
-                |from BOOK as tb_1_""".trimMargin().toOneLine()
-        ) {
-            select(
-                table,
-                sql(BigDecimal::class, "rank() over(order by %e desc)") {
-                    expressions(table.price)
-                },
-                sql(BigDecimal::class, "rank() over(partition by %e order by %e desc)") {
-                    expressions(table.store.id, table.price)
-                }
-            )
+                |from BOOK as tb_1_""".trimMargin()
+            }
+            variables()
+            rows {
+                expect(12) { size }
+                val rank1 = first { it.first.price.toInt() == 88 }
+                val rank12 = first { it.first.price.toInt() == 45 }
+                expect(1) { rank1.second }
+                expect(1) { rank1.third }
+                expect(12) { rank12.second }
+                expect(9) { rank12.third }
+            }
         }
     }
 
     @Test
     fun testTupleInList() {
-        testQuery(
-            Book::class,
-            """select 
-                |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
-            |from BOOK as tb_1_ 
-            |where (tb_1_.NAME, tb_1_.EDITION) in (
-                |($1, $2), ($3, $4)
-            |)""".trimMargin().toOneLine(),
-            "Learning GraphQL",
-            3,
-            "Effective TypeScript",
-            2
-        ) {
+        sqlClient.createQuery(Book::class) {
             where(
                 tuple(table.name, table.edition) valueIn listOf(
                     "Learning GraphQL" to 3,
@@ -60,14 +60,32 @@ class ComplexExprTest: AbstractTest() {
                 )
             )
             select(table)
+        }.executeAndExpect {
+            sql {
+                """select 
+                |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+                    |from BOOK as tb_1_ 
+                    |where (tb_1_.NAME, tb_1_.EDITION) in (
+                    |($1, $2), ($3, $4)
+                |)""".trimMargin()
+            }
+            variables("Learning GraphQL", 3, "Effective TypeScript", 2)
         }
     }
 
     @Test
     fun testSimpleCase() {
-        testQuery(
-            BookStore::class,
-            """select 
+        sqlClient.createQuery(BookStore::class) {
+            select(
+                table,
+                case(table.name)
+                    .match("O'RELLIY", "Classic publishing house")
+                    .match("MANNING", "Classic publishing house")
+                    .otherwise("Other publishing house")
+            )
+        }.executeAndExpect {
+            sql {
+                """select 
                 |tb_1_.ID, 
                 |tb_1_.NAME, 
                 |tb_1_.WEBSITE, 
@@ -76,28 +94,31 @@ class ComplexExprTest: AbstractTest() {
                     |when $3 then $4 
                     |else $5 
                 |end 
-                |from BOOK_STORE as tb_1_""".trimMargin().toOneLine(),
-            "O'RELLIY",
-            "Classic publishing house",
-            "MANNING",
-            "Classic publishing house",
-            "Other publishing house"
-        ) {
-            select(
-                table,
-                case(table.name)
-                    .match("O'RELLIY", "Classic publishing house")
-                    .match("MANNING", "Classic publishing house")
-                    .otherwise("Other publishing house")
+                |from BOOK_STORE as tb_1_""".trimMargin()
+            }
+            variables(
+                "O'RELLIY",
+                "Classic publishing house",
+                "MANNING",
+                "Classic publishing house",
+                "Other publishing house"
             )
         }
     }
 
     @Test
     fun testCase() {
-        testQuery(
-            Book::class,
-            """select 
+        sqlClient.createQuery(Book::class) {
+            select(
+                table,
+                case()
+                    .match(table.price gt BigDecimal(200), "Expensive")
+                    .match(table.price lt BigDecimal(100), "Cheap")
+                    .otherwise("Fitting")
+            )
+        }.executeAndExpect {
+            sql {
+                """select 
                 |tb_1_.ID, 
                 |tb_1_.EDITION, 
                 |tb_1_.NAME, 
@@ -108,19 +129,14 @@ class ComplexExprTest: AbstractTest() {
                     |when tb_1_.PRICE < $3 then $4 
                     |else $5 
                 |end 
-                |from BOOK as tb_1_""".trimMargin().toOneLine(),
-            BigDecimal(200),
-            "Expensive",
-            BigDecimal(100),
-            "Cheap",
-            "Fitting"
-        ) {
-            select(
-                table,
-                case()
-                    .match(table.price gt BigDecimal(200), "Expensive")
-                    .match(table.price lt BigDecimal(100), "Cheap")
-                    .otherwise("Fitting")
+                |from BOOK as tb_1_""".trimMargin()
+            }
+            variables(
+                BigDecimal(200),
+                "Expensive",
+                BigDecimal(100),
+                "Cheap",
+                "Fitting"
             )
         }
     }

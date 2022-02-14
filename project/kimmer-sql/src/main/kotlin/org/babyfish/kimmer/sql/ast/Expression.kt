@@ -3,9 +3,9 @@ package org.babyfish.kimmer.sql.ast
 import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
 import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
-import org.babyfish.kimmer.sql.ast.table.TableReferenceElement
-import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
-import org.babyfish.kimmer.sql.ast.table.accept
+import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceElement
+import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.table.impl.accept
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.MiddleTable

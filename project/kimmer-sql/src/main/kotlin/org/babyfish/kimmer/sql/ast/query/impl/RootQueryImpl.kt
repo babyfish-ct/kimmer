@@ -4,12 +4,9 @@ import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.query.MutableRootQuery
 import org.babyfish.kimmer.sql.ast.query.SelectableTypedRootQuery
-import org.babyfish.kimmer.sql.ast.query.TypedRootQuery
-import org.babyfish.kimmer.sql.ast.query.selectable.RootSelectable
-import org.babyfish.kimmer.sql.ast.table.TableAliasAllocator
+import org.babyfish.kimmer.sql.ast.table.impl.TableAliasAllocator
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import kotlin.reflect.KClass
-import kotlin.reflect.KProperty1
 
 internal class RootQueryImpl<E, ID>(
     sqlClient: SqlClientImpl,

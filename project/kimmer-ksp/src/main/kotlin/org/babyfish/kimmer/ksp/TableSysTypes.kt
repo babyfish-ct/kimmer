@@ -9,11 +9,6 @@ class TableSysTypes(
     resolver: Resolver
 ): SysTypes(immutableType, resolver) {
 
-    val entityType: KSType = resolver
-        .getClassDeclarationByName("$KIMMER_PACKAGE.sql.Entity")
-        ?.asStarProjectedType()
-        ?: error("Internal bug")
-
     val tableType: KSType = resolver
         .getClassDeclarationByName("$KIMMER_SQL_AST_TABLE_PACKAGE.Table")
         ?.asStarProjectedType()

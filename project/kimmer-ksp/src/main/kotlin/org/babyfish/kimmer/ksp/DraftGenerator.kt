@@ -14,6 +14,8 @@ class DraftGenerator(
     private val file: KSFile,
     private val modelClassDeclarations: List<KSClassDeclaration>
 ) {
+    private val entityIDTypeNameProvider = EntityIDTypeNameProvider()
+
     fun generate(files: List<KSFile>) {
         val draftFileName =
             file.fileName.let {
@@ -70,18 +72,34 @@ class DraftGenerator(
                 addSuperinterface(classDeclaration.asClassName())
                 for (superType in classDeclaration.superTypes) {
                     val st = superType.resolve()
-                    if (sysTypes.immutableType.isAssignableFrom(st) && st.arguments.isEmpty()) {
-                        if (st === sysTypes.immutableType) {
-                            addSuperinterface(
-                                ClassName(KIMMER_PACKAGE, "Draft")
-                                    .parameterizedBy(TypeVariableName("T"))
-                            )
-                        } else {
-                            addSuperinterface(
-                                (st.declaration as KSClassDeclaration).asClassName {
-                                    "$it$DRAFT_SUFFIX"
-                                }.parameterizedBy(TypeVariableName("T"))
-                            )
+                    if (sysTypes.immutableType.isAssignableFrom(st)) {
+                        when {
+                            st == sysTypes.immutableType ->
+                                addSuperinterface(
+                                    ClassName(KIMMER_PACKAGE, "Draft")
+                                        .parameterizedBy(TypeVariableName("T"))
+                                )
+                            st.starProjection() == sysTypes.entityType ->
+                                addSuperinterface(
+                                    ClassName("$KIMMER_PACKAGE.sql", "EntityDraft")
+                                        .parameterizedBy(
+                                            TypeVariableName("T"),
+                                            entityIDTypeNameProvider[classDeclaration]
+                                        )
+                                )
+                            else ->
+                                if (st.arguments.isNotEmpty()) {
+                                    throw GeneratorException(
+                                        "Illegal immutable type '${classDeclaration.qualifiedName!!.asString()}', " +
+                                            "its super interface '${st.declaration.qualifiedName!!.asString()}' has type arguments"
+                                    )
+                                } else {
+                                    addSuperinterface(
+                                        (st.declaration as KSClassDeclaration).asClassName {
+                                            "$it$DRAFT_SUFFIX"
+                                        }.parameterizedBy(TypeVariableName("T"))
+                                    )
+                                }
                         }
                     }
                 }

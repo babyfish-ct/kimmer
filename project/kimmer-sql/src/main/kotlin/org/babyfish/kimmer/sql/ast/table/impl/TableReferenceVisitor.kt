@@ -1,4 +1,4 @@
-package org.babyfish.kimmer.sql.ast.table
+package org.babyfish.kimmer.sql.ast.table.impl
 
 import org.babyfish.kimmer.sql.ast.Expression
 import org.babyfish.kimmer.sql.ast.NonNullExpression

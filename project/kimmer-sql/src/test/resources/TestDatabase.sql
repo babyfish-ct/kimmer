@@ -1,3 +1,8 @@
+drop table book_author_mapping if exists;
+drop table book if exists;
+drop table author if exists;
+drop table book_store if exists;
+
 create table book_store(
     id uuid not null,
     name varchar(50) not null,
@@ -17,7 +22,7 @@ create table book(
     name varchar(50) not null,
     edition integer not null,
     price numeric(10, 2) not null,
-    store_id char(36)
+    store_id uuid
 );
 alter table book
     add constraint pk_book

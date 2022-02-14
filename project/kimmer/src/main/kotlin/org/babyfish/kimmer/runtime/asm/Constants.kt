@@ -2,6 +2,7 @@ package org.babyfish.kimmer.runtime.asm
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.babyfish.kimmer.*
+import org.babyfish.kimmer.graphql.Connection
 import org.babyfish.kimmer.meta.ImmutableType
 import org.babyfish.kimmer.runtime.AsyncDraftContext
 import org.babyfish.kimmer.runtime.DraftContext
@@ -46,4 +47,8 @@ internal val OBJECT_MAPPER_INTERNAL_NAME = Type.getInternalName(ObjectMapper::cl
 internal val OBJECT_MAPPER_DESCRIPTOR = Type.getDescriptor(ObjectMapper::class.java)
 
 internal val CRE_INTERNAL_NAME = Type.getInternalName(CircularReferenceException::class.java)
+
+internal val COMPARABLE_DESCRIPTOR = Type.getDescriptor(Comparable::class.java)
+
+internal val CONNECTION_INTERNAL_NAME = Type.getInternalName(Connection::class.java)
 

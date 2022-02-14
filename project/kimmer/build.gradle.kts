@@ -13,8 +13,9 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:1.6.0")
 
     implementation("org.springframework.boot:spring-boot-autoconfigure:2.6.2")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
+
+    api("com.fasterxml.jackson.core:jackson-databind:2.13.1")
+    api("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
 
     testImplementation(kotlin("test"))
 

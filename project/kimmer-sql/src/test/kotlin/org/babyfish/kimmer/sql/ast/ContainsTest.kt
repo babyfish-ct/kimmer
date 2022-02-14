@@ -10,85 +10,85 @@ class ContainsTest: AbstractTest() {
 
     @Test
     fun testOneToMany() {
-        testQuery(
-            BookStore::class,
-            """select 1 from BOOK_STORE as tb_1_ 
-                |where tb_1_.ID in (
-                    |select STORE_ID from BOOK where ID in ($1, $2)
-                |)""".trimMargin().toOneLine(),
-            learningGraphQLId1,
-            learningGraphQLId2
-        ) {
+        sqlClient.createQuery(BookStore::class) {
             where(table.listContains(BookStore::books, listOf(learningGraphQLId1, learningGraphQLId2)))
             select(constant(1))
+        }.executeAndExpect {
+            sql {
+                """select 1 from BOOK_STORE as tb_1_ 
+                |where tb_1_.ID in (
+                    |select STORE_ID from BOOK where ID in ($1, $2)
+                |)""".trimMargin()
+            }
+            variables(learningGraphQLId1, learningGraphQLId2)
         }
     }
 
     @Test
     fun testNormalManyToManyByNormalApi() {
-        testQuery(
-            Book::class,
-            """select 1 from BOOK as tb_1_ where 
+        sqlClient.createQuery(Book::class) {
+            where(table.listContains(Book::authors, listOf(alexId, danId)))
+            select(constant(1))
+        }.executeAndExpect {
+            sql {
+                """select 1 from BOOK as tb_1_ where 
                 |tb_1_.ID in (
                     |select BOOK_ID from BOOK_AUTHOR_MAPPING 
                     |where AUTHOR_ID in ($1, $2)
-                |)""".trimMargin().toOneLine(),
-            alexId,
-            danId
-        ) {
-            where(table.listContains(Book::authors, listOf(alexId, danId)))
-            select(constant(1))
+                |)""".trimMargin()
+            }
+            variables(alexId, danId)
         }
     }
 
     @Test
     fun testInverseManyToManyByNormalApi() {
-        testQuery(
-            Author::class,
-            """select 1 from AUTHOR as tb_1_ 
+        sqlClient.createQuery(Author::class) {
+            where(table.listContains(Author::books, listOf(learningGraphQLId1, learningGraphQLId2)))
+            select(constant(1))
+        }.executeAndExpect {
+            sql {
+                """select 1 from AUTHOR as tb_1_ 
                 |where tb_1_.ID in (
                     |select AUTHOR_ID from BOOK_AUTHOR_MAPPING 
                     |where BOOK_ID in ($1, $2)
-                |)""".trimMargin().trimMargin().toOneLine(),
-            learningGraphQLId1,
-            learningGraphQLId2
-        ) {
-            where(table.listContains(Author::books, listOf(learningGraphQLId1, learningGraphQLId2)))
-            select(constant(1))
+                |)""".trimMargin()
+            }
+            variables(learningGraphQLId1, learningGraphQLId2)
         }
     }
 
     @Test
     fun testNormalManyToManyByInverseApi() {
-        testQuery(
-            Book::class,
-            """select 1 from BOOK as tb_1_ where 
-                |tb_1_.ID in (
-                    |select BOOK_ID from BOOK_AUTHOR_MAPPING 
-                    |where AUTHOR_ID in ($1, $2)
-                |)""".trimMargin().toOneLine(),
-            alexId,
-            danId
-        ) {
+        sqlClient.createQuery(Book::class) {
             where(table.`←listContains`(Author::books, listOf(alexId, danId)))
             select(constant(1))
+        }.executeAndExpect {
+            sql {
+                """select 1 from BOOK as tb_1_ 
+                    |where tb_1_.ID in (
+                    |select BOOK_ID from BOOK_AUTHOR_MAPPING 
+                    |where AUTHOR_ID in ($1, $2)
+                |)""".trimMargin()
+            }
+            variables(alexId, danId)
         }
     }
 
     @Test
     fun testInverseManyToManyByInverseApi() {
-        testQuery(
-            Author::class,
-            """select 1 from AUTHOR as tb_1_ 
+        sqlClient.createQuery(Author::class) {
+            where(table.`←listContains`(Book::authors, listOf(learningGraphQLId1, learningGraphQLId2)))
+            select(constant(1))
+        }.executeAndExpect {
+            sql {
+                """select 1 from AUTHOR as tb_1_ 
                 |where tb_1_.ID in (
                     |select AUTHOR_ID from BOOK_AUTHOR_MAPPING 
                     |where BOOK_ID in ($1, $2)
-                |)""".trimMargin().toOneLine(),
-            learningGraphQLId1,
-            learningGraphQLId2
-        ) {
-            where(table.`←listContains`(Book::authors, listOf(learningGraphQLId1, learningGraphQLId2)))
-            select(constant(1))
+                |)""".trimMargin()
+            }
+            variables(learningGraphQLId1, learningGraphQLId2)
         }
     }
 }

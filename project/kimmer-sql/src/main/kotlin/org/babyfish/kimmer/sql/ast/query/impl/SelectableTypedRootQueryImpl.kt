@@ -1,15 +1,16 @@
 package org.babyfish.kimmer.sql.ast.query.impl
 
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.ast.JdbcSqlBuilder
 import org.babyfish.kimmer.sql.ast.R2dbcSqlBuilder
 import org.babyfish.kimmer.sql.ast.Selection
 import org.babyfish.kimmer.sql.ast.SqlBuilder
-import org.babyfish.kimmer.sql.ast.query.MutableRootQuery
 import org.babyfish.kimmer.sql.ast.query.selectable.RootSelectable
 import org.babyfish.kimmer.sql.ast.query.SelectableTypedRootQuery
-import org.babyfish.kimmer.sql.ast.table.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.meta.EntityProp
+import org.babyfish.kimmer.sql.runtime.JdbcExecutorContext
 import org.babyfish.kimmer.sql.runtime.R2dbcExecutorContext
 
 internal class SelectableTypedRootQueryImpl<E, ID, R>(
@@ -62,14 +63,16 @@ internal class SelectableTypedRootQueryImpl<E, ID, R>(
         }
 
     override fun execute(con: java.sql.Connection): List<R> {
-        TODO("Not yet implemented")
+        val (sql, variables) = preExecute(JdbcSqlBuilder())
+        val executor = baseQuery.sqlClient.jdbcExecutor
+        return executor(JdbcExecutorContext(con, data.selections, sql, variables)) as List<R>
     }
 
     @Suppress("UNCHECKED_CAST")
     override suspend fun execute(con: io.r2dbc.spi.Connection): List<R> {
         val (sql, variables) = preExecute(R2dbcSqlBuilder())
         val executor = baseQuery.sqlClient.r2dbcExecutor
-        return executor(R2dbcExecutorContext(con, sql, variables)) as List<R>
+        return executor(R2dbcExecutorContext(con, data.selections, sql, variables)) as List<R>
     }
 
     private fun preExecute(builder: SqlBuilder): Pair<String, List<Any>> {

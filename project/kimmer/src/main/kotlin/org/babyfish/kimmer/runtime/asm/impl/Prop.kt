@@ -12,8 +12,10 @@ internal fun ClassVisitor.writeProp(prop: ImmutableProp, ownerInternalName: Stri
 
     val desc = Type.getDescriptor(prop.returnType.java)
     val loadedName = loadedName(prop)
-    val signature = prop.targetType?.takeIf { prop.isList }?.let {
-        "Ljava/util/List<${Type.getDescriptor(it.kotlinType.java)}>;"
+    val signature = when { // Jackson need it
+        prop.isList -> "Ljava/util/List<${Type.getDescriptor(prop.returnType.java)}>;"
+        prop.isConnection -> "L$CONNECTION_INTERNAL_NAME<${Type.getDescriptor(prop.returnType.java)}>;"
+        else -> null
     }
 
     writeField(

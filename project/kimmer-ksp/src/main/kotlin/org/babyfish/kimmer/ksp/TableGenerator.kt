@@ -1,6 +1,5 @@
 package org.babyfish.kimmer.ksp
 
-import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -17,6 +16,8 @@ class TableGenerator(
     private val modelClassDeclarations: List<KSClassDeclaration>,
     private val collectionJoinOnlyForSubQuery: Boolean
 ) {
+
+    private val entityIDTypeNameProvider =  EntityIDTypeNameProvider()
 
     fun generate(files: List<KSFile>) {
         val draftFileName =
@@ -49,20 +50,11 @@ class TableGenerator(
                             .build()
                     )
                     for (classDeclaration in modelClassDeclarations) {
-                        val idProp = classDeclaration.getAllProperties().first {
-                            it.simpleName.asString() == "id"
-                        }
                         val nonIdMap = classDeclaration.getAllProperties()
                             .filter { it.simpleName.asString() != "id" }
                             .associateBy({it}) {
                             PropMeta.of(it, sysTypes, true)
                         }
-                        addGetProps(
-                            classDeclaration,
-                            idProp,
-                            PropMeta.of(idProp, sysTypes, true),
-                            entityIDTypeNameProvider
-                        )
                         for ((prop, propMeta) in nonIdMap) {
                             if (propMeta.targetDeclaration === null) {
                                 addGetProps(classDeclaration, prop, propMeta, entityIDTypeNameProvider)
@@ -74,7 +66,6 @@ class TableGenerator(
                                     classDeclaration,
                                     prop,
                                     propMeta,
-                                    entityIDTypeNameProvider,
                                     true
                                 )
                                 if (!collectionJoinOnlyForSubQuery || propMeta.isReference) {
@@ -82,7 +73,6 @@ class TableGenerator(
                                         classDeclaration,
                                         prop,
                                         propMeta,
-                                        entityIDTypeNameProvider,
                                         false
                                     )
                                 }
@@ -159,7 +149,6 @@ class TableGenerator(
         classDeclaration: KSClassDeclaration,
         prop: KSPropertyDeclaration,
         propMeta: PropMeta,
-        entityIDTypeNameProvider: EntityIDTypeNameProvider,
         forSubQuery: Boolean
     ) {
         val selfTypeName = classDeclaration.asClassName()

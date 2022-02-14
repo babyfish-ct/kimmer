@@ -9,17 +9,7 @@ class SubQueryTest: AbstractTest() {
 
     @Test
     fun testColumnInSubQuery() {
-        testQuery(
-            Book::class,
-            """select 
-                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
-                |from BOOK as tb_1_ where tb_1_.ID in (
-                    |select tb_3_.BOOK_ID from AUTHOR as tb_2_ 
-                    |inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.AUTHOR_ID 
-                    |where tb_2_.FIRST_NAME = $1
-                |)""".trimMargin().toOneLine(),
-            "Alex"
-        ) {
+        sqlClient.createQuery(Book::class) {
             where(
                 table.id valueIn subQuery(Author::class) {
                     where(table.firstName eq "Alex")
@@ -27,14 +17,33 @@ class SubQueryTest: AbstractTest() {
                 }
             )
             select(table)
+        }.executeAndExpect {
+            sql {
+                """select 
+                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+                |from BOOK as tb_1_ where tb_1_.ID in (
+                    |select tb_3_.BOOK_ID from AUTHOR as tb_2_ 
+                    |inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.AUTHOR_ID 
+                    |where tb_2_.FIRST_NAME = $1
+                |)""".trimMargin()
+            }
+            variables("Alex")
         }
     }
 
     @Test
     fun testTwoColumnsInSubQuery() {
-        testQuery(
-            Book::class,
-            """select 
+        sqlClient.createQuery(Book::class) {
+            where(
+                tuple(table.name, table.price) valueIn subQuery(Book::class) {
+                    groupBy(table.name)
+                    select(table.name, table.price.max().`!`)
+                }
+            )
+            select(table)
+        }.executeAndExpect {
+            sql {
+                """select 
                     |tb_1_.ID, 
                     |tb_1_.EDITION, 
                     |tb_1_.NAME, 
@@ -50,35 +59,15 @@ class SubQueryTest: AbstractTest() {
                         |max(tb_2_.PRICE) 
                     |from BOOK as tb_2_ 
                     |group by tb_2_.NAME
-                |)""".trimMargin().toOneLine()
-        ) {
-            where(
-                tuple(table.name, table.price) valueIn subQuery(Book::class) {
-                    groupBy(table.name)
-                    select(table.name, table.price.max().`!`)
-                }
-            )
-            select(table)
+                |)""".trimMargin()
+            }
+            variables()
         }
     }
 
     @Test
     fun testExists() {
-        testQuery(
-            Book::class,
-            """select 
-                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
-                |from BOOK as tb_1_ 
-                |where exists(
-                    |select 1 from AUTHOR as tb_2_ 
-                    |inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.AUTHOR_ID 
-                    |where 
-                        |tb_1_.ID = tb_3_.BOOK_ID 
-                    |and 
-                        |tb_2_.FIRST_NAME = $1
-                |)""".trimMargin().toOneLine(),
-            "Alex"
-        ) {
+        sqlClient.createQuery(Book::class) {
             where(
                 exists(untypedSubQuery(Author::class) {
                     where(
@@ -88,14 +77,9 @@ class SubQueryTest: AbstractTest() {
                 })
             )
             select(table)
-        }
-    }
-
-    @Test
-    fun testExistsWithTypedQuery() {
-        testQuery(
-            Book::class,
-            """select 
+        }.executeAndExpect {
+            sql {
+                """select 
                     |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
                 |from BOOK as tb_1_ 
                 |where exists(
@@ -105,9 +89,15 @@ class SubQueryTest: AbstractTest() {
                         |tb_1_.ID = tb_3_.BOOK_ID 
                     |and 
                         |tb_2_.FIRST_NAME = $1
-                |)""".trimMargin().toOneLine(),
-            "Alex"
-        ) {
+                |)""".trimMargin()
+            }
+            variables("Alex")
+        }
+    }
+
+    @Test
+    fun testExistsWithTypedQuery() {
+        sqlClient.createQuery(Book::class) {
             where(
                 exists(subQuery(Author::class) {
                     where(
@@ -118,33 +108,56 @@ class SubQueryTest: AbstractTest() {
                 })
             )
             select(table)
+        }.executeAndExpect {
+            sql {
+                """select 
+                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+                |from BOOK as tb_1_ 
+                |where exists(
+                    |select 1 from AUTHOR as tb_2_ 
+                    |inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.AUTHOR_ID 
+                    |where 
+                        |tb_1_.ID = tb_3_.BOOK_ID 
+                    |and 
+                        |tb_2_.FIRST_NAME = $1
+                |)""".trimMargin()
+            }
+            variables("Alex")
         }
     }
 
     @Test
     fun testSubQueryAsSimpleExpression() {
-        testQuery(
-            Book::class,
-            """select 
-                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
-                |from BOOK as tb_1_ 
-                |where tb_1_.PRICE > (
-                    |select coalesce(avg(tb_2_.PRICE), $1) from BOOK as tb_2_
-                |)""".trimMargin().toOneLine(),
-            BigDecimal.ZERO
-        ) {
+        sqlClient.createQuery(Book::class) {
             where(table.price gt subQuery(Book::class) {
                 select(coalesce(table.price.avg(), BigDecimal.ZERO))
             })
             select(table)
+        }.executeAndExpect {
+            sql {
+                """select 
+                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+                |from BOOK as tb_1_ 
+                |where tb_1_.PRICE > (
+                    |select coalesce(avg(tb_2_.PRICE), $1) from BOOK as tb_2_
+                |)""".trimMargin()
+            }
+            variables(BigDecimal.ZERO)
         }
     }
 
     @Test
     fun testSubQueryAsSelectionOrderByClause() {
-        testQuery(
-            BookStore::class,
-            """select 
+        sqlClient.createQuery(BookStore::class) {
+            val subQuery = subQuery(Book::class) {
+                where(parentTable.id eq table.store.id)
+                select(coalesce(table.price.avg(), BigDecimal.ZERO))
+            }
+            orderBy(subQuery, true)
+            select(table, subQuery)
+        }.executeAndExpect {
+            sql {
+                """select 
                 |tb_1_.ID, 
                 |tb_1_.NAME, 
                 |tb_1_.WEBSITE, 
@@ -158,34 +171,15 @@ class SubQueryTest: AbstractTest() {
                     |select coalesce(avg(tb_2_.PRICE), $2) 
                     |from BOOK as tb_2_ 
                     |where tb_1_.ID = tb_2_.STORE_ID
-                |) desc""".trimMargin().toOneLine(),
-            BigDecimal.ZERO,
-            BigDecimal.ZERO
-        ) {
-            val subQuery = subQuery(Book::class) {
-                where(parentTable.id eq table.store.id)
-                select(coalesce(table.price.avg(), BigDecimal.ZERO))
+                |) desc""".trimMargin()
             }
-            orderBy(subQuery, true)
-            select(table, subQuery)
+            variables(BigDecimal.ZERO, BigDecimal.ZERO)
         }
     }
 
     @Test
     fun testSubQueryWithAny() {
-        testQuery(
-            Book::class,
-            """select 
-                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
-                |from BOOK as tb_1_ where tb_1_.ID = any(
-                    |select tb_3_.BOOK_ID 
-                    |from AUTHOR as tb_2_ 
-                    |inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.AUTHOR_ID 
-                    |where tb_2_.FIRST_NAME in ($1, $2)
-                |)""".trimMargin().toOneLine(),
-            "Alex",
-            "Bill"
-        ) {
+       sqlClient.createQuery(Book::class) {
             where(
                 table.id eq any(
                         subQuery(Author::class) {
@@ -195,24 +189,24 @@ class SubQueryTest: AbstractTest() {
                 )
             )
             select(table)
-        }
-    }
-
-    @Test
-    fun testSubQueryWithSome() {
-        testQuery(
-            Book::class,
-            """select 
+        }.executeAndExpect {
+            sql {
+                """select 
                     |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
-                |from BOOK as tb_1_ where tb_1_.ID = some(
+                |from BOOK as tb_1_ where tb_1_.ID = any(
                     |select tb_3_.BOOK_ID 
                     |from AUTHOR as tb_2_ 
                     |inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.AUTHOR_ID 
                     |where tb_2_.FIRST_NAME in ($1, $2)
-                |)""".trimMargin().toOneLine(),
-            "Alex",
-            "Bill"
-        ) {
+                |)""".trimMargin()
+            }
+           variables("Alex", "Bill")
+       }
+    }
+
+    @Test
+    fun testSubQueryWithSome() {
+        sqlClient.createQuery(Book::class) {
             where(
                 table.id eq some(
                     subQuery(Author::class) {
@@ -222,24 +216,24 @@ class SubQueryTest: AbstractTest() {
                 )
             )
             select(table)
+        }.executeAndExpect {
+            sql {
+                """select 
+                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+                |from BOOK as tb_1_ where tb_1_.ID = some(
+                    |select tb_3_.BOOK_ID 
+                    |from AUTHOR as tb_2_ 
+                    |inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.AUTHOR_ID 
+                    |where tb_2_.FIRST_NAME in ($1, $2)
+                |)""".trimMargin()
+            }
+            variables("Alex", "Bill")
         }
     }
 
     @Test
     fun testSubQueryWithAll() {
-        testQuery(
-            Book::class,
-            """select 
-                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
-                |from BOOK as tb_1_ where tb_1_.ID = all(
-                    |select tb_3_.BOOK_ID 
-                    |from AUTHOR as tb_2_ 
-                    |inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.AUTHOR_ID 
-                    |where tb_2_.FIRST_NAME in ($1, $2)
-                |)""".trimMargin().toOneLine(),
-            "Alex",
-            "Bill"
-        ) {
+        sqlClient.createQuery(Book::class) {
             where(
                 table.id eq all(
                     subQuery(Author::class) {
@@ -249,6 +243,18 @@ class SubQueryTest: AbstractTest() {
                 )
             )
             select(table)
+        }.executeAndExpect {
+            sql {
+                """select 
+                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+                |from BOOK as tb_1_ where tb_1_.ID = all(
+                    |select tb_3_.BOOK_ID 
+                    |from AUTHOR as tb_2_ 
+                    |inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.AUTHOR_ID 
+                    |where tb_2_.FIRST_NAME in ($1, $2)
+                |)""".trimMargin()
+            }
+            variables("Alex", "Bill")
         }
     }
 }
