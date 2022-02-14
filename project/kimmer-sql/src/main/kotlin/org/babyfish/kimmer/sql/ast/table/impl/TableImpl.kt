@@ -268,7 +268,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 query.sqlClient.entityTypeMap[it]
             } ?: error("The declaring type of reversed prop is not mapped entity")
 
-    override fun <X: Entity<XID>, XID: Comparable<XID>> listContains(
+    override fun <X: Entity<XID>, XID: Comparable<XID>> listContainsAny(
         prop: KProperty1<E, List<X>>,
         xIds: Collection<XID>
     ): NonNullExpression<Boolean> {
@@ -276,10 +276,10 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         if (entityProp?.isList != true) {
             throw IllegalArgumentException("'$prop' is not list")
         }
-        return contains0(entityProp, xIds, false)
+        return containsAny0(entityProp, xIds, false)
     }
 
-    override fun <X: Entity<XID>, XID: Comparable<XID>> connectionContains(
+    override fun <X: Entity<XID>, XID: Comparable<XID>> connectionContainsAny(
         prop: KProperty1<E, Connection<X>>,
         xIds: Collection<XID>
     ): NonNullExpression<Boolean> {
@@ -287,10 +287,10 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         if (entityProp?.isConnection != true) {
             throw IllegalArgumentException("'$prop' is not connection")
         }
-        return contains0(entityProp, xIds, false)
+        return containsAny0(entityProp, xIds, false)
     }
 
-    override fun <X: Entity<XID>, XID: Comparable<XID>> `←listContains`(
+    override fun <X: Entity<XID>, XID: Comparable<XID>> `←listContainsAny`(
         prop: KProperty1<X, List<E>>,
         xIds: Collection<XID>
     ): NonNullExpression<Boolean> {
@@ -298,10 +298,10 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         if (entityProp?.isList != true) {
             throw IllegalArgumentException("'$prop' is not list")
         }
-        return contains0(entityProp, xIds, true)
+        return containsAny0(entityProp, xIds, true)
     }
 
-    override fun <X: Entity<XID>, XID: Comparable<XID>> `←connectionContains`(
+    override fun <X: Entity<XID>, XID: Comparable<XID>> `←connectionContainsAny`(
         prop: KProperty1<X, Connection<E>>,
         xIds: Collection<XID>
     ): NonNullExpression<Boolean> {
@@ -309,18 +309,73 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         if (entityProp?.isConnection != true) {
             throw IllegalArgumentException("'$prop' is not connection")
         }
-        return contains0(entityProp, xIds, true)
+        return containsAny0(entityProp, xIds, true)
     }
 
-    private fun contains0(
+    override fun <X : Entity<XID>, XID : Comparable<XID>> listContainsAll(
+        prop: KProperty1<E, List<X>>,
+        xIds: Collection<XID>
+    ): NonNullExpression<Boolean> {
+        val entityProp = entityType.props[prop.name]
+        if (entityProp?.isList != true) {
+            throw IllegalArgumentException("'$prop' is not list")
+        }
+        return containsAll0(entityProp, xIds, false)
+    }
+
+    override fun <X : Entity<XID>, XID : Comparable<XID>> connectionContainsAll(
+        prop: KProperty1<E, Connection<X>>,
+        xIds: Collection<XID>
+    ): NonNullExpression<Boolean> {
+        val entityProp = entityType.props[prop.name]
+        if (entityProp?.isConnection != true) {
+            throw IllegalArgumentException("'$prop' is not connection")
+        }
+        return containsAll0(entityProp, xIds, false)
+    }
+
+    override fun <X : Entity<XID>, XID : Comparable<XID>> `←listContainsAll`(
+        prop: KProperty1<X, List<E>>,
+        xIds: Collection<XID>
+    ): NonNullExpression<Boolean> {
+        val entityProp = reverseType(prop).props[prop.name]
+        if (entityProp?.isList != true) {
+            throw IllegalArgumentException("'$prop' is not list")
+        }
+        return containsAll0(entityProp, xIds, true)
+    }
+
+    override fun <X : Entity<XID>, XID : Comparable<XID>> `←connectionContainsAll`(
+        prop: KProperty1<X, Connection<E>>,
+        xIds: Collection<XID>
+    ): NonNullExpression<Boolean> {
+        val entityProp = reverseType(prop).props[prop.name]
+        if (entityProp?.isConnection != true) {
+            throw IllegalArgumentException("'$prop' is not connection")
+        }
+        return containsAll0(entityProp, xIds, true)
+    }
+
+    private fun containsAny0(
         prop: EntityProp,
         xIds: Collection<Any>,
         inverse: Boolean
     ): NonNullExpression<Boolean> =
         if (prop.mappedBy !== null) {
-            ContainsExpression(this, prop.mappedBy!!, xIds, !inverse)
+            ContainsExpression(this, prop.mappedBy!!, false, xIds, !inverse)
         } else {
-            ContainsExpression(this, prop, xIds, inverse)
+            ContainsExpression(this, prop, false, xIds, inverse)
+        }
+
+    private fun containsAll0(
+        prop: EntityProp,
+        xIds: Collection<Any>,
+        inverse: Boolean
+    ): NonNullExpression<Boolean> =
+        if (prop.mappedBy !== null) {
+            ContainsExpression(this, prop.mappedBy!!, true, xIds, !inverse)
+        } else {
+            ContainsExpression(this, prop, true, xIds, inverse)
         }
 
     override fun renderTo(builder: SqlBuilder) {

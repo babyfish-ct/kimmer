@@ -76,6 +76,13 @@ class TableGenerator(
                                         false
                                     )
                                 }
+                                if (!propMeta.isReference) {
+                                    addContainsFuns(
+                                        classDeclaration,
+                                        prop,
+                                        propMeta
+                                    )
+                                }
                             }
                         }
                     }
@@ -152,15 +159,6 @@ class TableGenerator(
         forSubQuery: Boolean
     ) {
         val selfTypeName = classDeclaration.asClassName()
-        val nonNullReceiverTypeName =
-            if (forSubQuery) {
-                sysTypes.nonNullSubQueryTableType
-            } else {
-                sysTypes.nonNullJoinableTableType
-            }.asClassName().parameterizedBy(
-                selfTypeName,
-                entityIDTypeNameProvider[classDeclaration]
-            )
         val receiverTypeName =
             if (forSubQuery) {
                 sysTypes.subQueryTableType
@@ -224,6 +222,47 @@ class TableGenerator(
                     )
                 }
                 .build()
+        )
+    }
+
+    private fun FileSpec.Builder.addContainsFuns(
+        classDeclaration: KSClassDeclaration,
+        prop: KSPropertyDeclaration,
+        propMeta: PropMeta
+    ) {
+        val selfTypeName = classDeclaration.asClassName()
+        val receiverTypeName =
+            sysTypes.joinableTableType
+            .asClassName().parameterizedBy(
+                selfTypeName,
+                entityIDTypeNameProvider[classDeclaration]
+            )
+        val returnTypeName =
+            ClassName("$KIMMER_SQL_AST_PACKAGE", "Expression")
+                .parameterizedBy(Boolean::class.asClassName())
+        val listTypeName =
+            List::class.asClassName().parameterizedBy(
+                entityIDTypeNameProvider[propMeta.targetDeclaration!!]
+            )
+        addFunction(
+            FunSpec.builder("${prop.simpleName.asString()} ∩").apply {
+                modifiers += KModifier.INFIX
+                receiver(receiverTypeName)
+                returns(returnTypeName)
+                addParameter(ParameterSpec.builder("targetIds", listTypeName).build())
+                val targetFunName = if (propMeta.isConnection) "connectionContainsAny" else "listContainsAny"
+                addCode("return $targetFunName(%T::%L, targetIds)", selfTypeName, prop.simpleName.asString())
+            }.build()
+        )
+        addFunction(
+            FunSpec.builder("${prop.simpleName.asString()} ∋").apply {
+                modifiers += KModifier.INFIX
+                receiver(receiverTypeName)
+                returns(returnTypeName)
+                addParameter(ParameterSpec.builder("targetIds", listTypeName).build())
+                val targetFunName = if (propMeta.isConnection) "connectionContainsAll" else "listContainsAll"
+                addCode("return $targetFunName(%T::%L, targetIds)", selfTypeName, prop.simpleName.asString())
+            }.build()
         )
     }
 }

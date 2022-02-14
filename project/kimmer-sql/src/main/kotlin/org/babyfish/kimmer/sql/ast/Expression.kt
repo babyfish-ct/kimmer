@@ -537,8 +537,9 @@ internal class AggregationExpression<T: Any>(
 }
 
 internal class ContainsExpression(
-    private val table: TableImpl<*, *>,
+    table: TableImpl<*, *>,
     prop: EntityProp,
+    private val all: Boolean,
     private val targetIds: Collection<Any>,
     inverse: Boolean
 ): AbstractExpression<Boolean>(Boolean::class.java) {
@@ -578,11 +579,12 @@ internal class ContainsExpression(
 
     override fun SqlBuilder.render() {
         if (targetIds.isEmpty()) {
-            sql("1 = 0")
+            sql(if (all) "1=1" else "1 = 0")
             return
         }
         render(thisIdExpression)
-        sql(" in (select $thisColumnName from $tableName where $targetColumnName in (")
+        val prefix = if (all) "all" else "any"
+        sql(" = $prefix(select $thisColumnName from $tableName where $targetColumnName in (")
         var sp: String? = null
         for (targetId in targetIds) {
             if (sp === null) {

@@ -58,22 +58,42 @@ interface JoinableTable<E: Entity<ID>, ID: Comparable<ID>> : Table<E, ID> {
         prop: KProperty1<X, Connection<E>>
     ): JoinableTable<X, XID>
 
-    fun <X: Entity<XID>, XID: Comparable<XID>> listContains(
+    fun <X: Entity<XID>, XID: Comparable<XID>> listContainsAny(
         prop: KProperty1<E, List<X>>,
         xIds: Collection<XID>
     ): NonNullExpression<Boolean>
 
-    fun <X: Entity<XID>, XID: Comparable<XID>> connectionContains(
+    fun <X: Entity<XID>, XID: Comparable<XID>> connectionContainsAny(
         prop: KProperty1<E, Connection<X>>,
         xIds: Collection<XID>
     ): NonNullExpression<Boolean>
 
-    fun <X: Entity<XID>, XID: Comparable<XID>> `←listContains`(
+    fun <X: Entity<XID>, XID: Comparable<XID>> listContainsAll(
+        prop: KProperty1<E, List<X>>,
+        xIds: Collection<XID>
+    ): NonNullExpression<Boolean>
+
+    fun <X: Entity<XID>, XID: Comparable<XID>> connectionContainsAll(
+        prop: KProperty1<E, Connection<X>>,
+        xIds: Collection<XID>
+    ): NonNullExpression<Boolean>
+
+    fun <X: Entity<XID>, XID: Comparable<XID>> `←listContainsAny`(
         prop: KProperty1<X, List<E>>,
         xIds: Collection<XID>
     ): NonNullExpression<Boolean>
 
-    fun <X: Entity<XID>, XID: Comparable<XID>> `←connectionContains`(
+    fun <X: Entity<XID>, XID: Comparable<XID>> `←connectionContainsAny`(
+        prop: KProperty1<X, Connection<E>>,
+        xIds: Collection<XID>
+    ): NonNullExpression<Boolean>
+
+    fun <X: Entity<XID>, XID: Comparable<XID>> `←listContainsAll`(
+        prop: KProperty1<X, List<E>>,
+        xIds: Collection<XID>
+    ): NonNullExpression<Boolean>
+
+    fun <X: Entity<XID>, XID: Comparable<XID>> `←connectionContainsAll`(
         prop: KProperty1<X, Connection<E>>,
         xIds: Collection<XID>
     ): NonNullExpression<Boolean>
