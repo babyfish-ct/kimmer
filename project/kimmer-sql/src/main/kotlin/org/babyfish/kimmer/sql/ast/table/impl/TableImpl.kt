@@ -67,6 +67,10 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             outerJoin
         )
 
+    @Suppress("UNCHECKED_CAST")
+    override val `?`: Selection<E?>
+        get() = this as Selection<E?>
+
     override val id: NonNullExpression<ID>
         get() =
             PropExpression<ID>(this, entityType.idProp).`!`
