@@ -67,13 +67,15 @@ internal class EntityTypeImpl(
 
     override val starProps: Map<String, EntityProp> by lazy {
         // select * from table
-        props
-            .values
-            .filter {
-                // Ignore middle table because there are expensive
-                it.storage is Column || it.storage is Formula<*, *, *>
-            }
-            .associateBy { it.name }
+        mutableMapOf(idProp.name to idProp).also { map -> // mutableMapOf() is ordered, so id is first column
+            props
+                .values
+                .filter {
+                    // Ignore middle table because there are expensive
+                    !it.isId && (it.storage is Column || it.storage is Formula<*, *, *>)
+                }
+                .associateByTo(map) { it.name }
+        }
     }
 
     fun resolve(builder: EntityMappingBuilderImpl, phase: ResolvingPhase) {

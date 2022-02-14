@@ -12,8 +12,8 @@ class ComplexExprTest: AbstractTest() {
         testQuery(
             Book::class,
             """select 
-                    |tb_1_.EDITION, 
                     |tb_1_.ID, 
+                    |tb_1_.EDITION, 
                     |tb_1_.NAME, 
                     |tb_1_.PRICE, 
                     |tb_1_.STORE_ID, 
@@ -43,7 +43,7 @@ class ComplexExprTest: AbstractTest() {
         testQuery(
             Book::class,
             """select 
-                |tb_1_.EDITION, tb_1_.ID, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+                |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
             |from BOOK as tb_1_ 
             |where (tb_1_.NAME, tb_1_.EDITION) in (
                 |($1, $2), ($3, $4)
@@ -98,8 +98,8 @@ class ComplexExprTest: AbstractTest() {
         testQuery(
             Book::class,
             """select 
-                |tb_1_.EDITION, 
                 |tb_1_.ID, 
+                |tb_1_.EDITION, 
                 |tb_1_.NAME, 
                 |tb_1_.PRICE, 
                 |tb_1_.STORE_ID, 

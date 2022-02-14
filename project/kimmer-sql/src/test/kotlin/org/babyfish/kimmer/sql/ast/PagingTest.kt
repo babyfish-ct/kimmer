@@ -31,7 +31,7 @@ class PagingTest: AbstractTest() {
         ) { sql }
 
         execute(query.limit(10, 20))
-        expect("""select tb_1_.EDITION, tb_1_.ID, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+        expect("""select tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
             |from BOOK as tb_1_ 
             |left join BOOK_STORE as tb_2_ on tb_1_.STORE_ID = tb_2_.ID 
             |where tb_1_.PRICE between $1 and $2 
@@ -64,7 +64,7 @@ class PagingTest: AbstractTest() {
         ) { sql }
 
         execute(query.limit(10, 20))
-        expect("""select tb_1_.EDITION, tb_1_.ID, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+        expect("""select tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
             |from BOOK as tb_1_ 
             |inner join BOOK_STORE as tb_2_ on tb_1_.STORE_ID = tb_2_.ID 
             |where tb_1_.PRICE between $1 and $2 

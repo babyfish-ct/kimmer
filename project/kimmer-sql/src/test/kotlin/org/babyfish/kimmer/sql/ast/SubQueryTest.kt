@@ -12,7 +12,7 @@ class SubQueryTest: AbstractTest() {
         testQuery(
             Book::class,
             """select 
-                    |tb_1_.EDITION, tb_1_.ID, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
                 |from BOOK as tb_1_ where tb_1_.ID in (
                     |select tb_3_.BOOK_ID from AUTHOR as tb_2_ 
                     |inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.AUTHOR_ID 
@@ -35,8 +35,8 @@ class SubQueryTest: AbstractTest() {
         testQuery(
             Book::class,
             """select 
-                    |tb_1_.EDITION, 
                     |tb_1_.ID, 
+                    |tb_1_.EDITION, 
                     |tb_1_.NAME, 
                     |tb_1_.PRICE, 
                     |tb_1_.STORE_ID 
@@ -67,7 +67,7 @@ class SubQueryTest: AbstractTest() {
         testQuery(
             Book::class,
             """select 
-                    |tb_1_.EDITION, tb_1_.ID, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
                 |from BOOK as tb_1_ 
                 |where exists(
                     |select 1 from AUTHOR as tb_2_ 
@@ -96,7 +96,7 @@ class SubQueryTest: AbstractTest() {
         testQuery(
             Book::class,
             """select 
-                    |tb_1_.EDITION, tb_1_.ID, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
                 |from BOOK as tb_1_ 
                 |where exists(
                     |select 1 from AUTHOR as tb_2_ 
@@ -126,7 +126,7 @@ class SubQueryTest: AbstractTest() {
         testQuery(
             Book::class,
             """select 
-                    |tb_1_.EDITION, tb_1_.ID, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
                 |from BOOK as tb_1_ 
                 |where tb_1_.PRICE > (
                     |select coalesce(avg(tb_2_.PRICE), $1) from BOOK as tb_2_
@@ -176,7 +176,7 @@ class SubQueryTest: AbstractTest() {
         testQuery(
             Book::class,
             """select 
-                    |tb_1_.EDITION, tb_1_.ID, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
                 |from BOOK as tb_1_ where tb_1_.ID = any(
                     |select tb_3_.BOOK_ID 
                     |from AUTHOR as tb_2_ 
@@ -203,7 +203,7 @@ class SubQueryTest: AbstractTest() {
         testQuery(
             Book::class,
             """select 
-                    |tb_1_.EDITION, tb_1_.ID, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
                 |from BOOK as tb_1_ where tb_1_.ID = some(
                     |select tb_3_.BOOK_ID 
                     |from AUTHOR as tb_2_ 
@@ -230,7 +230,7 @@ class SubQueryTest: AbstractTest() {
         testQuery(
             Book::class,
             """select 
-                    |tb_1_.EDITION, tb_1_.ID, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+                    |tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
                 |from BOOK as tb_1_ where tb_1_.ID = all(
                     |select tb_3_.BOOK_ID 
                     |from AUTHOR as tb_2_ 
