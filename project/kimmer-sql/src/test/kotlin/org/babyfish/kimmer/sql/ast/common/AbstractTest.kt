@@ -49,7 +49,7 @@ abstract class AbstractTest {
 
         inverseProp(Author::books, Book::authors)
         prop(Author::fullName, Formula.of<Author, UUID, String> {
-            concat(firstName, value("="), lastName)
+            concat(firstName, value(" "), lastName)
         })
     }
 
