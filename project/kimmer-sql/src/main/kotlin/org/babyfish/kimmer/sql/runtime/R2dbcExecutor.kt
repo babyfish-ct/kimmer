@@ -42,4 +42,4 @@ private suspend fun R2dbcExecutorContext.defaultImpl(): List<Any?> {
         .map { if (it === Null) null else it }
 }
 
-object Null
+private object Null

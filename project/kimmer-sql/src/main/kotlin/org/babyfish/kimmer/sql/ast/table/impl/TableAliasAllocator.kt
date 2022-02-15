@@ -1,7 +1,7 @@
 package org.babyfish.kimmer.sql.ast.table.impl
 
 @JvmInline
-value class TableAliasAllocator(
+internal value class TableAliasAllocator(
     private val idRef: IntArray = IntArray(1)
 ) {
     fun allocate(): String =

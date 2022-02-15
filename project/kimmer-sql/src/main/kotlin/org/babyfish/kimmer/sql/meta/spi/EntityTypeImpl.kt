@@ -1,4 +1,4 @@
-package org.babyfish.kimmer.sql.meta.impl
+package org.babyfish.kimmer.sql.meta.spi
 
 import org.babyfish.kimmer.meta.ImmutableType
 import org.babyfish.kimmer.sql.Entity
@@ -7,9 +7,12 @@ import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.Formula
+import org.babyfish.kimmer.sql.meta.impl.EntityMappingBuilderImpl
+import org.babyfish.kimmer.sql.meta.impl.ResolvingPhase
 import org.babyfish.kimmer.sql.spi.databaseIdentifier
 
-internal class EntityTypeImpl(
+open class EntityTypeImpl(
+    private val metaFactory: MetaFactory,
     override val immutableType: ImmutableType
 ): EntityType {
 
@@ -78,13 +81,14 @@ internal class EntityTypeImpl(
         }
     }
 
-    fun resolve(builder: EntityMappingBuilderImpl, phase: ResolvingPhase) {
+    internal fun resolve(builder: EntityMappingBuilderImpl, phase: ResolvingPhase) {
         if (shouldResolve(phase)) {
             when (phase) {
                 ResolvingPhase.SUPER_TYPE -> resolveSuperTypes(builder)
                 ResolvingPhase.DECLARED_PROPS -> resolveDeclaredProps(builder)
                 ResolvingPhase.PROPS -> resolveProps(builder)
                 ResolvingPhase.ID_PROP -> resolveIdProp()
+                ResolvingPhase.ON_INITIALIZE_SPI -> onInitialize()
                 else -> resolvePropDetail(builder, phase)
             }
         }
@@ -125,7 +129,7 @@ internal class EntityTypeImpl(
                             "but it is not mapped"
                     )
                 }
-                declaredProps[immutableProp.name] = EntityPropImpl(
+                declaredProps[immutableProp.name] = metaFactory.createEntityProp(
                     this,
                     immutableProp.kotlinProp
                 )
@@ -173,6 +177,8 @@ internal class EntityTypeImpl(
         _idProp = idProp
         return idProp
     }
+
+    protected open fun onInitialize() {}
 
     override fun toString(): String =
         immutableType.qualifiedName

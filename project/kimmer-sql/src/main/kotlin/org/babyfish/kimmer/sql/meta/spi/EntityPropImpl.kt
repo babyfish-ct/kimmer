@@ -1,4 +1,4 @@
-package org.babyfish.kimmer.sql.meta.impl
+package org.babyfish.kimmer.sql.meta.spi
 
 import org.babyfish.kimmer.meta.ImmutableProp
 import org.babyfish.kimmer.sql.Entity
@@ -9,12 +9,13 @@ import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.Formula
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import org.babyfish.kimmer.sql.meta.config.Storage
+import org.babyfish.kimmer.sql.meta.impl.EntityMappingBuilderImpl
+import org.babyfish.kimmer.sql.meta.impl.ResolvingPhase
 import org.babyfish.kimmer.sql.spi.databaseIdentifier
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
-import kotlin.time.Duration
 
-internal class EntityPropImpl(
+open class EntityPropImpl(
     override val declaringType: EntityType,
     kotlinProp: KProperty1<*, *>
 ): EntityProp {
@@ -84,11 +85,12 @@ internal class EntityPropImpl(
         _mappedBy = name
     }
 
-    fun resolve(builder: EntityMappingBuilderImpl, phase: ResolvingPhase) {
+    internal fun resolve(builder: EntityMappingBuilderImpl, phase: ResolvingPhase) {
         when (phase) {
             ResolvingPhase.PROP_TARGET -> resolveTarget(builder)
             ResolvingPhase.PROP_MAPPED_BY -> resolvedMappedBy(builder)
             ResolvingPhase.PROP_DEFAULT_COLUMN -> resolveDefaultColumn()
+            ResolvingPhase.ON_INITIALIZE_SPI -> onInitialize()
         }
     }
 
@@ -141,6 +143,7 @@ internal class EntityPropImpl(
         }
     }
 
+    protected open fun onInitialize() {}
 
     override fun toString(): String =
         kotlinProp.toString()

@@ -7,13 +7,16 @@ import org.babyfish.kimmer.meta.ImmutableType
 import org.babyfish.kimmer.sql.MappingException
 import org.babyfish.kimmer.sql.meta.EntityMappingBuilder
 import org.babyfish.kimmer.sql.meta.EntityType
-import org.babyfish.kimmer.sql.meta.config.Formula
-import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import org.babyfish.kimmer.sql.meta.config.Storage
+import org.babyfish.kimmer.sql.meta.spi.EntityPropImpl
+import org.babyfish.kimmer.sql.meta.spi.EntityTypeImpl
+import org.babyfish.kimmer.sql.meta.spi.MetaFactory
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
-internal class EntityMappingBuilderImpl: EntityMappingBuilder {
+internal class EntityMappingBuilderImpl(
+    private val metaFactory: MetaFactory
+): EntityMappingBuilder {
 
     private val entityTypeMap = mutableMapOf<ImmutableType, EntityTypeImpl>()
 
@@ -90,7 +93,7 @@ internal class EntityMappingBuilderImpl: EntityMappingBuilder {
                     "it can not be derived type of '${Connection::class.qualifiedName}'"
             )
         }
-        val entityType = EntityTypeImpl(immutableType)
+        val entityType = metaFactory.createEntityType(immutableType)
         entityTypeMap[immutableType] = entityType
         for (superType in immutableType.superTypes) {
             this[superType]
@@ -112,7 +115,7 @@ internal class EntityMappingBuilderImpl: EntityMappingBuilder {
         if (entityType.declaredProps.containsKey(prop.name)) {
             throw MappingException("Cannot map '$prop' because its already been mapped")
         }
-        val entityProp = EntityPropImpl(entityType, prop)
+        val entityProp = metaFactory.createEntityProp(entityType, prop)
         entityType.declaredProps[prop.name] = entityProp
         return entityProp
     }

@@ -2,7 +2,7 @@ package org.babyfish.kimmer.sql.ast.query.impl
 
 import org.babyfish.kimmer.sql.ast.Selection
 
-data class TypedQueryData(
+internal data class TypedQueryData(
     val selections: List<Selection<*>>,
     val distinct: Boolean = false,
     val limit: Int = Int.MAX_VALUE,
