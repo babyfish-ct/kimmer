@@ -13,10 +13,18 @@ interface Filterable<E: Entity<ID>, ID: Comparable<ID>> {
 
     fun where(vararg predicates: Expression<Boolean>?)
 
-    fun orderBy(expression: Expression<*>?, descending: Boolean = false)
+    fun orderBy(
+        expression: Expression<*>?,
+        mode: OrderMode = OrderMode.ASC,
+        nullMode: NullOrderMode = NullOrderMode.UNSPECIFIED
+    )
 
-    fun orderBy(prop: KProperty1<E, *>, descending: Boolean = false) {
-        orderBy(table.`get?`(prop), descending)
+    fun orderBy(
+        prop: KProperty1<E, *>,
+        mode: OrderMode = OrderMode.ASC,
+        nullMode: NullOrderMode = NullOrderMode.UNSPECIFIED
+    ) {
+        orderBy(table.`get?`(prop), mode, nullMode)
     }
 
     fun <X, XID, R: Any> subQuery(
@@ -30,4 +38,15 @@ interface Filterable<E: Entity<ID>, ID: Comparable<ID>> {
         block: MutableSubQuery<E, ID, X, XID>.() -> Unit
     ): MutableSubQuery<E, ID, X, XID>
     where X: Entity<XID>, XID: Comparable<XID>
+}
+
+enum class OrderMode {
+    ASC,
+    DESC
+}
+
+enum class NullOrderMode {
+    UNSPECIFIED,
+    NULLS_FIRST,
+    NULLS_LAST
 }

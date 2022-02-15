@@ -4,6 +4,7 @@ import org.babyfish.kimmer.sql.ast.Selection
 
 data class TypedQueryData(
     val selections: List<Selection<*>>,
+    val distinct: Boolean = false,
     val limit: Int = Int.MAX_VALUE,
     val offset: Int = 0,
     val withoutSortingAndPaging: Boolean = false

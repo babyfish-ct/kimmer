@@ -9,7 +9,7 @@ import kotlin.reflect.KClass
 
 internal abstract class SqlBuilder {
 
-    protected val builder = StringBuilder()
+    private val builder = StringBuilder()
 
     protected val variables = mutableListOf<Any>()
 
@@ -168,14 +168,14 @@ internal abstract class SqlBuilder {
     }
 
     fun build(): Pair<String, List<Any>> =
-        Pair(builder.toString(), variables.toList())
+        builder.toString() to variables
 }
 
 internal class JdbcSqlBuilder : SqlBuilder() {
 
     override fun singleVariable(value: Any) {
         variables += value
-        builder.append("?")
+        sql("?")
     }
 }
 
@@ -183,8 +183,8 @@ internal class R2dbcSqlBuilder: SqlBuilder() {
 
     override fun singleVariable(value: Any) {
         variables += value
-        builder.append("$")
-        builder.append(variables.size)
+        sql("$")
+        sql(variables.size.toString())
     }
 }
 

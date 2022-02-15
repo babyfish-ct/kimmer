@@ -11,6 +11,7 @@ import org.babyfish.kimmer.sql.ast.model.*
 import org.babyfish.kimmer.sql.ast.value
 import org.babyfish.kimmer.sql.meta.config.Formula
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
+import org.babyfish.kimmer.sql.runtime.Dialect
 import org.babyfish.kimmer.sql.runtime.defaultJdbcExecutor
 import org.babyfish.kimmer.sql.runtime.defaultR2dbcExecutor
 import org.babyfish.kimmer.sql.spi.createSqlClient
@@ -21,9 +22,11 @@ import kotlin.test.expect
 
 abstract class AbstractTest {
 
+    private val dynamicDialect = DynamicDialect()
+
     protected val sqlClient = createSqlClient(
+        dynamicDialect,
         jdbcExecutor = {
-            println("jdbc: $sql")
             var index = 0
             _sql = sql.replace(JDBC_PARAMETER_REGEX) {
                 "$${++index}" // replace jdbc '?' to '$1', '$2', ..., '$N'
@@ -47,7 +50,11 @@ abstract class AbstractTest {
         prop(Book::store)
         prop(
             Book::authors,
-            MiddleTable("BOOK_AUTHOR_MAPPING", "BOOK_ID", "AUTHOR_ID")
+            MiddleTable(
+                tableName = "BOOK_AUTHOR_MAPPING",
+                joinColumnName = "BOOK_ID",
+                targetJoinColumnName = "AUTHOR_ID"
+            )
         )
 
         inverseProp(Author::books, Book::authors)
@@ -109,10 +116,14 @@ abstract class AbstractTest {
             }
         }
 
-        @Suppress("UNCHECK_CAST")
+        @Suppress("UNCHECKED_CAST")
         fun rows(block: List<R>.() -> Unit) {
             (_rows as List<R>).block()
         }
+    }
+
+    protected fun using(dialect: Dialect, block: () -> Unit) {
+        dynamicDialect.using(dialect, block)
     }
 
     companion object {

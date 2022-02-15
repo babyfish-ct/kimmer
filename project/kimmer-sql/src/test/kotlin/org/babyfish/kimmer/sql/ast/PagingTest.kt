@@ -2,6 +2,7 @@ package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.sql.ast.common.AbstractTest
 import org.babyfish.kimmer.sql.ast.model.*
+import org.babyfish.kimmer.sql.runtime.dialect.MysqlDialect
 import kotlin.test.Test
 import java.math.BigDecimal
 import kotlin.test.expect
@@ -76,6 +77,16 @@ class PagingTest: AbstractTest() {
                     |where tb_1_.PRICE between $1 and $2 
                     |order by tb_2_.NAME asc, tb_1_.NAME asc 
                     |limit $3 offset $4""".trimMargin()
+            }
+        }
+    }
+
+    @Test
+    fun testMySqlDialect() {
+        using(MysqlDialect()) {
+            sqlClient.createQuery(Book::class) {
+                orderBy(table.name)
+                select(table.name).distinct()
             }
         }
     }

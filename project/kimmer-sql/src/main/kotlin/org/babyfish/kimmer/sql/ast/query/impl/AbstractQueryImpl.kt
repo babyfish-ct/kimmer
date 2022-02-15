@@ -69,9 +69,13 @@ internal abstract class AbstractQueryImpl<E, ID>(
         }
     }
 
-    override fun orderBy(expression: Expression<*>?, descending: Boolean) {
+    override fun orderBy(
+        expression: Expression<*>?,
+        mode: OrderMode,
+        nullMode: NullOrderMode
+    ) {
         expression?.let {
-            orders += Order(expression, descending)
+            orders += Order(expression, mode, nullMode)
         }
     }
 

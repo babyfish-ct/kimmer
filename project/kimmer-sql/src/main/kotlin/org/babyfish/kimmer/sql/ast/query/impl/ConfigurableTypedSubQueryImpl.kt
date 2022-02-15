@@ -5,17 +5,18 @@ import org.babyfish.kimmer.sql.ast.Expression
 import org.babyfish.kimmer.sql.ast.Renderable
 import org.babyfish.kimmer.sql.ast.Selection
 import org.babyfish.kimmer.sql.ast.SqlBuilder
-import org.babyfish.kimmer.sql.ast.query.SelectableTypedSubQuery
+import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedSubQuery
+import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
 import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceElement
 import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
 
-internal class SelectableTypedSubQueryImpl<P, PID, E, ID, R>(
+internal class ConfigurableTypedSubQueryImpl<P, PID, E, ID, R>(
     data: TypedQueryData,
     baseQuery: SubQueryImpl<P, PID, E, ID>
-): AbstractSelectableTypedQueryImpl<E, ID, R>(
+): AbstractTypedQueryImpl<E, ID, R>(
     data,
     baseQuery
-), SelectableTypedSubQuery<P, PID, E, ID, R>, 
+), ConfigurableTypedSubQuery<P, PID, E, ID, R>,
     TypedSubQueryImplementor<P, PID, E, ID>, 
     Renderable, 
     TableReferenceElement
@@ -47,20 +48,13 @@ internal class SelectableTypedSubQueryImpl<P, PID, E, ID, R>(
     override val baseQuery: SubQueryImpl<P, PID, E, ID>
         get() = super.baseQuery as SubQueryImpl<P, PID, E, ID>
 
-    @Suppress("UNCHECKED_CAST")
-    override fun limit(limit: Int, offset: Int): SelectableTypedSubQuery<P, PID, E, ID, R> =
-        if (data.limit == limit && data.offset == offset) {
+    override fun distinct(distinct: Boolean): ConfigurableTypedSubQuery<P, PID, E, ID, R> =
+        if (data.distinct === distinct) {
             this
         } else {
-            if (limit < 0) {
-                throw IllegalArgumentException("'limit' can not be less than 0")
-            }
-            if (offset < 0) {
-                throw IllegalArgumentException("'offset' can not be less than 0")
-            }
-            SelectableTypedSubQueryImpl(
-                data = data.copy(limit = limit, offset = offset),
-                baseQuery = baseQuery
+            ConfigurableTypedSubQueryImpl(
+                data.copy(distinct = distinct),
+                baseQuery
             )
         }
 
@@ -83,8 +77,8 @@ internal class SelectableTypedSubQueryImpl<P, PID, E, ID, R>(
         fun <P: Entity<PID>, PID: Comparable<PID>, E: Entity<ID>, ID: Comparable<ID>, R: Any> select(
             query: SubQueryImpl<P, PID, E, ID>,
             vararg selections: Selection<*>
-        ): SelectableTypedSubQuery<P, PID, E, ID, R> =
-            SelectableTypedSubQueryImpl(
+        ): TypedSubQuery<P, PID, E, ID, R> =
+            ConfigurableTypedSubQueryImpl(
                 TypedQueryData(selections.toList()),
                 baseQuery = query
             )

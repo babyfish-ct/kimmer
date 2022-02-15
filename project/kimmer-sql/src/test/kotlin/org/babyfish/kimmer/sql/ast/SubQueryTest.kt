@@ -153,7 +153,7 @@ class SubQueryTest: AbstractTest() {
                 where(parentTable.id eq table.store.id)
                 select(coalesce(table.price.avg(), BigDecimal.ZERO))
             }
-            orderBy(subQuery, true)
+            orderBy(subQuery, OrderMode.DESC)
             select(table, subQuery)
         }.executeAndExpect {
             sql {

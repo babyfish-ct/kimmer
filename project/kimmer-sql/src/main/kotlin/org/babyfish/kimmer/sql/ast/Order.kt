@@ -6,14 +6,19 @@ import org.babyfish.kimmer.sql.ast.table.impl.accept
 
 internal class Order(
     private val expression: Expression<*>,
-    private val descending: Boolean
+    private val mode: OrderMode,
+    private val nullMode: NullOrderMode
 ): Renderable, TableReferenceElement {
 
     override fun renderTo(builder: SqlBuilder) {
         (expression as Renderable).renderTo(builder)
         builder.apply {
             sql(" ")
-            sql(if (descending) "desc" else "asc")
+            sql(if (mode == OrderMode.DESC) "desc" else "asc")
+            if (nullMode != NullOrderMode.UNSPECIFIED) {
+                sql(" ")
+                sql(if (nullMode === NullOrderMode.NULLS_FIRST) "nulls first" else "nulls last")
+            }
         }
     }
 

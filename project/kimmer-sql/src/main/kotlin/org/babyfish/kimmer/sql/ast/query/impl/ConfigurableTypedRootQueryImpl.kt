@@ -6,37 +6,48 @@ import org.babyfish.kimmer.sql.ast.R2dbcSqlBuilder
 import org.babyfish.kimmer.sql.ast.Selection
 import org.babyfish.kimmer.sql.ast.SqlBuilder
 import org.babyfish.kimmer.sql.ast.query.selectable.RootSelectable
-import org.babyfish.kimmer.sql.ast.query.SelectableTypedRootQuery
+import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedRootQuery
 import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.runtime.JdbcExecutorContext
+import org.babyfish.kimmer.sql.runtime.PaginationContext
 import org.babyfish.kimmer.sql.runtime.R2dbcExecutorContext
 
-internal class SelectableTypedRootQueryImpl<E, ID, R>(
+internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
     data: TypedQueryData,
     baseQuery: RootQueryImpl<E, ID>
-): AbstractSelectableTypedQueryImpl<E, ID, R>(
+): AbstractTypedQueryImpl<E, ID, R>(
     data,
     baseQuery
-), SelectableTypedRootQuery<E, ID, R>
+), ConfigurableTypedRootQuery<E, ID, R>
     where E: Entity<ID>, ID: Comparable<ID>, R: Any {
 
     override val baseQuery: RootQueryImpl<E, ID>
         get() = super.baseQuery as RootQueryImpl<E, ID>
     
     override fun <X: Any> reselect(
-        block: RootSelectable<E, ID>.() -> SelectableTypedRootQuery<E, ID, X>
-    ): SelectableTypedRootQuery<E, ID, X> {
+        block: RootSelectable<E, ID>.() -> ConfigurableTypedRootQuery<E, ID, X>
+    ): ConfigurableTypedRootQuery<E, ID, X> {
         val reselected = baseQuery.block()
-        val selections = (reselected as SelectableTypedRootQueryImpl<E, ID, X>).data.selections
-        return SelectableTypedRootQueryImpl(
+        val selections = (reselected as ConfigurableTypedRootQueryImpl<E, ID, X>).data.selections
+        return ConfigurableTypedRootQueryImpl(
             data = data.copy(selections = selections),
             baseQuery = baseQuery
         )
     }
 
-    override fun limit(limit: Int, offset: Int): SelectableTypedRootQuery<E, ID, R> =
+    override fun distinct(distinct: Boolean): ConfigurableTypedRootQuery<E, ID, R> =
+        if (data.distinct == distinct) {
+            this
+        } else {
+            ConfigurableTypedRootQueryImpl(
+                data.copy(distinct = data.distinct),
+                baseQuery
+            )
+        }
+
+    override fun limit(limit: Int, offset: Int): ConfigurableTypedRootQuery<E, ID, R> =
         if (data.limit == limit && data.offset == offset) {
             this
         } else {
@@ -46,17 +57,20 @@ internal class SelectableTypedRootQueryImpl<E, ID, R>(
             if (offset < 0) {
                 throw IllegalArgumentException("'offset' can not be less than 0")
             }
-            SelectableTypedRootQueryImpl(
+            if (limit > Int.MAX_VALUE - offset) {
+                throw IllegalArgumentException("'limit' > Int.MAX_VALUE - offset")
+            }
+            ConfigurableTypedRootQueryImpl(
                 data = data.copy(limit = limit, offset = offset),
                 baseQuery = baseQuery
             )
         }
 
-    override fun withoutSortingAndPaging(without: Boolean): SelectableTypedRootQuery<E, ID, R> =
+    override fun withoutSortingAndPaging(without: Boolean): ConfigurableTypedRootQuery<E, ID, R> =
         if (data.withoutSortingAndPaging == without) {
             this
         } else {
-            SelectableTypedRootQueryImpl(
+            ConfigurableTypedRootQueryImpl(
                 data = data.copy(withoutSortingAndPaging = without),
                 baseQuery = baseQuery
             )
@@ -79,7 +93,19 @@ internal class SelectableTypedRootQueryImpl<E, ID, R>(
         val visitor = UseTableVisitor(builder)
         accept(visitor)
         renderTo(builder)
-        return builder.build()
+        val pair = builder.build()
+        if (data.limit == Int.MAX_VALUE || data.withoutSortingAndPaging) {
+            return pair
+        }
+        val ctx = PaginationContext(
+            data.limit,
+            data.offset,
+            pair.first,
+            pair.second,
+            builder is R2dbcSqlBuilder
+        )
+        baseQuery.sqlClient.dialect.pagination(ctx)
+        return ctx.build()
     }
 
     private class UseTableVisitor(
@@ -104,8 +130,8 @@ internal class SelectableTypedRootQueryImpl<E, ID, R>(
         fun <E: Entity<ID>, ID: Comparable<ID>, R: Any> select(
             query: RootQueryImpl<E, ID>,
             vararg selections: Selection<*>
-        ): SelectableTypedRootQuery<E, ID, R> =
-            SelectableTypedRootQueryImpl(
+        ): ConfigurableTypedRootQuery<E, ID, R> =
+            ConfigurableTypedRootQueryImpl(
                 TypedQueryData(selections.toList()),
                 baseQuery = query
             )

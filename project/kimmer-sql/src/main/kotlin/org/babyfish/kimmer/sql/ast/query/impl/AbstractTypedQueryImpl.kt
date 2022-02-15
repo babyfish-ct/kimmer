@@ -8,7 +8,7 @@ import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
 import org.babyfish.kimmer.sql.ast.table.impl.accept
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 
-internal abstract class AbstractSelectableTypedQueryImpl<E, ID, R>(
+internal abstract class AbstractTypedQueryImpl<E, ID, R>(
     val data: TypedQueryData,
     open val baseQuery: AbstractQueryImpl<E, ID>,
 ) : Renderable,
@@ -36,6 +36,9 @@ internal abstract class AbstractSelectableTypedQueryImpl<E, ID, R>(
 
     override fun renderTo(builder: SqlBuilder) {
         builder.sql("select ")
+        if (data.distinct) {
+            builder.sql("distinct ")
+        }
         var sp: String? = null
         for (selection in data.selections) {
             if (sp === null) {
@@ -50,20 +53,6 @@ internal abstract class AbstractSelectableTypedQueryImpl<E, ID, R>(
             }
         }
         baseQuery.renderTo(builder, data.withoutSortingAndPaging)
-        data.apply {
-            if (!withoutSortingAndPaging) {
-                builder.apply {
-                    if (limit != Int.MAX_VALUE) {
-                        sql(" limit ")
-                        variable(limit)
-                    }
-                    if (offset > 0) {
-                        sql(" offset ")
-                        variable(offset)
-                    }
-                }
-            }
-        }
     }
 
     override fun accept(visitor: TableReferenceVisitor) {
