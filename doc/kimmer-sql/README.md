@@ -43,7 +43,7 @@ Why provide a new SQL DSL?
 3. [Table Joins(merged join, phantom Join, half join, reverse join)](../table-joins.md)
 4. [Contains](./contains.md)
 5. [Subqueries](./subqueries.md)
-6. [Reselecting & Pagination]
+6. [Pagination](./pagination.md)
 
 --------------------
 
