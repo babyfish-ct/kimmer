@@ -176,7 +176,7 @@ abstract class AbstractTest {
         protected fun jdbc(
             block: java.sql.Connection.() -> Unit
         ) {
-            DriverManager.getConnection("jdbc:h2:~/test_db").use {
+            DriverManager.getConnection(JDBC_URL).use {
                 it.block()
             }
         }
