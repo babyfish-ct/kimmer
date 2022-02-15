@@ -4,7 +4,6 @@ import org.babyfish.kimmer.sql.ast.sql
 import org.babyfish.kimmer.sql.ast.valueIn
 import org.babyfish.kimmer.sql.example.AppContext
 import org.babyfish.kimmer.sql.example.model.*
-import java.io.InputStreamReader
 
 fun main(args: Array<String>) {
     showData(
@@ -74,10 +73,10 @@ private fun showData(
     for (pageNo in 1..pageCount) {
         println("-----------Page no: $pageNo-----------")
         println()
-        val tuples = AppContext.jdbc {
+        val rows = AppContext.jdbc {
             query.limit(pageSize, pageSize * (pageNo - 1)).execute(this)
         }
-        for ((book, rank, partitionRank) in tuples) {
+        for ((book, rank, partitionRank) in rows) {
             println("book object: $book")
             println("global price rank: $rank")
             println("price rank in own store: $partitionRank")
