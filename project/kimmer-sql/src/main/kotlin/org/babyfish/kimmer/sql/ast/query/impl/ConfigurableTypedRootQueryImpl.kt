@@ -7,17 +7,17 @@ import org.babyfish.kimmer.sql.ast.Selection
 import org.babyfish.kimmer.sql.ast.SqlBuilder
 import org.babyfish.kimmer.sql.ast.query.selectable.RootSelectable
 import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedRootQuery
+import org.babyfish.kimmer.sql.ast.query.TypedRootQuery
 import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.runtime.JdbcExecutorContext
-import org.babyfish.kimmer.sql.runtime.PaginationContext
 import org.babyfish.kimmer.sql.runtime.R2dbcExecutorContext
 
 internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
     data: TypedQueryData,
     baseQuery: RootQueryImpl<E, ID>
-): AbstractTypedQueryImpl<E, ID, R>(
+): AbstractConfigurableTypedQueryImpl<E, ID, R>(
     data,
     baseQuery
 ), ConfigurableTypedRootQuery<E, ID, R>
@@ -96,20 +96,17 @@ internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
         return builder.build()
     }
 
-    private class UseTableVisitor(
-        override val sqlBuilder: SqlBuilder
-    ): TableReferenceVisitor {
+    override fun union(right: TypedRootQuery<E, ID, R>): TypedRootQuery<E, ID, R> =
+        MergedTypedRootQueryImpl(baseQuery.sqlClient, "union", this, right)
 
-        override fun visit(table: TableImpl<*, *>, entityProp: EntityProp?) {
-            if (entityProp === null) {
-                if (table.entityType.starProps.size > 1) {
-                    sqlBuilder.useTable(table)
-                }
-            } else if (!entityProp.isId) {
-                sqlBuilder.useTable(table)
-            }
-        }
-    }
+    override fun unionAll(right: TypedRootQuery<E, ID, R>): TypedRootQuery<E, ID, R> =
+        MergedTypedRootQueryImpl(baseQuery.sqlClient, "union all", this, right)
+
+    override fun minus(right: TypedRootQuery<E, ID, R>): TypedRootQuery<E, ID, R> =
+        MergedTypedRootQueryImpl(baseQuery.sqlClient, "minus", this, right)
+
+    override fun intersect(right: TypedRootQuery<E, ID, R>): TypedRootQuery<E, ID, R> =
+        MergedTypedRootQueryImpl(baseQuery.sqlClient, "intersect", this, right)
 
     companion object {
 

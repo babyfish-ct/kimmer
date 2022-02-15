@@ -6,19 +6,19 @@ import org.babyfish.kimmer.sql.ast.Renderable
 import org.babyfish.kimmer.sql.ast.Selection
 import org.babyfish.kimmer.sql.ast.SqlBuilder
 import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedSubQuery
+import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
 import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceElement
 import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
 
 internal class ConfigurableTypedSubQueryImpl<P, PID, E, ID, R>(
     data: TypedQueryData,
     baseQuery: SubQueryImpl<P, PID, E, ID>
-): AbstractTypedQueryImpl<E, ID, R>(
+): AbstractConfigurableTypedQueryImpl<E, ID, R>(
     data,
     baseQuery
 ), ConfigurableTypedSubQuery<P, PID, E, ID, R>,
     TypedSubQueryImplementor<P, PID, E, ID>, 
-    Renderable, 
-    TableReferenceElement
+    TypedQueryImplementor
     where
         P: Entity<PID>,
         PID: Comparable<PID>,
@@ -87,6 +87,26 @@ internal class ConfigurableTypedSubQueryImpl<P, PID, E, ID, R>(
             super.accept(visitor)
         }
     }
+
+    override fun union(
+        right: TypedSubQuery<P, PID, E, ID, R>
+    ): TypedSubQuery<P, PID, E, ID, R> =
+        MergedTypedSubQueryImpl("union", this, right)
+
+    override fun unionAll(
+        right: TypedSubQuery<P, PID, E, ID, R>
+    ): TypedSubQuery<P, PID, E, ID, R> =
+        MergedTypedSubQueryImpl("union all", this, right)
+
+    override fun minus(
+        right: TypedSubQuery<P, PID, E, ID, R>
+    ): TypedSubQuery<P, PID, E, ID, R> =
+        MergedTypedSubQueryImpl("minus", this, right)
+
+    override fun intersect(
+        right: TypedSubQuery<P, PID, E, ID, R>
+    ): TypedSubQuery<P, PID, E, ID, R> =
+        MergedTypedSubQueryImpl("intersect", this, right)
 
     companion object {
 

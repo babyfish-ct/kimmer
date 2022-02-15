@@ -3,17 +3,15 @@ package org.babyfish.kimmer.sql.ast.query.impl
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.Renderable
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceElement
 import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
 import org.babyfish.kimmer.sql.ast.table.impl.accept
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.runtime.PaginationContext
 
-internal abstract class AbstractTypedQueryImpl<E, ID, R>(
+internal abstract class AbstractConfigurableTypedQueryImpl<E, ID, R>(
     val data: TypedQueryData,
     open val baseQuery: AbstractQueryImpl<E, ID>,
-) : Renderable,
-    TableReferenceElement
+) : TypedQueryImplementor
     where E:
           Entity<ID>,
           ID: Comparable<ID>,
@@ -34,6 +32,9 @@ internal abstract class AbstractTypedQueryImpl<E, ID, R>(
             }
         }
     }
+
+    override val selections: List<Selection<*>>
+        get() = data.selections
 
     override fun renderTo(builder: SqlBuilder) {
         if (data.withoutSortingAndPaging || data.limit == Int.MAX_VALUE) {
