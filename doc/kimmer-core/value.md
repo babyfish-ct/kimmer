@@ -113,4 +113,4 @@ val newNode = new(Node::class).by(node) {
 ```
 -----
 
-[Back to home](https://github.com/babyfish-ct/kimmer)
+[Back](./README.md)
