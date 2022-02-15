@@ -84,6 +84,6 @@ In order to make it as efficient as hand-hardcoding and as clean as hand-hardcod
 1. Avoid reflection, avoid hash map, keep the performance that a static language should have
 2. Avoid complex data structures to keep the IDE's debugger simple and clean
 
-![image](./clean_debugger.jpeg)
+![image](./images/clean_debugger.jpeg)
 
 As you can see from the picture, the debugger is very clean
