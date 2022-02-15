@@ -1,4 +1,4 @@
-# [kimmer](https://github.com/babyfish-ct/kimmer)/[kimmer-core](./README.md)/Dynamics & unloaded properties
+# [Home](https://github.com/babyfish-ct/kimmer)/[kimmer](./README.md)/Dynamics & unloaded properties
 
 Kimmer is designed for server-side development, so dynamics is important.
 
