@@ -54,7 +54,7 @@
       This argument will be discussed in detail in Chapter "[Contains](../contains.md)", it is recommended to open.
       
 3. Refresh gradle to download all dependencies and plugins
-   ![image](../kimmer-core/images/refresh-gradle.jpeg)
+   ![image](../kimmer-core/images/gradle-refresh.jpeg)
 
 4. Add data model interfaces
    
