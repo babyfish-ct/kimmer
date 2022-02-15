@@ -37,21 +37,41 @@
    
    We configured 3 arguments to ksp.
    
-   1. "kimmer.draft"
+   i. "kimmer.draft"
    
       true means to generate source codes of kimmer, its default value is true.
 
       Let's focus on kimmer-sql, not kimmer. Set it to false.
       
-   2. "kimmer.table"
+   ii. "kimmer.table"
       
       true means to generate source codes of kimmer, its default value is false.
 
       We want to used kimmer-sql, so it must be set to true, this is important.
       
-   3. "kimmer.table.collection-join-only-for-sub-query"
+   iii. "kimmer.table.collection-join-only-for-sub-query"
    
       This argument will be discussed in detail in Chapter "[Contains](../contains.md)", it is recommended to open.
+      
+3. Refresh gradle to download all dependencies and plugins
+   ![image](../kimmer-core/images/refresh-gradle.jpeg)
+
+4. Add data model interfaces
+   
+   Create a package with any path， add threes kotlin files into it
+
+   a. BookStore.kt
+   ```kt
+   package org.babyfish.kimmer.sql.example.model
+
+   import org.babyfish.kimmer.sql.Entity
+   import java.util.*
+
+   interface BookStore: Entity<UUID> {
+       val name: String
+       val books: List<Book>
+   }
+   ```
       
 
 [Back to parent](./README.md) | [Next: Null Saftey >](./null-safety.md)
