@@ -6,7 +6,6 @@ import org.babyfish.kimmer.sql.ast.Renderable
 import org.babyfish.kimmer.sql.ast.Selection
 import org.babyfish.kimmer.sql.ast.SqlBuilder
 import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedSubQuery
-import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
 import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceElement
 import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
 
@@ -77,7 +76,7 @@ internal class ConfigurableTypedSubQueryImpl<P, PID, E, ID, R>(
         fun <P: Entity<PID>, PID: Comparable<PID>, E: Entity<ID>, ID: Comparable<ID>, R: Any> select(
             query: SubQueryImpl<P, PID, E, ID>,
             vararg selections: Selection<*>
-        ): TypedSubQuery<P, PID, E, ID, R> =
+        ): ConfigurableTypedSubQuery<P, PID, E, ID, R> =
             ConfigurableTypedSubQueryImpl(
                 TypedQueryData(selections.toList()),
                 baseQuery = query

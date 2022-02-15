@@ -4,8 +4,8 @@ import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.Renderable
 import org.babyfish.kimmer.sql.ast.SqlBuilder
+import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedSubQuery
 import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
-import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
 import org.babyfish.kimmer.sql.ast.table.Table
 import org.babyfish.kimmer.sql.ast.table.impl.SubQueryTableImpl
 import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceElement
@@ -50,20 +50,20 @@ internal class SubQueryImpl<P, PID, E, ID>(
 
     override fun <R: Any> select(
         selection: Selection<R>
-    ): TypedSubQuery<P, PID, E, ID, R> =
+    ): ConfigurableTypedSubQuery<P, PID, E, ID, R> =
         ConfigurableTypedSubQueryImpl.select(this, selection)
 
     override fun <A, B> select(
         selection1: Selection<A>,
         selection2: Selection<B>
-    ): TypedSubQuery<P, PID, E, ID, Pair<A, B>> =
+    ): ConfigurableTypedSubQuery<P, PID, E, ID, Pair<A, B>> =
         ConfigurableTypedSubQueryImpl.select(this, selection1, selection2)
 
     override fun <A, B, C> select(
         selection1: Selection<A>,
         selection2: Selection<B>,
         selection3: Selection<C>
-    ): TypedSubQuery<P, PID, E, ID, Triple<A, B, C>> =
+    ): ConfigurableTypedSubQuery<P, PID, E, ID, Triple<A, B, C>> =
         ConfigurableTypedSubQueryImpl.select(this, selection1, selection2, selection3)
 
     override fun <T1, T2, T3, T4> select(
@@ -71,7 +71,7 @@ internal class SubQueryImpl<P, PID, E, ID>(
         selection2: Selection<T2>,
         selection3: Selection<T3>,
         selection4: Selection<T4>,
-    ): TypedSubQuery<P, PID, E, ID, Tuple4<T1, T2, T3, T4>> =
+    ): ConfigurableTypedSubQuery<P, PID, E, ID, Tuple4<T1, T2, T3, T4>> =
         ConfigurableTypedSubQueryImpl.select(this, selection1, selection2, selection3, selection4)
 
     override fun <T1, T2, T3, T4, T5> select(
@@ -80,7 +80,7 @@ internal class SubQueryImpl<P, PID, E, ID>(
         selection3: Selection<T3>,
         selection4: Selection<T4>,
         selection5: Selection<T5>,
-    ): TypedSubQuery<P, PID, E, ID, Tuple5<T1, T2, T3, T4, T5>> =
+    ): ConfigurableTypedSubQuery<P, PID, E, ID, Tuple5<T1, T2, T3, T4, T5>> =
         ConfigurableTypedSubQueryImpl.select(this, selection1, selection2, selection3, selection4, selection5)
 
     override fun <T1, T2, T3, T4, T5, T6> select(
@@ -90,7 +90,7 @@ internal class SubQueryImpl<P, PID, E, ID>(
         selection4: Selection<T4>,
         selection5: Selection<T5>,
         selection6: Selection<T6>,
-    ): TypedSubQuery<P, PID, E, ID, Tuple6<T1, T2, T3, T4, T5, T6>> =
+    ): ConfigurableTypedSubQuery<P, PID, E, ID, Tuple6<T1, T2, T3, T4, T5, T6>> =
         ConfigurableTypedSubQueryImpl.select(this, selection1, selection2, selection3, selection4, selection5, selection6)
 
     override fun <T1, T2, T3, T4, T5, T6, T7> select(
@@ -101,7 +101,7 @@ internal class SubQueryImpl<P, PID, E, ID>(
         selection5: Selection<T5>,
         selection6: Selection<T6>,
         selection7: Selection<T7>
-    ): TypedSubQuery<P, PID, E, ID, Tuple7<T1, T2, T3, T4, T5, T6, T7>> =
+    ): ConfigurableTypedSubQuery<P, PID, E, ID, Tuple7<T1, T2, T3, T4, T5, T6, T7>> =
         ConfigurableTypedSubQueryImpl.select(this, selection1, selection2, selection3, selection4, selection5, selection6, selection7)
 
     override fun <T1, T2, T3, T4, T5, T6, T7, T8> select(
@@ -113,7 +113,7 @@ internal class SubQueryImpl<P, PID, E, ID>(
         selection6: Selection<T6>,
         selection7: Selection<T7>,
         selection8: Selection<T8>,
-    ): TypedSubQuery<P, PID, E, ID, Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> =
+    ): ConfigurableTypedSubQuery<P, PID, E, ID, Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> =
         ConfigurableTypedSubQueryImpl.select(this, selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8)
 
     override fun <T1, T2, T3, T4, T5, T6, T7, T8, T9> select(
@@ -126,6 +126,6 @@ internal class SubQueryImpl<P, PID, E, ID>(
         selection7: Selection<T7>,
         selection8: Selection<T8>,
         selection9: Selection<T9>,
-    ): TypedSubQuery<P, PID, E, ID, Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> =
+    ): ConfigurableTypedSubQuery<P, PID, E, ID, Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> =
         ConfigurableTypedSubQueryImpl.select(this, selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8, selection9)
 }
