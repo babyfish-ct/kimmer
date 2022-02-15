@@ -1,4 +1,4 @@
-This projec contains 2 parts
+This projec contains 2 sub projects
 
 1. kimmer
    Port [https://github.com/immerjs/immer](https://github.com/immerjs/immer) for kotlin/jvm.
