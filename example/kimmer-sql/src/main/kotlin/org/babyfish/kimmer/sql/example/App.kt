@@ -57,9 +57,11 @@ private fun showData(
         )
     }
 
-    val countQuery = query.reselect {
-        select(table.id.count())
-    }.withoutSortingAndPaging()
+    val countQuery = query
+        .reselect {
+            select(table.id.count())
+        }
+        .withoutSortingAndPaging()
 
     val rowCount = AppContext.jdbc {
         countQuery.execute(this)[0].toInt()
