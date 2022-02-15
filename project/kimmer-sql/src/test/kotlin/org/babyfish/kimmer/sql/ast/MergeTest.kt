@@ -34,7 +34,7 @@ class MergeTest: AbstractTest() {
                             where(table.fullName like "D")
                             select(table.books.id)
                         }
-                        )
+                    )
                 )
                 select(table)
             }
