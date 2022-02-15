@@ -28,6 +28,14 @@ Why provide a new SQL DSL?
 
 ## 2. Documentation
 
+1. Get started
+2. ksp for kimmer-sql
+3. Null safety
+4. Table Joins(merged join, phantom Join, half Join, reverse join)
+5. Contains
+6. Subqueries
+7. Reselecting & Pagination
+
 --------------------
 
 [Home](https://github.com/babyfish-ct/kimmer)
