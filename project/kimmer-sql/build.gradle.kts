@@ -70,7 +70,7 @@ publishing {
     }
     publications {
         register("mavenJava", MavenPublication::class) {
-            artifactId = "kimmer"
+            artifactId = "kimmer-sql"
             from(components["java"])
             pom {
                 name.set("kimmer")
