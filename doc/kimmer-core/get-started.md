@@ -1,4 +1,4 @@
-# [kimmer](https://github.com/babyfish-ct/kimmer)/[documentation](./README.md)/Get started
+# [kimmer](https://github.com/babyfish-ct/kimmer)/[kimmer-core](./README.md)/Get started
 
 ## 1. Create project
 
