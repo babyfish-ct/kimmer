@@ -2,7 +2,10 @@ package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.sql.ast.common.AbstractTest
 import org.babyfish.kimmer.sql.ast.model.*
+import org.babyfish.kimmer.sql.runtime.dialect.DefaultDialect
 import org.babyfish.kimmer.sql.runtime.dialect.MysqlDialect
+import org.babyfish.kimmer.sql.runtime.dialect.OracleDialect
+import org.babyfish.kimmer.sql.runtime.dialect.SqlServerDialect
 import kotlin.test.Test
 import java.math.BigDecimal
 import kotlin.test.expect
@@ -82,11 +85,119 @@ class PagingTest: AbstractTest() {
     }
 
     @Test
+    fun testDefaultDialect() {
+        using(DefaultDialect()) {
+            sqlClient.createQuery(Book::class) {
+                orderBy(table.name)
+                select(table.name).distinct().limit(2, 1)
+            }.executeAndExpect {
+                sql {
+                    """select distinct tb_1_.NAME 
+                        |from BOOK as tb_1_ 
+                        |order by tb_1_.NAME asc 
+                        |limit $1 offset $2""".trimMargin()
+                }
+                variables(2, 1)
+                rows {
+                    expect(listOf("GraphQL in Action", "Learning GraphQL")) {
+                        this
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
     fun testMySqlDialect() {
         using(MysqlDialect()) {
             sqlClient.createQuery(Book::class) {
                 orderBy(table.name)
-                select(table.name).distinct()
+                select(table.name).distinct().limit(2, 1)
+            }.executeAndExpect {
+                sql {
+                    """select distinct tb_1_.NAME 
+                        |from BOOK as tb_1_ 
+                        |order by tb_1_.NAME asc 
+                        |limit $1, $2""".trimMargin()
+                }
+                variables(1, 2)
+                rows {
+                    expect(listOf("GraphQL in Action", "Learning GraphQL")) {
+                        this
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testSqlServerDialect() {
+        using(SqlServerDialect()) {
+            sqlClient.createQuery(Book::class) {
+                orderBy(table.name)
+                select(table.name).distinct().limit(2, 1)
+            }.executeAndExpect {
+                sql {
+                    """select distinct tb_1_.NAME 
+                        |from BOOK as tb_1_ 
+                        |order by tb_1_.NAME asc 
+                        |offset $1 rows fetch next $2 rows only""".trimMargin()
+                }
+                variables(1, 2)
+                rows {
+                    expect(listOf("GraphQL in Action", "Learning GraphQL")) {
+                        this
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testOracleDialect() {
+
+        using(OracleDialect()) {
+
+            // Both limit & offset
+            sqlClient.createQuery(Book::class) {
+                orderBy(table.name)
+                select(table.name).distinct().limit(2, 1)
+            }.executeAndExpect {
+                sql {
+                    """select * from (
+                            |select core__.*, rownum rn__ from (
+                                |select distinct tb_1_.NAME 
+                                |from BOOK as tb_1_ 
+                                |order by tb_1_.NAME asc
+                            |) core__ where rownum <= $1
+                        |) limited__ where rn__ > $2""".trimMargin()
+                }
+                variables(3, 1)
+                rows {
+                    expect(listOf("GraphQL in Action", "Learning GraphQL")) {
+                        this
+                    }
+                }
+            }
+
+            // Only limit
+            sqlClient.createQuery(Book::class) {
+                orderBy(table.name)
+                select(table.name).distinct().limit(2)
+            }.executeAndExpect {
+                sql {
+                    """select core__.* from (
+                            |select distinct tb_1_.NAME 
+                            |from BOOK as tb_1_ 
+                            |order by tb_1_.NAME asc
+                        |) core__ where rownum <= $1""".trimMargin()
+                }
+                variables(2)
+                rows {
+                    expect(listOf("Effective TypeScript", "GraphQL in Action")) {
+                        this
+                    }
+                }
             }
         }
     }

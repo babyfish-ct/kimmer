@@ -42,7 +42,7 @@ internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
             this
         } else {
             ConfigurableTypedRootQueryImpl(
-                data.copy(distinct = data.distinct),
+                data.copy(distinct = distinct),
                 baseQuery
             )
         }

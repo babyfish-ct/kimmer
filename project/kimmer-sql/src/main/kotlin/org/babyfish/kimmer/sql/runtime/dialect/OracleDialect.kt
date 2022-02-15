@@ -12,7 +12,7 @@ class OracleDialect : Dialect {
             } else {
                 sql("select * from (")
                 limit()
-                sql(") limited__ where rownum > ")
+                sql(") limited__ where rn__ > ")
                 variable(offset)
             }
         }
@@ -20,7 +20,7 @@ class OracleDialect : Dialect {
 
     private fun PaginationContext.limit() {
         val rnProjection = if (offset > 0) ", rownum rn__" else ""
-        sql("select core__.*$rnProjection from(")
+        sql("select core__.*$rnProjection from (")
         origin()
         sql(") core__ where rownum <= ")
         variable(offset + limit)
