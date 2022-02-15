@@ -32,9 +32,9 @@ Why provide a new SQL DSL?
 
    Paging query requires two SQL statements, one for querying the number of records and one for data of a page, let's call them **count-query** and **data-query**. These two SQL statements have both the same parts and different parts, it is difficult to share the code unless that SQL logic is very simple.
 
-   > For example, **count-query** does not require "order by" clause but **data-query requires**. If there are some table joins in "order by" clause, are these table joins only used by "order by" clause or also be used by other parts of SQL? If a table join is only used by "order by" caluse, is it guaranteed not to affect the number of records so that it can be removed from the **count-query** to optimize the performance?
+   > For example, **count-query** does not require "order by" clause but **data-query requires**. If there are some table joins in "order by" clause, are these table joins only used by "order by" clause or also used by other parts of SQL? If a table join is only used by "order by" caluse, is it guaranteed not to affect the number of records so that it can be removed from the **count-query** to optimize the performance?
 
-   kimmer-ksp provides new APIs and optimization algorithms to perfectly solve this problem.
+   kimmer-sql provides new APIs and optimization algorithms to perfectly solve this problem.
 
 ## 2. Documentation
 
