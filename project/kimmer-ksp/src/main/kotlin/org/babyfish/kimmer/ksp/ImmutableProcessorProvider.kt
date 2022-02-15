@@ -20,7 +20,7 @@ class ImmutableProcessorProvider: SymbolProcessorProvider {
         val draft = environment.parseBoolean(ENV_OPTION_DRAFT) ?: true
         val table = environment.parseBoolean(ENV_OPTION_TABLE) ?: false
         val collectionJoinOnlyForSubQuery = environment.parseBoolean(ENV_OPTION_TABLE_COLLECTION_JOIN) ?: false
-        if (!draft && table) {
+        if (!draft && !table) {
             throw GeneratorException(
                 "Both 'immutable.draft' and 'immutable.table' of ksp options are false, " +
                     "this is not allowed because it makes this ksp module meaningless"

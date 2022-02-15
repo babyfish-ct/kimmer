@@ -128,7 +128,6 @@ class TableGenerator(
                         receiver(nonNullReceiverTypeName)
                         getter(
                             FunSpec.getterBuilder().apply {
-                                modifiers += KModifier.INLINE
                                 addCode("return get(%T::%L)", selfTypeName, prop.simpleName.asString())
                             }.build()
                         )
@@ -143,7 +142,6 @@ class TableGenerator(
                     receiver(receiverTypeName)
                     getter(
                         FunSpec.getterBuilder().apply {
-                            modifiers += KModifier.INLINE
                             addCode("return `get?`(%T::%L)", selfTypeName, prop.simpleName.asString())
                         }.build()
                     )
@@ -202,7 +200,6 @@ class TableGenerator(
                     receiver(receiverTypeName)
                     getter(
                         FunSpec.getterBuilder().apply {
-                            modifiers += KModifier.INLINE
                             addCode("return $joinFunName(%T::%L)", selfTypeName, prop.simpleName.asString())
                         }.build()
                     )
@@ -216,7 +213,6 @@ class TableGenerator(
                     receiver(receiverTypeName)
                     getter(
                         FunSpec.getterBuilder().apply {
-                            modifiers += KModifier.INLINE
                             addCode("return `$joinFunName?`(%T::%L)", selfTypeName, prop.simpleName.asString())
                         }.build()
                     )

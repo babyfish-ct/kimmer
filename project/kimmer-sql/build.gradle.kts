@@ -74,7 +74,7 @@ publishing {
             from(components["java"])
             pom {
                 name.set("kimmer")
-                description.set("Kimmer for kotlin/jvm")
+                description.set("SQL DSL base on kotlin")
                 url.set("https://github.com/babyfish-ct/kimmer")
                 licenses {
                     license {
