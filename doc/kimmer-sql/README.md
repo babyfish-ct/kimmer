@@ -40,7 +40,7 @@ Why provide a new SQL DSL?
 
 1. [Get started](./get-started.md)
 2. [Null safety](./null-safety.md)
-3. [Table Joins(merged join, phantom Join, half join, reverse join)](../table-joins.md)
+3. [Table Joins](../table-joins.md)
 4. [Contains](./contains.md)
 5. [Subqueries](./subqueries.md)
 6. [Pagination](./pagination.md)
