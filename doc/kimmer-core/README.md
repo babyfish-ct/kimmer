@@ -41,7 +41,13 @@ val book2 = new(Book::class).by(book) {
 
 > For the modification, it looks like the copy-on-write strategy of linux "fork", **unchaged parts are always shared and reused**.
 
-# Documatation
+## 2. Documentation
+1. Get started(./get-started.md)
+2. Dynamic properties(./dynamic.md)
+3. Draft properties VS Draft functions(./propfun.md)
+4. Jackson(./jackson.md)
+5. Abstract(./abstract.md)
+6. Coroutines(./corotuine.md)
 
 --------------------------
 
