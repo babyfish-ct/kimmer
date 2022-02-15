@@ -43,7 +43,7 @@ class JoinTest : AbstractTest() {
                     |and tb_2_.PRICE <= $2 
                     |and lower(tb_4_.FIRST_NAME) like $3""".trimMargin()
             }
-            variables(BigDecimal(20), BigDecimal(30), "alex")
+            variables(BigDecimal(20), BigDecimal(30), "%alex%")
         }
     }
 
@@ -64,7 +64,7 @@ class JoinTest : AbstractTest() {
                     |and tb_3_.PRICE <= $2 
                     |and lower(tb_4_.NAME) like $3""".trimMargin()
             }
-            variables(BigDecimal(20), BigDecimal(30), "manning")
+            variables(BigDecimal(20), BigDecimal(30), "%manning%")
         }
     }
 
@@ -145,7 +145,7 @@ class JoinTest : AbstractTest() {
                     |where tb_1_.STORE_ID is null 
                     |or lower(tb_2_.NAME) like $1""".trimMargin()
             }
-            variables("manning")
+            variables("%manning%")
         }
     }
 }

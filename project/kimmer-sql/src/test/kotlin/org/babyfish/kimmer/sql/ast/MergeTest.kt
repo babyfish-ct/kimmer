@@ -82,7 +82,7 @@ class MergeTest: AbstractTest() {
                         |)
                     |)""".trimMargin()
             }
-            variables("g", " ", "A", " ", "B", "f", " ", "C", " ", "D")
+            variables("%g%", " ", "%A%", " ", "%B%", "%f%", " ", "%C%", " ", "%D%")
         }
     }
 }

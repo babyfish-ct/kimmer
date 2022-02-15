@@ -200,11 +200,13 @@ internal class LikeExpression(
             ?.let {
                 it
                     .takeIf { !mode.startExact && !it.startsWith("%") }
+                    ?.let { s -> "%$s" }
                     ?: it
             }
             ?.let {
                 it
                     .takeIf { !mode.endExact && !it.endsWith("%") }
+                    ?.let { s -> "$s%" }
                     ?: it
             }
             ?.let {
