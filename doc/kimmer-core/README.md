@@ -45,4 +45,4 @@ val book2 = new(Book::class).by(book) {
 
 --------------------------
 
-[Home page](https://github.com/babyfish-ct/kimmer)
+[Home page](https://github.com/babyfish-ct/kimmer) | [kimmer-sql](../kimmer-sql/README.md)
