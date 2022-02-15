@@ -160,7 +160,7 @@ abstract class AbstractTest {
             runBlocking {
                 r2dbc {
                     AbstractTest::class.java.classLoader.getResourceAsStream("TestDatabase.sql").use { stream ->
-                        val text = InputStreamReader(stream).readText()
+                        val text = InputStreamReader(stream ?: error("Cannot load embedded SQL")).readText()
                         text
                             .split(";")
                             .filter { it.isNotBlank() }
