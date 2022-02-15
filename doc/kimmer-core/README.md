@@ -47,7 +47,7 @@ val book2 = new(Book::class).by(book) {
 3. [Draft properties VS Draft functions](./propfun.md)
 4. [Jackson](./jackson.md)
 5. [Abstract](./abstract.md)
-6. [Coroutines](./corotuine.md)
+6. [Coroutines](./coroutine.md)
 
 --------------------------
 
