@@ -1,4 +1,4 @@
-# [kimmer](https://github.com/babyfish-ct/kimmer/)/[documentation](./README.md)/Draft property vs Draft function
+# [kimmer](https://github.com/babyfish-ct/kimmer/)/[documentation](./README.md)/Draft properties VS Draft functions
 
 Let's see an immutable interface
 
