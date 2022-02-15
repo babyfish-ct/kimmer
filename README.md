@@ -1,4 +1,4 @@
-This projec contains 2 sub projects
+This project contains 2 sub projects
 
 1. **kimmer**
 
