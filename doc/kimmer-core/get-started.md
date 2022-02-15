@@ -8,11 +8,12 @@ Use Intellij to create a **gradle** project, choose **kotlin/jvm** and **kotlin 
 ## 2. Add plugins and dependencies
 
 Edit the "build.gradle.kts" 
-a. Add this section into *plugin{}*
+
+Add this section into *plugin{}*
 ```kts
 id("com.google.devtools.ksp") version "1.6.10-1.0.2"
 ```
-b. Add this section into *dependencies{}*
+Add this section into *dependencies{}*
 ```kts
 implementation("org.babyfish.kimmer:kimmer:0.1.5")
 ksp("org.babyfish.kimmer:kimmer-ksp:0.1.5")
