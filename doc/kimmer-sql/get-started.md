@@ -4,8 +4,8 @@
 
 ## 1. First Experience
 
-1. Use Intellij to create a **gradle** project, choose **kotlin/jvm** and **kotlin 
-   ![image](../kimmer-core/immages/create-project.png)
+1. Use Intellij to create a **gradle** project, choose **kotlin/jvm** and **kotlin**
+   ![image](../kimmer-core/images/create-project.png)
 
 [Back to parent](./README.md) | [Next: Null Saftey >](./null-safety.md)
 
