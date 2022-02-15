@@ -1,6 +1,8 @@
+# kimmer-sql
+
 kimmer-sql is a SQL DSL to help you access RDBMS by kotlin, whether based on JDBC or R2DBC.
 
-# 1. Why?
+## 1. Why?
 
 There are currently many solution for accessing RDMBS
 
@@ -24,7 +26,7 @@ Why provide a new SQL DSL?
 
    Among the above solutions, JOOQ is the best at finding SQL errors at the compile stage, but JOOQ is designed for Java rather than kotlin. Kotlin is a language with null safety, this DSL expects the SQL model to have the same null safety as kotlin.
 
-# 2. Documentation
+## 2. Documentation
 
 --------------------
 
