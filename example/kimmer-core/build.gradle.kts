@@ -3,8 +3,8 @@ plugins {
     id("com.google.devtools.ksp") version "1.6.10-1.0.2"
 }
 
-group = "org.babyfish.kimmer"
-version = "0.0.0"
+group = "org.babyfish.kimmer.example"
+version = "0.1.3"
 
 repositories {
     mavenCentral()
@@ -12,8 +12,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("org.babyfish.kimmer:kimmer:0.0.4")
-    ksp("org.babyfish.kimmer:kimmer-ksp:0.0.4")
+    implementation("org.babyfish.kimmer:kimmer:0.1.3")
+    ksp("org.babyfish.kimmer:kimmer-ksp:0.1.3")
 }
 
 kotlin {

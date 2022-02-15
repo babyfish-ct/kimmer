@@ -12,12 +12,12 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("org.babyfish.kimmer:kimmer-sql:0.1.2")
-    ksp("org.babyfish.kimmer:kimmer-ksp:0.1.2")
+    implementation("org.babyfish.kimmer:kimmer-sql:0.1.3")
+    ksp("org.babyfish.kimmer:kimmer-ksp:0.1.3")
 }
 
 ksp {
-    //arg("kimmer.draft", "false")
+    arg("kimmer.draft", "false")
     arg("kimmer.table", "true")
 }
 

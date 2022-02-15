@@ -37,6 +37,15 @@ class ImmutableProcessor(
                         tableSysTypes.entityType.isAssignableFrom(it.asStarProjectedType())
                     }
                     if (entityDeclarations.isNotEmpty()) {
+                        if (entityDeclarations.size > 1) {
+                            throw GeneratorException(
+                                "When the ksp argument 'kimmer.table' is true, " +
+                                    "each source file can only declare one entity interface inherits " +
+                                    "'${tableSysTypes.entityType.declaration.qualifiedName!!.asString()}'. " +
+                                    "However, the source file '${file.filePath}' declares ${entityDeclarations.size} entity types: " +
+                                    entityDeclarations.joinToString { "'${it.simpleName!!.asString()}'" }
+                            )
+                        }
                         TableGenerator(codeGenerator, tableSysTypes, file, entityDeclarations, collectionJoinOnlyForSubQuery)
                             .generate(resolver.getAllFiles().toList())
                     }
