@@ -47,6 +47,25 @@ internal class ConfigurableTypedSubQueryImpl<P, PID, E, ID, R>(
     override val baseQuery: SubQueryImpl<P, PID, E, ID>
         get() = super.baseQuery as SubQueryImpl<P, PID, E, ID>
 
+    override fun limit(limit: Int, offset: Int): ConfigurableTypedSubQuery<P, PID, E, ID, R> =
+        if (data.limit == limit && data.offset == offset) {
+            this
+        } else {
+            if (limit < 0) {
+                throw IllegalArgumentException("'limit' can not be less than 0")
+            }
+            if (offset < 0) {
+                throw IllegalArgumentException("'offset' can not be less than 0")
+            }
+            if (limit > Int.MAX_VALUE - offset) {
+                throw IllegalArgumentException("'limit' > Int.MAX_VALUE - offset")
+            }
+            ConfigurableTypedSubQueryImpl(
+                data = data.copy(limit = limit, offset = offset),
+                baseQuery = baseQuery
+            )
+        }
+
     override fun distinct(distinct: Boolean): ConfigurableTypedSubQuery<P, PID, E, ID, R> =
         if (data.distinct === distinct) {
             this

@@ -7,16 +7,30 @@ import org.babyfish.kimmer.sql.meta.EntityProp
 import java.lang.StringBuilder
 import kotlin.reflect.KClass
 
-internal abstract class SqlBuilder {
+
+internal abstract class SqlBuilder(
+    private val parent: SqlBuilder?
+) {
+    private var childBuilderCount = 0
 
     private val builder = StringBuilder()
 
     protected val variables = mutableListOf<Any>()
 
-    private val usedTables = mutableSetOf<Table<*, *>>()
+    private val usedTables: MutableSet<Table<*, *>> =
+        parent?.usedTables ?: mutableSetOf()
 
-    private val formulaPropStack = // mutableSetOf always is ordered
-        mutableSetOf<EntityProp>()
+    // mutableSetOf always is ordered
+    private val formulaPropStack: MutableSet<EntityProp> =
+        parent?.formulaPropStack ?: mutableSetOf()
+
+    init {
+        var p: SqlBuilder? = parent
+        while (p !== null) {
+            p.childBuilderCount++
+            p = p.parent
+        }
+    }
 
     fun useTable(table: TableImpl<*, *>) {
         usedTables += table
@@ -29,10 +43,12 @@ internal abstract class SqlBuilder {
         usedTables.contains(table)
 
     fun sql(sql: String) {
+        validate()
         builder.append(sql)
     }
 
     fun variable(value: Any) {
+        validate()
         when (value) {
             is Pair<*, *> -> {
                 sql("(")
@@ -149,14 +165,14 @@ internal abstract class SqlBuilder {
             else -> singleVariable(value)
         }
     }
-
-    protected abstract fun singleVariable(value: Any)
     
     fun nullVariable(type: KClass<*>) {
+        validate()
         variables += DbNull(type)
     }
 
     fun resolveFormula(formulaProp: EntityProp, block: () -> Unit) {
+        validate()
         if (!formulaPropStack.add(formulaProp)) {
             throw MappingException("Failed to resolve formula property '$formulaProp', dead recursion found")
         }
@@ -167,25 +183,61 @@ internal abstract class SqlBuilder {
         }
     }
 
-    fun build(): Pair<String, List<Any>> =
-        builder.toString() to variables
+    fun build(
+        transformer: ((Pair<String, List<Any>>) -> Pair<String, List<Any>>)? = null
+    ): Pair<String, List<Any>> {
+        validate()
+        val result = builder.toString() to variables
+        val transformedResult =
+            if (transformer !== null) {
+                transformer(result)
+            } else {
+                result
+            }
+        var p: SqlBuilder? = parent
+        if (p !== null) {
+            p.builder.append(transformedResult.first)
+            p.variables.addAll(transformedResult.second)
+            while (p !== null) {
+                --p.childBuilderCount
+                p = p.parent
+            }
+        }
+        return transformedResult
+    }
+
+    private fun validate() {
+        if (childBuilderCount != 0) {
+            error("Internal bug: Cannot change sqlbuilder because there are some child builders")
+        }
+    }
+
+    protected abstract fun singleVariable(value: Any)
+
+    abstract fun createChildBuilder(): SqlBuilder
 }
 
-internal class JdbcSqlBuilder : SqlBuilder() {
+internal class JdbcSqlBuilder(parent: JdbcSqlBuilder? = null) : SqlBuilder(parent) {
 
     override fun singleVariable(value: Any) {
         variables += value
         sql("?")
     }
+
+    override fun createChildBuilder(): SqlBuilder =
+        JdbcSqlBuilder(this)
 }
 
-internal class R2dbcSqlBuilder: SqlBuilder() {
+internal class R2dbcSqlBuilder(parent: R2dbcSqlBuilder? = null): SqlBuilder(parent) {
 
     override fun singleVariable(value: Any) {
         variables += value
         sql("$")
         sql(variables.size.toString())
     }
+
+    override fun createChildBuilder(): SqlBuilder =
+        R2dbcSqlBuilder(this)
 }
 
 internal data class DbNull(val type: KClass<*>)

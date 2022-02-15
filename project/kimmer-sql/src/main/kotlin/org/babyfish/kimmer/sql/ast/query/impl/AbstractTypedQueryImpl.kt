@@ -7,6 +7,7 @@ import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceElement
 import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
 import org.babyfish.kimmer.sql.ast.table.impl.accept
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
+import org.babyfish.kimmer.sql.runtime.PaginationContext
 
 internal abstract class AbstractTypedQueryImpl<E, ID, R>(
     val data: TypedQueryData,
@@ -35,28 +36,48 @@ internal abstract class AbstractTypedQueryImpl<E, ID, R>(
     }
 
     override fun renderTo(builder: SqlBuilder) {
-        builder.sql("select ")
+        if (data.withoutSortingAndPaging || data.limit == Int.MAX_VALUE) {
+            builder.renderRenderWithoutPaging()
+        } else {
+            val paginationBuilder = builder.createChildBuilder()
+            paginationBuilder.renderRenderWithoutPaging()
+            paginationBuilder.build {
+                val ctx = PaginationContext(
+                    data.limit,
+                    data.offset,
+                    it.first,
+                    it.second,
+                    builder is R2dbcSqlBuilder
+                )
+                baseQuery.sqlClient.dialect.pagination(ctx)
+                ctx.build()
+            }
+        }
+    }
+
+    override fun accept(visitor: TableReferenceVisitor) {
+        data.selections.forEach { it.accept(visitor) }
+        baseQuery.accept(visitor, data.withoutSortingAndPaging)
+    }
+
+    private fun SqlBuilder.renderRenderWithoutPaging() {
+        sql("select ")
         if (data.distinct) {
-            builder.sql("distinct ")
+            sql("distinct ")
         }
         var sp: String? = null
         for (selection in data.selections) {
             if (sp === null) {
                 sp = ", "
             } else {
-                builder.sql(sp)
+                sql(sp)
             }
             if (selection is TableImpl<*, *>) {
-                selection.renderAsSelection(builder)
+                selection.renderAsSelection(this)
             } else if (selection !== null) {
-                (selection as Renderable).renderTo(builder)
+                (selection as Renderable).renderTo(this)
             }
         }
-        baseQuery.renderTo(builder, data.withoutSortingAndPaging)
-    }
-
-    override fun accept(visitor: TableReferenceVisitor) {
-        data.selections.forEach { it.accept(visitor) }
-        baseQuery.accept(visitor, data.withoutSortingAndPaging)
+        baseQuery.renderTo(this, data.withoutSortingAndPaging)
     }
 }

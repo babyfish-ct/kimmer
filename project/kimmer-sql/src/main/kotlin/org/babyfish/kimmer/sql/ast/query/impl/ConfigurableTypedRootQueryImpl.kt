@@ -93,19 +93,7 @@ internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
         val visitor = UseTableVisitor(builder)
         accept(visitor)
         renderTo(builder)
-        val pair = builder.build()
-        if (data.limit == Int.MAX_VALUE || data.withoutSortingAndPaging) {
-            return pair
-        }
-        val ctx = PaginationContext(
-            data.limit,
-            data.offset,
-            pair.first,
-            pair.second,
-            builder is R2dbcSqlBuilder
-        )
-        baseQuery.sqlClient.dialect.pagination(ctx)
-        return ctx.build()
+        return builder.build()
     }
 
     private class UseTableVisitor(
