@@ -10,30 +10,30 @@
 2. Edit the "build.gradle.kts" 
 
    a. Add this section into **plugin{}**
-   ```
-   id("com.google.devtools.ksp") version "1.6.10-1.0.2"
-   ```
+      ```
+      id("com.google.devtools.ksp") version "1.6.10-1.0.2"
+      ```
    
    b. Add this section into **dependencies{}**
    
-   ```
-   implementation("org.babyfish.kimmer:kimmer-sql:0.1.5")
-   ksp("org.babyfish.kimmer:kimmer-ksp:0.1.5")
-   ```
+      ```
+      implementation("org.babyfish.kimmer:kimmer-sql:0.1.5")
+      ksp("org.babyfish.kimmer:kimmer-ksp:0.1.5")
+      ```
    
    c. Add this section into as toppest declaration
-   ```
-   ksp {
-       arg("kimmer.draft", "false")
-       arg("kimmer.table", "true")
-       arg("kimmer.table.collection-join-only-for-sub-query", "true")
-   }
-   kotlin {
-       sourceSets.main {
-           kotlin.srcDir("build/generated/ksp/main/kotlin")
-       }
-   }
-   ```
+      ```
+      ksp {
+          arg("kimmer.draft", "false")
+          arg("kimmer.table", "true")
+          arg("kimmer.table.collection-join-only-for-sub-query", "true")
+      }
+      kotlin {
+          sourceSets.main {
+              kotlin.srcDir("build/generated/ksp/main/kotlin")
+          }
+      }
+      ```
    
    We configured 3 arguments to ksp.
    
@@ -62,17 +62,22 @@
    Create a package with any path， add threes kotlin files into it
 
    a. BookStore.kt
-   ```kt
-   package org.babyfish.kimmer.sql.example.model
+   
+      ```kt
+      package org.babyfish.kimmer.sql.example.model
 
-   import org.babyfish.kimmer.sql.Entity
-   import java.util.*
+      import org.babyfish.kimmer.sql.Entity
+      import java.util.*
 
-   interface BookStore: Entity<UUID> {
-       val name: String
-       val books: List<Book>
-   }
-   ```
+      interface BookStore: Entity<UUID> {
+          val name: String
+          val books: List<Book>
+      }
+      ```
+      
+   b. Book.kt
+      ```kt
+      ```
       
 
 [Back to parent](./README.md) | [Next: Null Saftey >](./null-safety.md)
