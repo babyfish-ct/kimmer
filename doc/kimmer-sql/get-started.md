@@ -16,8 +16,8 @@
    b. Add this section into **dependencies{}**
    
       ```
-      implementation("org.babyfish.kimmer:kimmer-sql:0.1.5")
-      ksp("org.babyfish.kimmer:kimmer-ksp:0.1.5")
+      implementation("org.babyfish.kimmer:kimmer-sql:0.1.6")
+      ksp("org.babyfish.kimmer:kimmer-ksp:0.1.6")
       runtimeOnly("com.h2database:h2:2.1.210")
       ```
    
@@ -144,7 +144,7 @@
       This file used to setup environment
       
       - Uses "database.sql" to create tables and insert data
-      - Specify ORM meta information for the kimmer-ksp
+      - Specify ORM meta information for the kimmer-sql
 
    - [example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/App.kt](../../example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/App.kt)
       
@@ -173,12 +173,12 @@
         }
 
         authorName?.let {
-            where(
+            where {
                 table.id valueIn subQuery(Author::class) {
                     where(table.fullName ilike it)
                     select(table.books.id)
                 }
-            )
+            }
         }
 
         orderBy(table.name)
@@ -292,7 +292,7 @@ Recalling the previous steps, we used ksp
 ```
 dependencies {
     ...
-    ksp("org.babyfish.kimmer:kimmer-ksp:0.1.5")
+    ksp("org.babyfish.kimmer:kimmer-ksp:0.1.6")
 }
 
 ksp {
