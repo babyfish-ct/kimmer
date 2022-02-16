@@ -88,7 +88,7 @@ How is this function implemented? Let me take a look at the source code generate
 public val NonNullTable<BookStore, UUID>.name: NonNullExpression<String>
   get() = get(BookStore::name)
 
-// Get nonnull column from nullable table, still returns nullable type
+// Get nonnull column from nullable table, still returns nullable expression
 public val Table<BookStore, UUID>.name: Expression<String>
   get() = `get?`(BookStore::name)
 ```
