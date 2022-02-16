@@ -168,7 +168,7 @@
         }
 
         storeName?.let {
-            where(table.store.name ilike it)
+            where(table.store.name ilike it)    // α
         }
 
         authorName?.let {
@@ -188,7 +188,7 @@
                 expressions(table.price)
             },
             sql(Int::class, "rank() over(partition by %e order by %e desc)") {
-                expressions(table.store.id, table.price)
+                expressions(table.store.id, table.price)    // β
             }
         )
     }
@@ -223,7 +223,7 @@
     }
    ```
 
-   1. Like C#'s LINQ, *select* must be at the end.
+   1. Like C#'s LINQ, *select* must must be at the end of lambda of createQuery.
     
       a. Before *select*, queries were mutable objects. Mutable queries have no return type. The following operations always modify the mutable query object itself
        
@@ -243,6 +243,32 @@
          - unionAll
          - minus
          - intersect
+
+   2. Table joins can be initially divided into real joins and phantom joins
+    
+      - table.stroe.name,  at comment α
+      
+         This is real join, because the name of the parent object can only be obtained through table join. 
+
+         It will appear in the final generated SQL. Of course, this real join is defined in dynamic conditions so it will only be generated in SQL if the corresponding condition exists.
+      
+      - table.store.id, at comment β
+      
+         This is phantom join, *Book.store* is a many-to-one association based on foreign key. The id of the parent object is actually the foreign key of the child object. 
+         Phantom join never appears in the final SQL.
+
+      kimmer-sql does not require nor encourage developers to think about and differentiate between them.
+      
+   3. *where* and *orderedBy* are scattered
+
+      In the above code, we use *where* 3 times, but each time is limited to a specific condition, this is called dynamic query.
+
+      > If table joins conflict due to different dynamic conditions, kimmer-sql will merge them. For more details, see [Table joins](./table-joins.md)
+      
+      
+      
+      
+    
        
     
 ------------------------------
