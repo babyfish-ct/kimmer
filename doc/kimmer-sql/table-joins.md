@@ -116,7 +116,7 @@ Obviously, for the code above, these temporary table joins will conflict if mult
 
 ### Path type merge rule
 
-Let's look at the following 3 talbe join paths
+Let's look at the following 3 table join paths
 
 ```
 a->b->c->d->e->f->g
