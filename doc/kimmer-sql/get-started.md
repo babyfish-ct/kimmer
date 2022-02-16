@@ -291,19 +291,20 @@
        
        - Select one column
        
-       ```kt
-       select(expr)
-       ```
+          ```kt
+          select(expr)
+          ```
        
        - Select two or more columns
-       ```
-       select {
-           expr1 then
-           expr2 then
-           ...
-           exprN
-       }
-       ```
+       
+          ```
+          select {
+              expr1 then
+              expr2 then
+              ...
+              exprN
+          }
+          ```
 
 ## 3. What does kimmer-ksp do?
 
