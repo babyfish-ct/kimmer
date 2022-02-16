@@ -196,7 +196,8 @@ val rows = query.execute(con)
 We use table join ```table.store```, this code generates the following SQL
 ```sql
 select tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
-from BOOK as tb_1_ inner join BOOK_STORE as tb_2_ on tb_1_.STORE_ID = tb_2_.ID 
+from BOOK as tb_1_ 
+inner join BOOK_STORE as tb_2_ on tb_1_.STORE_ID = tb_2_.ID 
 where tb_2_.NAME = ?
 ```
 In the final generated SQL, we see SQL join ```inner join BOOK_STORE as tb_2_ on tb_1_.STORE_ID = tb_2_.ID```.
