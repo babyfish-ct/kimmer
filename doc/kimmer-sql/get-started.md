@@ -305,6 +305,7 @@
              exprN
          }
          ```
+         The two spellings are incompatible. For why this is the case, see [A Design to Avoid Intellij's BUG](intellij-bug.md)
 
 ## 3. What does kimmer-ksp do?
 
