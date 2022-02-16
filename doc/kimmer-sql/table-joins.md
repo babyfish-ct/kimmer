@@ -108,7 +108,7 @@ In the code above
     ```table.`books?`.`store?` ```
     Left outer join chain, 2 entity types are joined
     
-> In fact, γ and δ are not complete connections, they are semi-connections, which will be described later. You can think for now that kimmer-sql foolishly treats them as full table joins.
+> In fact, γ and δ are not complete table joins, they are half joins, which will be described later. You can think for now that kimmer-sql foolishly treats them as normal table joins.
 
 
 
