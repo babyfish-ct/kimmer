@@ -36,12 +36,12 @@ private fun showData(
         }
 
         authorName?.let {
-            where(
+            where {
                 table.id valueIn subQuery(Author::class) {
                     where(table.fullName ilike it)
                     select(table.books.id)
                 }
-            )
+            }
         }
 
         orderBy(table.name)

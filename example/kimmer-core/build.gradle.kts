@@ -12,8 +12,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("org.babyfish.kimmer:kimmer:0.1.5")
-    ksp("org.babyfish.kimmer:kimmer-ksp:0.1.5")
+    implementation("org.babyfish.kimmer:kimmer:0.1.6")
+    ksp("org.babyfish.kimmer:kimmer-ksp:0.1.6")
 }
 
 kotlin {

@@ -12,8 +12,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("org.babyfish.kimmer:kimmer-sql:0.1.5")
-    ksp("org.babyfish.kimmer:kimmer-ksp:0.1.5")
+    implementation("org.babyfish.kimmer:kimmer-sql:0.1.6")
+    ksp("org.babyfish.kimmer:kimmer-ksp:0.1.6")
     runtimeOnly("com.h2database:h2:2.1.210")
 }
 
