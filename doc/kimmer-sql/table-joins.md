@@ -76,5 +76,37 @@ select(table.id)
 val matchedAuthorIds = query.execute(con)
 ```
 
+In the code above
+
+1. The line with comment *α*: 
+
+    ```table.books```
+    Inner join chain, 1 table is joined
+    
+2. The line with comment *β*: 
+
+    ```table.books.store```
+    Inner join chain, 2 tables are joined
+
+3. The line with comment *γ*: 
+
+    ```table.books.store```
+    Inner join chain, 2 tables are joined
+
+4. The line with comment *δ*: 
+
+    ```table.books.store```
+    Inner join chain, 2 tables are joined
+    
+5. The line with comment *ε*: 
+
+    ```table.`books?` ```
+    Left outer join chain, 2 tables are joined
+    
+6. The line with comment *ζ*: 
+
+    ```table.`books?`.`store?` ```
+    Left outer join chain, 2 tables are joined
+
 ------------------
 [< Previous: Null safety](./null-safety.md) | [Back to parent](./README.md) | [Next: Contains >](./contains.md)
