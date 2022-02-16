@@ -116,7 +116,7 @@
 
 5. Let kimmer-ksp generates extra sources code.
 
-   ![image](../kimmer-core/image/ksp.jpeg)
+   ![image](../kimmer-core/images/ksp.jpeg)
    
    Remember we had such a configuration in gradle before?
    
