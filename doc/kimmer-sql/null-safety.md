@@ -266,7 +266,7 @@ The aggregate function *max()* may return null, which can be caused by aggregati
 
 So, the return type of the subquery is *Pair<String, Int?>*. However, the tuple type on the left side of *valueIn* is *Pair<String, Int>*, the mismatch between them in a compilation error.
 
-However, when *max()* is used together with group by, it is never possible for *max()* to return null because empty groups cannot appear in the query results. This query has no problem.
+However, when *max()* is used together with *group by*, it is never possible for *max()* to return null because empty groups cannot appear in the query results. This query has no problem.
 
 At this time, *asNonNull()* can help you to treat the *max()* function as a non-null expression.
 
