@@ -76,6 +76,8 @@ select(table.id)
 val matchedAuthorIds = query.execute(con)
 ```
 
+> In order for this code to be compiled correctly, the ksp parameter *kimmer.table.collection-join-only-for-sub-query* needs to be set to *false*. For details, please refer to [Contains](./contains.md). Let's ignore this ksp parameter for now and focus on the table joins now
+
 In the code above
 
 1. The line with comment *α*: 
@@ -108,8 +110,62 @@ In the code above
     ```table.`books?`.`store?` ```
     Left outer join chain, 2 entity types are joined
     
-> In fact, γ and δ are not complete table joins, they are half joins, which will be described later. You can think for now that kimmer-sql foolishly treats them as normal table joins.
+> In fact, γ and δ are not complete table joins, they are half joins, which will be described later. You can think for now that kimmer-sql foolishly treats them as normal table joins. 
 
+Obviously, for the code above, these temporary table joins will conflict if multiple dynamic conditions are met at runtime. kimmer-sql can merge several join paths together and remove redundant connections.
+
+### Path type merge rule
+
+Let's look at the following 3 talbe join paths
+
+```
+a->b->c->d->e->f->g
+```
+```
+a->b->c->h->i->j
+```
+```
+a->x->y->z->a->b->c->d
+```
+
+kimmer-sql will merge these paths into a tree
+
+```
+-+-a
+ |
+ +----+-b
+ |    |
+ |    \----+-c 
+ |         |
+ |         +----+-d
+ |         |    |
+ |         |    \----+-e
+ |         |         |
+ |         |         \----+-f
+ |         |              |
+ |         |              \------g
+ |         |
+ |         \----+-h
+ |              |
+ |              \----+-i
+ |                   |
+ |                   \------j
+ |
+ \----+-x
+      |
+      \----+-y
+           |
+           \----+-z
+                |
+                \----+-a
+                     |
+                     \----+-b
+                          |
+                          \----+-c
+                               |
+                               \------d
+ 
+```
 
 
 ------------------
