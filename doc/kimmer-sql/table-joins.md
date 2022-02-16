@@ -16,10 +16,11 @@ More importantly, you don't have to consider whether there is some conflict betw
 This feature makes kimmer-sql very suitable for dynamic SQL
 
 ```kt
-/* environment arguments */
+// Environment arguments
+val sqlClient = ... some code to get sql client ...
+val con = ... some code to get JDBC/R2DBC connection ...
 
-
-/* dynamic query arguments */
+// Dynamic query arguments
 name: String? = ...Some code...
 val bookName: String? = 
 val storeName: String?
@@ -29,6 +30,7 @@ orderByName: Boolean,
 orderByBookName: Boolean,
 orderByStoreName: Boolean
 
+// Now, start dynamic query
 name?.let {
     where { table.fullName ilike it }
 }
@@ -70,6 +72,7 @@ select(table.id)
                 // cause duplicated data, distinct
 }
 
+// Get the result
 val matchedAuthorIds = query.execute(con)
 ```
 
