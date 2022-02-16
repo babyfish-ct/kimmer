@@ -21,14 +21,14 @@ val sqlClient = ... some code to get sql client ...
 val con = ... some code to get JDBC/R2DBC connection ...
 
 // Dynamic query arguments
-name: String? = ...Some code...
-val bookName: String? = 
-val storeName: String?
-val inclusiveStoreIds: Collection<UUID>? =
-exclusiveStoreIds: Collection<UUID>? =
-orderByName: Boolean,
-orderByBookName: Boolean,
-orderByStoreName: Boolean
+val name: String? = ...Some code...
+val bookName: String? = ...Some code...
+val storeName: String? = ...Some code...
+val inclusiveStoreIds: Collection<UUID>? = ...Some code...
+exclusiveStoreIds: Collection<UUID>? = ...Some code...
+orderByName: Boolean = ...Some code...
+orderByBookName: Boolean = ...Some code...
+orderByStoreName: Boolean = ...Some code...
 
 // Now, start dynamic query
 name?.let {
@@ -175,6 +175,55 @@ kimmer-sql merges them like this
 
 1. If all the conflicting table joins are left outer joins, the left outer join is finally adopted.
 2. If any one of the conflicting table joins is an inner join, the inner join is finally adopted.
+
+## 2. Phantom join
+
+Phantom join is a very simple concept, just compare it with normal join to understand. 
+
+Let's first look at an example of a normal table join
+
+```kt
+val sqlClient = ... some code to get sql client ...
+val con = ... some code to get JDBC/R2DBC connection ...
+
+val query = sqlClient.createQuery(Book::class) {
+    where { table.store.name eq "MANNING" }
+    select(table)
+}
+val rows = query.execute(con)
+```
+
+We use table join ```table.store```, this code generates the following SQL
+```sql
+select tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+from BOOK as tb_1_ inner join BOOK_STORE as tb_2_ on tb_1_.STORE_ID = tb_2_.ID 
+where tb_2_.NAME = ?
+```
+In the final generated SQL, we see SQL join ```inner join BOOK_STORE as tb_2_ on tb_1_.STORE_ID = tb_2_.ID```.
+
+Now let's look at the phantom table join.
+
+```kt
+val sqlClient = ... some code to get sql client ...
+val con = ... some code to get JDBC/R2DBC connection ...
+
+val query = sqlClient.createQuery(Book::class) {
+    where { table.store.id eq UUID.fromString("2fa3955e-3e83-49b9-902e-0465c109c779") }
+    select(table)
+}
+query.execute(con)
+```
+We use table join ```table.store```, this code generates the following SQL
+```
+select tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+from BOOK as tb_1_ 
+where tb_1_.STORE_ID = ?
+```
+We don't see any SQL joins, we only see condition ```tb_1_.STORE_ID = ?``` for foreign keys.
+
+For many-to-one association based on foreign key. The id of the parent table is actually the foreign key of the child table.
+
+So, if we join an association based on a foreign key but don't access any fields of the associated object other than id, the join will be treated as a phantom join. It looks like table join in kotlin code, but nothing is generated in SQL.
 
 ------------------
 [< Previous: Null safety](./null-safety.md) | [Back to parent](./README.md) | [Next: Contains >](./contains.md)
