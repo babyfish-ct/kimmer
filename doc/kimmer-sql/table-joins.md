@@ -226,5 +226,39 @@ For many-to-one association based on foreign key. The id of the parent table is 
 
 So, if we join an association based on a foreign key but don't access any fields of the associated object other than id, the join will be treated as a phantom join. It looks like table join in kotlin code, but nothing is generated in SQL.
 
+## 3. Half join
+
+Half join is a similar concept to a phantom join, but for associations based on middle table.
+
+Let's first look at a normal join based on middle table
+
+```kt
+val query = sqlClient.createQuery(Book::class) {
+    where { table.authors.firstName eq "Alex" }
+    select(table)
+}
+query.execute(con)
+```
+
+The generated SQL is as follows
+
+```sql
+select tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+from BOOK as tb_1_ 
+inner join BOOK_AUTHOR_MAPPING as tb_2_ on tb_1_.ID = tb_2_.BOOK_ID 
+inner join AUTHOR as tb_3_ on tb_2_.AUTHOR_ID = tb_3_.ID 
+where tb_3_.FIRST_NAME = ?
+```
+
+We see that the association based on the middle table will generate two SQL joins
+
+- Step1: Join to middle table
+
+    ```inner join BOOK_AUTHOR_MAPPING as tb_2_ on tb_1_.ID = tb_2_.BOOK_ID ```
+    
+- Step2: join to target table
+
+    ```inner join AUTHOR as tb_3_ on tb_2_.AUTHOR_ID = tb_3_.ID ```
+
 ------------------
 [< Previous: Null safety](./null-safety.md) | [Back to parent](./README.md) | [Next: Contains >](./contains.md)
