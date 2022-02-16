@@ -37,19 +37,19 @@
    
    We configured 3 arguments to ksp.
    
-   i. "kimmer.draft"
+   - "kimmer.draft"
    
       true means to generate source codes of kimmer, its default value is true.
 
       Let's focus on kimmer-sql, not kimmer. Set it to false.
       
-   ii. "kimmer.table"
+   - "kimmer.table"
       
       true means to generate source codes of kimmer, its default value is false.
 
       We want to used kimmer-sql, so it must be set to true, this is important.
       
-   iii. "kimmer.table.collection-join-only-for-sub-query"
+   - "kimmer.table.collection-join-only-for-sub-query"
    
       This argument will be discussed in detail in Chapter "[Contains](../contains.md)", it is recommended to open.
       
@@ -76,8 +76,43 @@
       ```
       
    b. Book.kt
+   
       ```kt
+      package org.babyfish.kimmer.sql.example.model
+
+      import org.babyfish.kimmer.sql.Entity
+      import java.math.BigDecimal
+      import java.util.*
+
+      interface Book: Entity<UUID> {
+          val name: String
+          val store: BookStore
+          val edition: Int
+          val price: BigDecimal
+          val authors: List<Author>
+      }
       ```
+      
+   c. Author.kt
+   
+      ```kt
+      package org.babyfish.kimmer.sql.example.model
+
+      import org.babyfish.kimmer.sql.Entity
+      import java.util.*
+
+      interface Author: Entity<UUID> {
+          val firstName: String
+          val lastName: String
+          val fullName: String
+          val books: List<Book>
+      }
+      ```
+      
+   Two points to note
+
+   - All database entities must extend *org.babyfish.kimmer.sql.Entity*， its generic parameter must be specified as the type of priamry key, but the business entities itself cannot have generic parameters.
+   - Unlike kimmer, kimmer-sql does not allow multiple entity types to be defined in one source code file. Otherwise, the kimmer-ksp precompiler will report an error.
       
 
 [Back to parent](./README.md) | [Next: Null Saftey >](./null-safety.md)
