@@ -183,15 +183,15 @@
 
         orderBy(table.name)
 
-        select(
-            table,
+        select {
+            table then
             sql(Int::class, "rank() over(order by %e desc)") {   // γ
                 expressions(table.price)
-            },
+            } then
             sql(Int::class, "rank() over(partition by %e order by %e desc)") {    // δ
                 expressions(table.store.id, table.price)    // β
             }
-        )
+        }
     }
 
     val countQuery = query
