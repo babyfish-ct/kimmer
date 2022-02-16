@@ -64,7 +64,7 @@ the line with comment "β" will result in a compilation error, store is a nullab
 
 Left join always return nonnull table regardless of whether the association itself is nullable or not.
 
-## 3. NonNull column of nullable table
+## 3. Nonnull column of nullable table
 
 *BookStore::name* is a non null property.
 
