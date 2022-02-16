@@ -183,15 +183,15 @@
 
         orderBy(table.name)
 
-        select(
-            table,
+        select {   // η
+            table then
             sql(Int::class, "rank() over(order by %e desc)") {   // γ
                 expressions(table.price)
-            },
+            } then
             sql(Int::class, "rank() over(partition by %e order by %e desc)") {    // δ
                 expressions(table.store.id, table.price)    // β
             }
-        )
+        }
     }
 
     val countQuery = query
@@ -284,6 +284,28 @@
       They can quickly create the count query based on data queriy, this is very useful for pagination.
 
       Since the count query does not need *order by* clause, if the *order by* clause of the original query is complex, the count query may have optimization potential. kimmer-sql can automatically optimize the count query. For more details, please check [Pagination](./pagination).
+
+   6. Projection
+       
+      There are two uses of the select function
+       
+      - Select one column
+       
+         ```kt
+         select(expr)
+         ```
+       
+      - Select two or more columns
+       
+         ```
+         select {
+             expr1 then
+             expr2 then
+             ...
+             exprN
+         }
+         ```
+         The two spellings are incompatible. For why this is the case, see [A design to avoid intellij's bug](intellij-bug.md)
 
 ## 3. What does kimmer-ksp do?
 
