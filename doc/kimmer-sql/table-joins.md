@@ -187,7 +187,7 @@ val sqlClient = ... some code to get sql client ...
 val con = ... some code to get JDBC/R2DBC connection ...
 
 val query = sqlClient.createQuery(Book::class) {
-    where { table.store.name eq "MANNING" }
+    where(table.store.name eq "MANNING")
     select(table)
 }
 val rows = query.execute(con)
@@ -209,7 +209,7 @@ val sqlClient = ... some code to get sql client ...
 val con = ... some code to get JDBC/R2DBC connection ...
 
 val query = sqlClient.createQuery(Book::class) {
-    where { table.store.id eq UUID.fromString("2fa3955e-3e83-49b9-902e-0465c109c779") }
+    where(table.store.id eq UUID.fromString("2fa3955e-3e83-49b9-902e-0465c109c779"))
     select(table)
 }
 query.execute(con)
