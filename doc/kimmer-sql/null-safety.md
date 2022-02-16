@@ -223,5 +223,75 @@ The line with comment "α" will result in a compilation error, Coalesce expressi
 >  
 >   ```select(coalesce(table.website, "https://www.jetbrains.com/"))```
 
+## 7. asNonNullable
+
+In most cases, null-safety can work well to help you get more secure code.
+
+However, sometimes, it can have negative effects
+
+```kt
+val sqlClient = ... some code to get sql client ...
+val con = ... some code to get JDBC/R2DBC connection ...
+
+val rows = sqlClient
+    .createQuery(Book::class) {
+        where { 
+            tuple { 
+                table.name then 
+                    table.edition 
+            } valueIn subQuery(Book::class) {
+                groupBy(table.name)
+                select {    // α
+                    table.name then 
+                        table.edition.max()
+                }
+            }
+        }
+        select(table)
+    }
+    .execute(con)
+```
+
+The line with comment "α" will result in a compilation error
+
+```
+Type mismatch.
+Required:
+TypedSubQuery<Book, UUID, Book, UUID, Pair<String, Int>>
+Found:
+ConfigurableTypedSubQuery<Book, UUID, Book, UUID, Pair<String, Int?>>
+```
+
+The aggregate function *max()* may return null, which can be caused by aggregating an empty collection.
+
+So, the return type of the subquery is *Pair<String, Int?>*. However, the tuple type on the left side of *valueIn* is *Pair<String, Int>*, the mismatch between them in a compilation error.
+
+However, when *max()* is used together with group by, it is never possible for *max()* to return null because empty groups cannot appear in the query results. This query has no problem.
+
+At this time, *asNonNull()* can help you to treat the *max()* function as a non-null expression.
+
+```kt
+val sqlClient = ... some code to get sql client ...
+val con = ... some code to get JDBC/R2DBC connection ...
+
+val rows = sqlClient
+    .createQuery(Book::class) {
+        where {
+            tuple {
+                table.name then
+                    table.edition
+            } valueIn subQuery(Book::class) {
+                groupBy(table.name)
+                select {
+                    table.name then
+                        table.edition.max().asNonNull()
+                }
+            }
+        }
+        select(table)
+    }
+    .execute(con)
+```
+
 ------------------
 [< Previous: Get started](./get-started.md) | [Back to parent](./README.md) | [Next: Table joins >](./table-joins.md)
