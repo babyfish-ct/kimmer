@@ -114,7 +114,7 @@ In the code above
 
 Obviously, for the code above, these temporary table joins will conflict if multiple dynamic conditions are met at runtime. kimmer-sql can merge several join paths together and remove redundant connections.
 
-### Path type merge rule
+#### Path type merge rule
 
 Let's look at the following 3 table join paths
 
@@ -164,9 +164,17 @@ kimmer-sql will merge these paths into a tree
                           \----+-c
                                |
                                \------d
- 
 ```
+This tree removes all redundant table joins, and kimmer-sql will generate the final SQL based on this tree
 
+#### Join style merge rule
+
+In the above code, we not only used inner join ```table.books.store``` but also left outer join ```table.`books?`.`store?` ```.
+
+kimmer-sql merges them like this
+
+1. If all the conflicting table joins are left outer joins, the left outer join is finally adopted.
+2. If any one of the conflicting table joins is an inner join, the inner join is finally adopted.
 
 ------------------
 [< Previous: Null safety](./null-safety.md) | [Back to parent](./README.md) | [Next: Contains >](./contains.md)
