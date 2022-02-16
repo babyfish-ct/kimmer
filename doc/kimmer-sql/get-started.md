@@ -129,6 +129,22 @@
    ```
    
    It must be ensured that the automatically generated code can be recognized by intellij, otherwise the IDE will not be able to perform intellisense in the subsequent development process.
+   
+   
+6. Add other code and run
+
+   You also need to create three files, which can be learned or copied from the example of this project. To save space, the code will not be shown here.
+   
+   - [example/kimmer-sql/src/main/resources/database.sql](../../example/kimmer-sql/src/main/resources/database.sql)
+   
+      This file is used to initialize database, create tables and insert data.
+      
+   - [example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/AppContext.kt](../../example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/AppContext.kt)
+
+      This file used to setup environment
+      
+      - Uses "database.sql" to create tables and insert data
+      - Specify ORM meta information for the kimmer-ksp
       
 
 [Back to parent](./README.md) | [Next: Null Saftey >](./null-safety.md)
