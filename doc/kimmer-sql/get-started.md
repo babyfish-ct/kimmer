@@ -145,7 +145,16 @@
       
       - Uses "database.sql" to create tables and insert data
       - Specify ORM meta information for the kimmer-ksp
+
+   - [example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/App.kt](../../example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/App.kt)
       
+      This file is what kimmer-sql wants to present to the user, it's a small but comprehensive example. including
+      
+      - Dynamic sql
+      - Table join
+      - Sub quieres
+      - Mix dsl and native sql together
+      - Pagination
 
 [Back to parent](./README.md) | [Next: Null Saftey >](./null-safety.md)
 
