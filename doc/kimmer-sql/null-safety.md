@@ -50,6 +50,9 @@ Inner join always return nonnull table regardless of whether the association its
 
 Let's look at another example
 ```kt
+val sqlClient = ... some code to get sql client ...
+val con = ... some code to get JDBC/R2DBC connection ...
+
 val rows = sqlClient
     .createQuery(Book::class) {
         select(table.`store?`)
@@ -60,7 +63,7 @@ for (store in rows) {
 }
 ```    
 
-the line with comment "β" will result in a compilation error, store is a nullable object because *table.store?* means left join. 
+The line with comment "β" will result in a compilation error, store is a nullable object because *table.store?* means left join. 
 
 Left join always return nonnull table regardless of whether the association itself is nullable or not.
 
@@ -69,6 +72,9 @@ Left join always return nonnull table regardless of whether the association itse
 *BookStore::name* is a non null property.
 
 ```kt
+val sqlClient = ... some code to get sql client ...
+val con = ... some code to get JDBC/R2DBC connection ...
+
 val rows = sqlClient
     .createQuery(Book::class) {
         select(table.`store?`.name)
@@ -92,6 +98,82 @@ public val NonNullTable<BookStore, UUID>.name: NonNullExpression<String>
 public val Table<BookStore, UUID>.name: Expression<String>
   get() = `get?`(BookStore::name)
 ```
+
+## 4. Nullity of evaluate expression
+
+```kt
+val sqlClient = ... some code to get sql client ...
+val con = ... some code to get JDBC/R2DBC connection ...
+
+val rows = sqlClient
+    .createQuery(Book::class) {
+        select {
+            table.price + BigDecimal(1) then 
+                table.price + nullValue(BigDecimal::class)
+        }
+    }
+    .execute(con)
+for ((p1, p2) in rows) {
+    println(p1.scale()) // α
+    println(p2.scale()) // β
+}
+```
+
+- The line with comment "α" can be compiled correctly.
+
+    Both sides of the *+* are non-null expressions, and the result is also nonnullable
+    
+- However, the line with comment "β" will result in a compilation error， because BookStore::website is nullable
+
+    Either side of the *+* is a nullable expression, the result is nullable
+    
+Similarly, many other operators have this feature, which will not be described here.
+
+## 4. Nullity of case expression
+
+```kt
+val sqlClient = ... some code to get sql client ...
+val con = ... some code to get JDBC/R2DBC connection ...
+
+val rows = sqlClient
+    .createQuery(Book::class) {
+        select(
+            case()
+                .match(table.price lt BigDecimal(100), "Cheap")
+                .match(table.price gt BigDecimal(200), "Expensive")
+                .otherwise("Middle")
+        )
+    }
+    .execute(con)
+for (str in rows) {
+    println(str.length)
+}
+```
+
+This code can be compiled and run successfully, the result is nonnull when all branches of the case expression return nonnull.
+
+However, the result will be nullable when either branch of the case expression is nullable.
+
+```kt
+val sqlClient = ... some code to get sql client ...
+val con = ... some code to get JDBC/R2DBC connection ...
+
+val rows = sqlClient
+    .createQuery(Book::class) {
+        select(
+            case()
+                .match(table.price lt BigDecimal(100), "Cheap")
+                .match(table.price gt BigDecimal(200), nullValue(String::class))
+                .otherwise("Middle")
+        )
+    }
+    .execute(con)
+for (str in rows) {
+    println(str.length)   // α
+}
+```
+
+The line with comment "α" will result in a compilation error, the second branch of the case expression returns nullable type causing the entire case expression to return nullable type.
 
 ------------------
 [< Previous: Get started](./get-started.md) | [Back to parent](./README.md) | [Next: Table joins >](./table-joins.md)
