@@ -11,7 +11,9 @@ interface Filterable<E: Entity<ID>, ID: Comparable<ID>> {
 
     val table: NonNullJoinableTable<E, ID>
 
-    fun where(vararg predicates: Expression<Boolean>?)
+    fun where(vararg predicates: NonNullExpression<Boolean>?)
+
+    fun where(block: () -> NonNullExpression<Boolean>?)
 
     fun orderBy(
         expression: Expression<*>?,

@@ -126,18 +126,18 @@ interface CaseStartBuilder {
 interface NonNullCaseBuilder<T: Any> {
 
     fun match(
-        cond: Expression<Boolean>,
+        cond: NonNullExpression<Boolean>,
         value: T
     ): NonNullCaseBuilder<T> =
         match(cond, value(value))
 
     fun match(
-        cond: Expression<Boolean>,
+        cond: NonNullExpression<Boolean>,
         value: NonNullExpression<T>
     ): NonNullCaseBuilder<T>
 
     fun match(
-        cond: Expression<Boolean>,
+        cond: NonNullExpression<Boolean>,
         value: Expression<T>
     ): NullableCaseBuilder<T>
 
@@ -158,18 +158,18 @@ interface NonNullCaseBuilder<T: Any> {
 interface NullableCaseBuilder<T: Any> {
 
     fun match(
-        cond: Expression<Boolean>,
+        cond: NonNullExpression<Boolean>,
         value: T
     ): NullableCaseBuilder<T> =
         match(cond, value(value))
 
     fun match(
-        cond: Expression<Boolean>,
+        cond: NonNullExpression<Boolean>,
         value: NonNullExpression<T>
     ): NullableCaseBuilder<T>
 
     fun match(
-        cond: Expression<Boolean>,
+        cond: NonNullExpression<Boolean>,
         value: Expression<T>
     ): NullableCaseBuilder<T>
 
@@ -299,7 +299,7 @@ internal class CaseStartBuilderImpl: CaseStartBuilder, CaseChainNode {
 
 internal class CaseBuilderImpl<T: Any>(
     private val parent: CaseChainNode,
-    private val cond: Expression<Boolean>,
+    private val cond: NonNullExpression<Boolean>,
     val value: Expression<T>
 ): NullableCaseBuilder<T>, NonNullCaseBuilder<T>, CaseChainNode {
 
@@ -314,19 +314,19 @@ internal class CaseBuilderImpl<T: Any>(
     }
 
     override fun match(
-        cond: Expression<Boolean>,
+        cond: NonNullExpression<Boolean>,
         value: T
     ): CaseBuilderImpl<T> =
         CaseBuilderImpl(this, cond, value(value))
 
     override fun match(
-        cond: Expression<Boolean>,
+        cond: NonNullExpression<Boolean>,
         value: NonNullExpression<T>
     ): CaseBuilderImpl<T> =
         CaseBuilderImpl(this, cond, value)
 
     override fun match(
-        cond: Expression<Boolean>,
+        cond: NonNullExpression<Boolean>,
         value: Expression<T>
     ): CaseBuilderImpl<T> =
         CaseBuilderImpl(this, cond, value)

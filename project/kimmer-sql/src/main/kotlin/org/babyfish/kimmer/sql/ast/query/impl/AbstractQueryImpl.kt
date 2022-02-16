@@ -30,11 +30,11 @@ internal abstract class AbstractQueryImpl<E, ID>(
     protected val entityTypeMap: Map<KClass<out Immutable>, EntityType>
         get() = sqlClient.entityTypeMap
 
-    private val predicates = mutableListOf<Expression<Boolean>>()
+    private val predicates = mutableListOf<NonNullExpression<Boolean>>()
 
     private val groupByExpressions = mutableListOf<Expression<*>>()
 
-    private val havingPredicates = mutableListOf<Expression<Boolean>>()
+    private val havingPredicates = mutableListOf<NonNullExpression<Boolean>>()
 
     private val orders = mutableListOf<Order>()
 
@@ -49,7 +49,7 @@ internal abstract class AbstractQueryImpl<E, ID>(
     protected open fun createTable(entityType: EntityType): TableImpl<E, ID> =
         TableImpl(this, entityType)
 
-    override fun where(vararg predicates: Expression<Boolean>?) {
+    override fun where(vararg predicates: NonNullExpression<Boolean>?) {
         for (predicate in predicates) {
             predicate?.let {
                 this.predicates += it
@@ -57,15 +57,27 @@ internal abstract class AbstractQueryImpl<E, ID>(
         }
     }
 
+    override fun where(block: () -> NonNullExpression<Boolean>?) {
+        block()?.let {
+            predicates += it
+        }
+    }
+
     override fun groupBy(vararg expression: Expression<*>) {
         groupByExpressions += expression
     }
 
-    override fun having(vararg predicates: Expression<Boolean>?) {
+    override fun having(vararg predicates: NonNullExpression<Boolean>?) {
         for (predicate in predicates) {
             predicate?.let {
                 this.havingPredicates += it
             }
+        }
+    }
+
+    override fun having(block: () -> NonNullExpression<Boolean>?) {
+        block()?.let {
+            havingPredicates += it
         }
     }
 

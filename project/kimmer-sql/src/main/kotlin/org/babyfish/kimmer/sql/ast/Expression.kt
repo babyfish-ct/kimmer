@@ -136,7 +136,7 @@ internal class PropExpression<T: Any>(
 
 internal class CombinedExpression(
     private val operator: String,
-    private val predicates: List<Expression<*>>
+    private val predicates: List<NonNullExpression<*>>
 ) : AbstractExpression<Boolean>(Boolean::class.java) {
 
     init {
@@ -170,7 +170,7 @@ internal class CombinedExpression(
 }
 
 internal class NotExpression(
-    private val predicate: Expression<Boolean>
+    private val predicate: NonNullExpression<Boolean>
 ): AbstractExpression<Boolean>(Boolean::class.java) {
 
     override val precedence: Int

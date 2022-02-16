@@ -10,12 +10,12 @@ class SubQueryTest: AbstractTest() {
     @Test
     fun testColumnInSubQuery() {
         sqlClient.createQuery(Book::class) {
-            where(
+            where {
                 table.id valueIn subQuery(Author::class) {
                     where(table.firstName eq "Alex")
                     select(table.books.id)
                 }
-            )
+            }
             select(table)
         }.executeAndExpect {
             sql {
@@ -34,12 +34,12 @@ class SubQueryTest: AbstractTest() {
     @Test
     fun testTwoColumnsInSubQuery() {
         sqlClient.createQuery(Book::class) {
-            where(
+            where {
                 tuple(table.name, table.price) valueIn subQuery(Book::class) {
                     groupBy(table.name)
                     select(table.name, table.price.max().`!`)
                 }
-            )
+            }
             select(table)
         }.executeAndExpect {
             sql {
@@ -68,14 +68,14 @@ class SubQueryTest: AbstractTest() {
     @Test
     fun testExists() {
         sqlClient.createQuery(Book::class) {
-            where(
+            where {
                 exists(untypedSubQuery(Author::class) {
                     where(
                         parentTable.id eq table.books.id,
                         table.firstName eq "Alex"
                     )
                 })
-            )
+            }
             select(table)
         }.executeAndExpect {
             sql {
@@ -98,7 +98,7 @@ class SubQueryTest: AbstractTest() {
     @Test
     fun testExistsWithTypedQuery() {
         sqlClient.createQuery(Book::class) {
-            where(
+            where {
                 exists(subQuery(Author::class) {
                     where(
                         parentTable.id eq table.books.id,
@@ -106,7 +106,7 @@ class SubQueryTest: AbstractTest() {
                     )
                     select(table)
                 })
-            )
+            }
             select(table)
         }.executeAndExpect {
             sql {
@@ -129,9 +129,11 @@ class SubQueryTest: AbstractTest() {
     @Test
     fun testSubQueryAsSimpleExpression() {
         sqlClient.createQuery(Book::class) {
-            where(table.price gt subQuery(Book::class) {
-                select(coalesce(table.price.avg(), BigDecimal.ZERO))
-            })
+            where {
+                table.price gt subQuery(Book::class) {
+                    select(coalesce(table.price.avg(), BigDecimal.ZERO))
+                }
+            }
             select(table)
         }.executeAndExpect {
             sql {

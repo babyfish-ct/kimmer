@@ -57,7 +57,10 @@ class ReverseJoinTest: AbstractTest() {
     @Test
     fun testReverseHalfJoinOnNormalProp() {
         sqlClient.createQuery(Author::class) {
-            where(table.`←joinList`(Book::authors).id valueIn listOf(learningGraphQLId1, learningGraphQLId2))
+            where {
+                table.`←joinList`(Book::authors).id valueIn
+                    listOf(learningGraphQLId1, learningGraphQLId2)
+            }
             select(constant(1))
         }.executeAndExpect {
             sql {
@@ -72,7 +75,7 @@ class ReverseJoinTest: AbstractTest() {
     @Test
     fun mergeNormalJoinsAndReversedJoins() {
         sqlClient.createQuery(BookStore::class) {
-            where(
+            where {
                 or(
                     table
                         .`←joinReference?`(Book::store)
@@ -80,7 +83,7 @@ class ReverseJoinTest: AbstractTest() {
                         .get(Author::firstName) eq "Alex",
                     table.`books?`.`authors?`.firstName eq "Tim"
                 )
-            )
+            }
             select(constant(1))
         }.executeAndExpect {
             sql {
@@ -97,7 +100,7 @@ class ReverseJoinTest: AbstractTest() {
     @Test
     fun mergeNormalJoinsAndReversedJoinsWithDiffJoinTypes() {
         sqlClient.createQuery(BookStore::class) {
-            where(
+            where {
                 or(
                     table
                         .`←joinReference?`(Book::store)
@@ -105,7 +108,7 @@ class ReverseJoinTest: AbstractTest() {
                         .get(Author::firstName) eq "Alex",
                     table.books.authors.firstName eq "Tim"
                 )
-            )
+            }
             select(constant(1))
         }.executeAndExpect {
             sql {

@@ -234,7 +234,7 @@ class TableGenerator(
                 entityIDTypeNameProvider[classDeclaration]
             )
         val returnTypeName =
-            ClassName("$KIMMER_SQL_AST_PACKAGE", "Expression")
+            ClassName("$KIMMER_SQL_AST_PACKAGE", "NonNullExpression")
                 .parameterizedBy(Boolean::class.asClassName())
         val listTypeName =
             List::class.asClassName().parameterizedBy(
