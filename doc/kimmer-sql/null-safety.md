@@ -131,7 +131,7 @@ for ((p1, p2) in rows) {
     
 Similarly, many other operators have this feature, which will not be described here.
 
-## 4. Nullity of case expression
+## 5. Nullity of case expression
 
 ```kt
 val sqlClient = ... some code to get sql client ...
@@ -176,6 +176,52 @@ for (str in rows) {
 ```
 
 The line with comment "α" will result in a compilation error, the second branch of the case expression returns nullable type causing the entire case expression to return nullable type.
+
+## 6. Nullity of coalesce
+
+```kt
+val sqlClient = ... some code to get sql client ...
+val con = ... some code to get JDBC/R2DBC connection ...
+
+val rows = sqlClient
+    .createQuery(BookStore::class) {
+        select(
+            coalesce(table.website)
+                .or("https://www.jetbrains.com/")
+                .or(nullValue(String::class))
+                .end()
+        )
+    }
+    .execute(con)
+for (website in rows) {
+    println(website.length)
+}
+```
+This code can be compiled and run successfully, The coalesce expression returns nonnull type when any one of its choice returns nonnull type.
+
+```kt
+val sqlClient = ... some code to get sql client ...
+val con = ... some code to get JDBC/R2DBC connection ...
+
+val rows = sqlClient
+    .createQuery(BookStore::class) {
+        select(
+            coalesce(table.website)
+                .or(nullValue(String::class))
+                .or(nullValue(String::class))
+                .end()
+        )
+    }
+    .execute(con)
+for (website in rows) {
+    println(website.length)    // α
+}
+```
+The line with comment "α" will result in a compilation error, Coalesce expression returns nullable type when all the choices returns nullable type.
+
+>   For coalesce expressions with only two options, there is a quick way to write it
+>  
+>   select(coalesce(table.website, "https://www.jetbrains.com/"))
 
 ------------------
 [< Previous: Get started](./get-started.md) | [Back to parent](./README.md) | [Next: Table joins >](./table-joins.md)
