@@ -215,7 +215,7 @@ val query = sqlClient.createQuery(Book::class) {
 query.execute(con)
 ```
 We use table join ```table.store```, this code generates the following SQL
-```
+```sql
 select tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
 from BOOK as tb_1_ 
 where tb_1_.STORE_ID = ?
