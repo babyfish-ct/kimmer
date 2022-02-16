@@ -75,7 +75,9 @@ But, this will cause problem of Intellij, for example
 
 ```kt
 sqlClient.createQuery(YourEntity::class) {
+
     ...where, groupBy, having, orderBy...
+    
     select(
         // You just wrote the select function without any parameters, 
         // you enter the first letter here and expect Intellij's intellisense
