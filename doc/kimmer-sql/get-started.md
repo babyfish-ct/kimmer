@@ -1,5 +1,8 @@
 # [Home](https://github.com/babyfish-ct/kimmer)/[kimmer-sql](./README.md)/Get started
 
+
+## 1. First experience
+
 1. Use Intellij to create a **gradle** project, choose **kotlin/jvm** and **kotlin/dsl**
    ![image](../kimmer-core/images/create-project.jpeg)
 
@@ -152,6 +155,95 @@
       - Mix dsl and native sql together
       - Pagination
 
+## 2. Key code description
+
+    Let's take a piece of code from [example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/App.kt](../../example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/App.kt) to illustrate.
+    
+    ```kt
+    val query = AppContext.sqlClient.createQuery(Book::class) {
+
+        name?.let {
+            where(table.name ilike it)
+        }
+
+        storeName?.let {
+            where(table.store.name ilike it)
+        }
+
+        authorName?.let {
+            where(
+                table.id valueIn subQuery(Author::class) {
+                    where(table.fullName ilike it)
+                    select(table.books.id)
+                }
+            )
+        }
+
+        orderBy(table.name)
+
+        select(
+            table,
+            sql(Int::class, "rank() over(order by %e desc)") {
+                expressions(table.price)
+            },
+            sql(Int::class, "rank() over(partition by %e order by %e desc)") {
+                expressions(table.store.id, table.price)
+            }
+        )
+    }
+
+    val countQuery = query
+        .reselect {
+            select(table.id.count())
+        }
+        .withoutSortingAndPaging()
+
+    val rowCount = AppContext.jdbc {
+        countQuery.execute(this)[0].toInt()
+    }
+    val pageCount = (rowCount + pageSize - 1) / pageSize
+    println("-------------------------------------------------")
+    println("Total row count: $rowCount, pageCount: $pageCount")
+    println("-------------------------------------------------")
+    println()
+
+    for (pageNo in 1..pageCount) {
+        println("-----------Page no: $pageNo-----------")
+        println()
+        val rows = AppContext.jdbc {
+            query.limit(pageSize, pageSize * (pageNo - 1)).execute(this)
+        }
+        for ((book, rank, partitionRank) in rows) {
+            println("book object: $book")
+            println("global price rank: $rank")
+            println("price rank in own store: $partitionRank")
+            println()
+        }
+    }
+    ```
+
+    1. Like C#'s LINQ, *select* must be at the end.
+    
+       a. Before *select*, queries were mutable objects. Mutable queries have no return type. The following operations always modify the mutable query object itself
+       
+          - join
+          - where
+          - groupBy
+          - having
+          - orderBy
+       
+       b. After *select*, new query object with return type is returned for you. Typed query objects are lightweight immutable proxies. The following operations do not change the query object itself, but create a new query object.
+       
+          - reselect
+          - withoutSortingAndPaging
+          - limit
+          - distinct
+          - union
+          - unionAll
+          - minus
+          - intersect
+       
+    
 ------------------------------
 
 [Back to parent](./README.md) | [Next: Null Saftey >](./null-safety.md)
