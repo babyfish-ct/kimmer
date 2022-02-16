@@ -63,7 +63,7 @@ for (store in rows) {
 }
 ```    
 
-The line with comment "β" will result in a compilation error, store is a nullable object because *table.store?* means left join. 
+The line with comment "α" will result in a compilation error, store is a nullable object because *table.store?* means left join. 
 
 Left join always return nonnull table regardless of whether the association itself is nullable or not.
 
@@ -84,6 +84,8 @@ for (name in rows) {
     println(name.length)    // α
 }
 ```
+
+The line with comment "α" will result in a compilation error.
 
 Although *BookStore::name* is a nonnull property, its it is created by the left join *table.store?*, so its data type in the query result is still nullable.
 
