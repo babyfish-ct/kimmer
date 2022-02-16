@@ -113,6 +113,22 @@
 
    - All database entities must extend *org.babyfish.kimmer.sql.Entity*， its generic parameter must be specified as the type of priamry key, but the business entities itself cannot have generic parameters.
    - Unlike kimmer, kimmer-sql does not allow multiple entity types to be defined in one source code file. Otherwise, the kimmer-ksp precompiler will report an error.
+
+5. Let kimmer-ksp generates extra sources code.
+
+   ![image](../kimmer-core/image/ksp.jpeg)
+   
+   Remember we had such a configuration in gradle before?
+   
+   ```
+   kotlin {
+       sourceSets.main {
+           kotlin.srcDir("build/generated/ksp/main/kotlin")
+       }
+   }
+   ```
+   
+   It must be ensured that the automatically generated code can be recognized by intellij, otherwise the IDE will not be able to perform intellisense in the subsequent development process.
       
 
 [Back to parent](./README.md) | [Next: Null Saftey >](./null-safety.md)
