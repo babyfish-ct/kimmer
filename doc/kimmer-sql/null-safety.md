@@ -221,7 +221,7 @@ The line with comment "α" will result in a compilation error, Coalesce expressi
 
 >   For coalesce expressions with only two options, there is a quick way to write it
 >  
->   select(coalesce(table.website, "https://www.jetbrains.com/"))
+>   ```select(coalesce(table.website, "https://www.jetbrains.com/"))```
 
 ------------------
 [< Previous: Get started](./get-started.md) | [Back to parent](./README.md) | [Next: Table joins >](./table-joins.md)
