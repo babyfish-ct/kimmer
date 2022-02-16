@@ -184,20 +184,20 @@
 
         select(
             table,
-            sql(Int::class, "rank() over(order by %e desc)") {
+            sql(Int::class, "rank() over(order by %e desc)") {   // γ
                 expressions(table.price)
             },
-            sql(Int::class, "rank() over(partition by %e order by %e desc)") {
+            sql(Int::class, "rank() over(partition by %e order by %e desc)") {    // δ
                 expressions(table.store.id, table.price)    // β
             }
         )
     }
 
     val countQuery = query
-        .reselect {
+        .reselect {    //ε
             select(table.id.count())
         }
-        .withoutSortingAndPaging()
+        .withoutSortingAndPaging()    // ζ
 
     val rowCount = AppContext.jdbc {
         countQuery.execute(this)[0].toInt()
@@ -264,12 +264,25 @@
       In the above code, we use *where* 3 times, but each time is limited to a specific condition, this is called dynamic query.
 
       > If table joins conflict due to different dynamic conditions, kimmer-sql will merge them. For more details, see [Table joins](./table-joins.md)
+
+   4. SQL DSL and native SQL can mixed together
+
+      In the above code, we called "sql", at comment γ and δ 
       
+      In the lambda expression of the *sql* function, we use the *expressions* function to inject DSL expressions into native SQL, the arguments correspond one-to-one with *"%e"* in the native sql string template.
+
+      In addition to the *expressions* functions shown here, there are actually another *values* function to inject literal values into native SQL, the arguments correspond one-to-one with *"%v"* in the native sql string template.
       
+   5. Special API for pagination
       
+      In the above code, we have called two functions
       
-    
-       
+      - reselect, at comment ε
+      - withoutSortingAndPaging, at comment ζ
+
+      They can quickly create the count query based on data queriy, this is very useful for pagination.
+
+      Since the count query does not need *order by* clause, if the *order by* clause of the original query is complex, the count query may have optimization potential. kimmer-sql can automatically optimize the count query. For more details, please check [Pagination](./pagination).
     
 ------------------------------
 
