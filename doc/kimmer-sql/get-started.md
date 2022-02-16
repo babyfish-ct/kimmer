@@ -18,6 +18,7 @@
       ```
       implementation("org.babyfish.kimmer:kimmer-sql:0.1.5")
       ksp("org.babyfish.kimmer:kimmer-ksp:0.1.5")
+      runtimeOnly("com.h2database:h2:2.1.210")
       ```
    
    c. Add this section into as toppest declaration
@@ -283,6 +284,56 @@
       They can quickly create the count query based on data queriy, this is very useful for pagination.
 
       Since the count query does not need *order by* clause, if the *order by* clause of the original query is complex, the count query may have optimization potential. kimmer-sql can automatically optimize the count query. For more details, please check [Pagination](./pagination).
+
+## 3. What does kimmer-ksp do?
+
+Recalling the previous steps, we used ksp
+
+```
+dependencies {
+    ...
+    ksp("org.babyfish.kimmer:kimmer-ksp:0.1.5")
+}
+
+ksp {
+    arg("kimmer.draft", "false")
+    arg("kimmer.table", "true")
+    arg("kimmer.table.collection-join-only-for-sub-query", "true")
+}
+```
+
+What does kimmer-ksp do?
+
+In fact, kimmer-sql can be used without ksp, but it is not concise enough. The user code opens like this
+
+```kt
+// table is Aurhor
+where(table.joinList(Author::books).joinReference(Book::store).get(BookStore.name) eq "MANNING")
+```
+
+Although such code is also type-safe, it is very cumbersome
+
+ksp can generate some extension functions for you. *(Use BookStore.store to be example)*
+
+```kt
+public val SubQueryTable<Book, UUID>.store: NonNullSubQueryTable<BookStore, UUID>
+  get() = joinReference(Book::store)
+
+public val SubQueryTable<Book, UUID>.`store?`: SubQueryTable<BookStore, UUID>
+  get() = `joinReference?`(Book::store)
+
+public val JoinableTable<Book, UUID>.store: NonNullJoinableTable<BookStore, UUID>
+  get() = joinReference(Book::store)
+
+public val JoinableTable<Book, UUID>.`store?`: JoinableTable<BookStore, UUID>
+  get() = `joinReference?`(Book::store)
+```
+
+So you can use an easier way
+
+```kt
+where(table.books.store.name eq "MANNING")
+```
     
 ------------------------------
 
