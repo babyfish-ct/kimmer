@@ -157,9 +157,10 @@
 
 ## 2. Key code description
 
-    Let's take a piece of code from [example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/App.kt](../../example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/App.kt) to illustrate.
+   Let's take a piece of code from [example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/App.kt](../../example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/App.kt) to illustrate.
     
-    ```kt
+    
+   ```kt
     val query = AppContext.sqlClient.createQuery(Book::class) {
 
         name?.let {
@@ -220,28 +221,28 @@
             println()
         }
     }
-    ```
+   ```
 
-    1. Like C#'s LINQ, *select* must be at the end.
+   1. Like C#'s LINQ, *select* must be at the end.
     
-       a. Before *select*, queries were mutable objects. Mutable queries have no return type. The following operations always modify the mutable query object itself
+      a. Before *select*, queries were mutable objects. Mutable queries have no return type. The following operations always modify the mutable query object itself
        
-          - join
-          - where
-          - groupBy
-          - having
-          - orderBy
+         - join
+         - where
+         - groupBy
+         - having
+         - orderBy
        
-       b. After *select*, new query object with return type is returned for you. Typed query objects are lightweight immutable proxies. The following operations do not change the query object itself, but create a new query object.
+      b. After *select*, new query object with return type is returned for you. Typed query objects are lightweight immutable proxies. The following operations do not change the query object itself, but create a new query object.
        
-          - reselect
-          - withoutSortingAndPaging
-          - limit
-          - distinct
-          - union
-          - unionAll
-          - minus
-          - intersect
+         - reselect
+         - withoutSortingAndPaging
+         - limit
+         - distinct
+         - union
+         - unionAll
+         - minus
+         - intersect
        
     
 ------------------------------
