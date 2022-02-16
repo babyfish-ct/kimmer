@@ -11,26 +11,21 @@ import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import kotlin.reflect.KClass
 
-interface Expression<T: Any> {
+interface Expression<T> {
 
     @Suppress("UNCHECKED_CAST")
-    val `!`: NonNullExpression<T>
-        get() = this as NonNullExpression<T>
-
-    @Suppress("UNCHECKED_CAST")
-    val `?`: Selection<T?>
-        get() = this as Selection<T?>
+    fun asNonNull() = this as NonNullExpression<T>
 
     val isSelectable: Boolean
 
     val selectedType: Class<T>
 }
 
-interface NonNullExpression<T: Any>: Expression<T>, Selection<T>
+interface NonNullExpression<T>: Expression<T>
 
 internal abstract class AbstractExpression<T: Any>(
     selectedType: Class<*>?
-): NonNullExpression<T>, Renderable, TableReferenceElement {
+): NonNullExpression<T>, Selection<T>, Renderable, TableReferenceElement {
 
     private val _selectedType: Class<T>? = selectedType?.let { convertType(it) }
 

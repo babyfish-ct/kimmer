@@ -35,9 +35,15 @@ class SubQueryTest: AbstractTest() {
     fun testTwoColumnsInSubQuery() {
         sqlClient.createQuery(Book::class) {
             where {
-                tuple(table.name, table.price) valueIn subQuery(Book::class) {
+                tuple {
+                    table.name then
+                        table.price
+                } valueIn subQuery(Book::class) {
                     groupBy(table.name)
-                    select(table.name, table.price.max().`!`)
+                    select {
+                        table.name then
+                            table.price.max().asNonNull()
+                    }
                 }
             }
             select(table)
@@ -56,7 +62,8 @@ class SubQueryTest: AbstractTest() {
                 |) in (
                     |select 
                         |tb_2_.NAME, 
-                        |max(tb_2_.PRICE) 
+                        |max(tb_2_.PRICE
+                    |) 
                     |from BOOK as tb_2_ 
                     |group by tb_2_.NAME
                 |)""".trimMargin()
@@ -156,18 +163,18 @@ class SubQueryTest: AbstractTest() {
                 select(coalesce(table.price.avg(), BigDecimal.ZERO))
             }
             orderBy(subQuery, OrderMode.DESC)
-            select(table, subQuery)
+            select {table then subQuery }
         }.executeAndExpect {
             sql {
                 """select 
-                |tb_1_.ID, 
-                |tb_1_.NAME, 
-                |tb_1_.WEBSITE, 
-                |(
-                    |select coalesce(avg(tb_2_.PRICE), $1) 
-                    |from BOOK as tb_2_ 
-                    |where tb_1_.ID = tb_2_.STORE_ID
-                |) 
+                    |tb_1_.ID, 
+                    |tb_1_.NAME, 
+                    |tb_1_.WEBSITE, 
+                    |(
+                        |select coalesce(avg(tb_2_.PRICE), $1) 
+                        |from BOOK as tb_2_ 
+                        |where tb_1_.ID = tb_2_.STORE_ID
+                    |) 
                 |from BOOK_STORE as tb_1_ 
                 |order by (
                     |select coalesce(avg(tb_2_.PRICE), $2) 

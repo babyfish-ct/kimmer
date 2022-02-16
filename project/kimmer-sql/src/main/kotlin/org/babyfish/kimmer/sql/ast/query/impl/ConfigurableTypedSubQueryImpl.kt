@@ -17,14 +17,12 @@ internal class ConfigurableTypedSubQueryImpl<P, PID, E, ID, R>(
     data,
     baseQuery
 ), ConfigurableTypedSubQuery<P, PID, E, ID, R>,
-    TypedSubQueryImplementor<P, PID, E, ID>, 
-    TypedQueryImplementor
+    TypedSubQueryImplementor<P, PID, E, ID, R>
     where
         P: Entity<PID>,
         PID: Comparable<PID>,
         E: Entity<ID>,
-        ID: Comparable<ID>,
-        R: Any {
+        ID: Comparable<ID> {
 
     private val _selectedType: Class<R>?
 
@@ -88,33 +86,13 @@ internal class ConfigurableTypedSubQueryImpl<P, PID, E, ID, R>(
         }
     }
 
-    override fun union(
-        right: TypedSubQuery<P, PID, E, ID, R>
-    ): TypedSubQuery<P, PID, E, ID, R> =
-        MergedTypedSubQueryImpl("union", this, right)
-
-    override fun unionAll(
-        right: TypedSubQuery<P, PID, E, ID, R>
-    ): TypedSubQuery<P, PID, E, ID, R> =
-        MergedTypedSubQueryImpl("union all", this, right)
-
-    override fun minus(
-        right: TypedSubQuery<P, PID, E, ID, R>
-    ): TypedSubQuery<P, PID, E, ID, R> =
-        MergedTypedSubQueryImpl("minus", this, right)
-
-    override fun intersect(
-        right: TypedSubQuery<P, PID, E, ID, R>
-    ): TypedSubQuery<P, PID, E, ID, R> =
-        MergedTypedSubQueryImpl("intersect", this, right)
-
     companion object {
 
         @JvmStatic
         @Suppress("UNCHECKED_CAST")
-        fun <P: Entity<PID>, PID: Comparable<PID>, E: Entity<ID>, ID: Comparable<ID>, R: Any> select(
+        fun <P: Entity<PID>, PID: Comparable<PID>, E: Entity<ID>, ID: Comparable<ID>, R> select(
             query: SubQueryImpl<P, PID, E, ID>,
-            vararg selections: Selection<*>
+            selections: List<Selection<*>>
         ): ConfigurableTypedSubQuery<P, PID, E, ID, R> =
             ConfigurableTypedSubQueryImpl(
                 TypedQueryData(selections.toList()),

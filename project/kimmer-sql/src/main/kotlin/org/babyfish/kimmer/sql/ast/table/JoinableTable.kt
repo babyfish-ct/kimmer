@@ -8,8 +8,6 @@ import kotlin.reflect.KProperty1
 
 interface JoinableTable<E: Entity<ID>, ID: Comparable<ID>> : Table<E, ID> {
 
-    val `?`: Selection<E?>
-
     fun <X: Entity<XID>, XID: Comparable<XID>> joinReference(
         prop: KProperty1<E, X?>
     ): NonNullJoinableTable<X, XID>

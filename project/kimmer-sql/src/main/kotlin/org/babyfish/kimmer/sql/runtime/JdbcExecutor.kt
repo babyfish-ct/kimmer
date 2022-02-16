@@ -13,9 +13,9 @@ import kotlin.reflect.KClass
 
 typealias JdbcExecutor = JdbcExecutorContext.() -> List<Any?>
 
-data class JdbcExecutorContext(
+data class JdbcExecutorContext internal constructor(
     val connection: Connection,
-    val selections: List<Selection<*>>,
+    internal val selections: List<Selection<*>>,
     val sql: String,
     val variables: List<Any>
 )

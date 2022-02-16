@@ -7,8 +7,7 @@ interface ConfigurableTypedSubQuery<P, PID, E, ID, R> : TypedSubQuery<P, PID, E,
         P: Entity<PID>,
         PID: Comparable<PID>,
         E: Entity<ID>,
-        ID: Comparable<ID>,
-        R: Any {
+        ID: Comparable<ID> {
 
     fun limit(limit: Int, offset: Int = 0): ConfigurableTypedSubQuery<P, PID, E, ID, R>
 

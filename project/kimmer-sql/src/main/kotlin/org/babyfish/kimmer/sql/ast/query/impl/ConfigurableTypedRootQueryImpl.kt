@@ -21,7 +21,7 @@ internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
     data,
     baseQuery
 ), ConfigurableTypedRootQuery<E, ID, R>
-    where E: Entity<ID>, ID: Comparable<ID>, R: Any {
+    where E: Entity<ID>, ID: Comparable<ID> {
 
     override val baseQuery: RootQueryImpl<E, ID>
         get() = super.baseQuery as RootQueryImpl<E, ID>
@@ -76,6 +76,7 @@ internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
             )
         }
 
+    @Suppress("UNCHECKED_CAST")
     override fun execute(con: java.sql.Connection): List<R> {
         val (sql, variables) = preExecute(JdbcSqlBuilder())
         val executor = baseQuery.sqlClient.jdbcExecutor
@@ -112,9 +113,9 @@ internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
 
         @JvmStatic
         @Suppress("UNCHECKED_CAST")
-        fun <E: Entity<ID>, ID: Comparable<ID>, R: Any> select(
+        fun <E: Entity<ID>, ID: Comparable<ID>, R> select(
             query: RootQueryImpl<E, ID>,
-            vararg selections: Selection<*>
+            selections: List<Selection<*>>
         ): ConfigurableTypedRootQuery<E, ID, R> =
             ConfigurableTypedRootQueryImpl(
                 TypedQueryData(selections.toList()),

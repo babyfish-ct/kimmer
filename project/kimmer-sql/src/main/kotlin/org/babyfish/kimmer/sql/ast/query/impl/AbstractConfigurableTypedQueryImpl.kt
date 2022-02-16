@@ -14,8 +14,7 @@ internal abstract class AbstractConfigurableTypedQueryImpl<E, ID, R>(
 ) : TypedQueryImplementor
     where E:
           Entity<ID>,
-          ID: Comparable<ID>,
-          R: Any {
+          ID: Comparable<ID> {
 
     init {
         data.selections.forEach {
@@ -73,10 +72,10 @@ internal abstract class AbstractConfigurableTypedQueryImpl<E, ID, R>(
             } else {
                 sql(sp)
             }
-            if (selection is TableImpl<*, *>) {
-                selection.renderAsSelection(this)
-            } else if (selection !== null) {
-                (selection as Renderable).renderTo(this)
+            when (selection) {
+                is TableImpl<*, *> -> selection.renderAsSelection(this)
+                is Renderable -> selection.renderTo(this)
+                else -> error("Internal bug unexpected selection")
             }
         }
         baseQuery.renderTo(this, data.withoutSortingAndPaging)

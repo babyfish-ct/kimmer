@@ -11,15 +11,15 @@ class ComplexExprTest: AbstractTest() {
     @Test
     fun testSqlExpression() {
         sqlClient.createQuery(Book::class) {
-            select(
-                table,
+            select {
+                table then
                 sql(Int::class, "rank() over(order by %e desc)") {
                     expressions(table.price)
-                },
+                } then
                 sql(Int::class, "rank() over(partition by %e order by %e desc)") {
                     expressions(table.store.id, table.price)
                 }
-            )
+            }
         }.executeAndExpect {
             sql {
                 """select 
@@ -54,7 +54,9 @@ class ComplexExprTest: AbstractTest() {
     fun testTupleInList() {
         sqlClient.createQuery(Book::class) {
             where(
-                tuple(table.name, table.edition) valueIn listOf(
+                tuple {
+                    table.name then table.edition
+                } valueIn listOf(
                     "Learning GraphQL" to 3,
                     "Effective TypeScript" to 2
                 )
@@ -76,13 +78,13 @@ class ComplexExprTest: AbstractTest() {
     @Test
     fun testSimpleCase() {
         sqlClient.createQuery(BookStore::class) {
-            select(
-                table,
-                case(table.name)
-                    .match("O'RELLIY", "Classic publishing house")
-                    .match("MANNING", "Classic publishing house")
-                    .otherwise("Other publishing house")
-            )
+            select {
+                table then
+                    case(table.name)
+                        .match("O'RELLIY", "Classic publishing house")
+                        .match("MANNING", "Classic publishing house")
+                        .otherwise("Other publishing house")
+            }
         }.executeAndExpect {
             sql {
                 """select 
@@ -109,13 +111,13 @@ class ComplexExprTest: AbstractTest() {
     @Test
     fun testCase() {
         sqlClient.createQuery(Book::class) {
-            select(
-                table,
+            select {
+                table then
                 case()
                     .match(table.price gt BigDecimal(200), "Expensive")
                     .match(table.price lt BigDecimal(100), "Cheap")
                     .otherwise("Fitting")
-            )
+            }
         }.executeAndExpect {
             sql {
                 """select 

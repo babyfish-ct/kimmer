@@ -46,15 +46,15 @@ private fun showData(
 
         orderBy(table.name)
 
-        select(
-            table,
+        select {
+            table then
             sql(Int::class, "rank() over(order by %e desc)") {
                 expressions(table.price)
-            },
+            } then
             sql(Int::class, "rank() over(partition by %e order by %e desc)") {
                 expressions(table.store.id, table.price)
             }
-        )
+        }
     }
 
     val countQuery = query

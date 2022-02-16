@@ -3,6 +3,10 @@ package org.babyfish.kimmer.sql.ast
 import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
 import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
 import org.babyfish.kimmer.sql.ast.query.impl.TypedSubQueryImplementor
+import org.babyfish.kimmer.sql.ast.query.selectable.AbstractProjection
+import org.babyfish.kimmer.sql.ast.query.selectable.Projection
+import org.babyfish.kimmer.sql.ast.query.selectable.Projection2
+import org.babyfish.kimmer.sql.ast.query.selectable.ProjectionContext
 import kotlin.reflect.KClass
 
 fun <X: Any> sql(
@@ -278,81 +282,13 @@ fun Expression<*>.isNull(): NonNullExpression<Boolean> =
 fun Expression<*>.isNotNull(): NonNullExpression<Boolean> =
     NullityExpression(false, this)
 
-fun <A: Any, B: Any> tuple(
-    a: Selection<A>,
-    b: Selection<B>
-): NonNullExpression<Pair<A, B>> =
-    PairExpression(a, b)
 
-fun <A: Any, B: Any, C: Any> tuple(
-    a: Selection<A>,
-    b: Selection<B>,
-    c: Selection<C>
-): NonNullExpression<Triple<A, B, C>> =
-    TripleExpression(a, b, c)
-
-fun <T1: Any, T2: Any, T3: Any, T4: Any> tuple(
-    selection1: Selection<T1>,
-    selection2: Selection<T2>,
-    selection3: Selection<T3>,
-    selection4: Selection<T4>,
-): NonNullExpression<Tuple4<T1, T2, T3, T4>> =
-    Tuple4Expression(selection1, selection2, selection3, selection4)
-
-fun <T1: Any, T2: Any, T3: Any, T4: Any, T5: Any> tuple(
-    selection1: Selection<T1>,
-    selection2: Selection<T2>,
-    selection3: Selection<T3>,
-    selection4: Selection<T4>,
-    selection5: Selection<T5>,
-): NonNullExpression<Tuple5<T1, T2, T3, T4, T5>> =
-    Tuple5Expression(selection1, selection2, selection3, selection4, selection5)
-
-fun <T1: Any, T2: Any, T3: Any, T4: Any, T5: Any, T6: Any> tuple(
-    selection1: Selection<T1>,
-    selection2: Selection<T2>,
-    selection3: Selection<T3>,
-    selection4: Selection<T4>,
-    selection5: Selection<T5>,
-    selection6: Selection<T6>,
-): NonNullExpression<Tuple6<T1, T2, T3, T4, T5, T6>> =
-    Tuple6Expression(selection1, selection2, selection3, selection4, selection5, selection6)
-
-fun <T1: Any, T2: Any, T3: Any, T4: Any, T5: Any, T6: Any, T7: Any> tuple(
-    selection1: Selection<T1>,
-    selection2: Selection<T2>,
-    selection3: Selection<T3>,
-    selection4: Selection<T4>,
-    selection5: Selection<T5>,
-    selection6: Selection<T6>,
-    selection7: Selection<T7>,
-): NonNullExpression<Tuple7<T1, T2, T3, T4, T5, T6, T7>> =
-    Tuple7Expression(selection1, selection2, selection3, selection4, selection5, selection6, selection7)
-
-fun <T1: Any, T2: Any, T3: Any, T4: Any, T5: Any, T6: Any, T7: Any, T8: Any> tuple(
-    selection1: Selection<T1>,
-    selection2: Selection<T2>,
-    selection3: Selection<T3>,
-    selection4: Selection<T4>,
-    selection5: Selection<T5>,
-    selection6: Selection<T6>,
-    selection7: Selection<T7>,
-    selection8: Selection<T8>,
-): NonNullExpression<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> =
-    Tuple8Expression(selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8)
-
-fun <T1: Any, T2: Any, T3: Any, T4: Any, T5: Any, T6: Any, T7: Any, T8: Any, T9: Any> tuple(
-    selection1: Selection<T1>,
-    selection2: Selection<T2>,
-    selection3: Selection<T3>,
-    selection4: Selection<T4>,
-    selection5: Selection<T5>,
-    selection6: Selection<T6>,
-    selection7: Selection<T7>,
-    selection8: Selection<T8>,
-    selection9: Selection<T9>,
-): NonNullExpression<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> =
-    Tuple9Expression(selection1, selection2, selection3, selection4, selection5, selection6, selection7, selection8, selection9)
+fun <T: Any> tuple(
+    block: ProjectionContext.() -> Projection<T>
+): NonNullExpression<T> =
+    (ProjectionContext.block() as AbstractProjection).let {
+        TupleExpression(it.selections)
+    }
 
 
 infix fun <T: Any> Expression<T>.valueIn(
@@ -391,12 +327,12 @@ fun notExists(
 fun exists(
     subQuery: TypedSubQuery<*, *, *, *, *>
 ): NonNullExpression<Boolean> =
-    exists((subQuery as TypedSubQueryImplementor<*, *, *, *>).baseQuery)
+    exists((subQuery as TypedSubQueryImplementor<*, *, *, *, *>).baseQuery)
 
 fun notExists(
     subQuery: TypedSubQuery<*, *, *, *, *>
 ): NonNullExpression<Boolean> =
-    notExists((subQuery as TypedSubQueryImplementor<*, *, *, *>).baseQuery)
+    notExists((subQuery as TypedSubQueryImplementor<*, *, *, *, *>).baseQuery)
 
 
 fun <T: Any> all(

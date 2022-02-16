@@ -9,9 +9,9 @@ import org.babyfish.kimmer.sql.ast.Selection
 
 typealias R2dbcExecutor = suspend R2dbcExecutorContext.() -> List<Any?>
 
-data class R2dbcExecutorContext(
+data class R2dbcExecutorContext internal constructor(
     val connection: Connection,
-    val selections: List<Selection<*>>,
+    internal val selections: List<Selection<*>>,
     val sql: String,
     val variables: List<Any>
 )

@@ -27,11 +27,11 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     private val isInverse: Boolean = false,
     private val joinProp: EntityProp? = null,
     private var isOuterJoin: Boolean = false
-): NonNullJoinableTable<E, ID>, Renderable {
+): NonNullJoinableTable<E, ID>, Renderable, Selection<E> {
 
-    val alias: String
+    private val alias: String
 
-    val middleTableAlias: String?
+    private val middleTableAlias: String?
 
     private var _staticallyUsed = parent === null
 
@@ -67,16 +67,12 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             outerJoin
         )
 
-    @Suppress("UNCHECKED_CAST")
-    override val `?`: Selection<E?>
-        get() = this as Selection<E?>
-
     override val id: NonNullExpression<ID>
         get() =
-            PropExpression<ID>(this, entityType.idProp).`!`
+            PropExpression(this, entityType.idProp)
 
     override fun <X : Any> get(prop: KProperty1<E, X>): NonNullExpression<X> =
-        `get?`(prop).`!`
+        `get?`(prop).asNonNull()
 
     override fun <X: Any> `get?`(prop: KProperty1<E, X?>): Expression<X> {
         val entityProp = entityType.props[prop.name] ?: error("No property '${prop.name}'")
