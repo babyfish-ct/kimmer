@@ -81,32 +81,36 @@ In the code above
 1. The line with comment *α*: 
 
     ```table.books```
-    Inner join chain, 1 table is joined
+    Inner join chain, 1 entity type is joined
     
 2. The line with comment *β*: 
 
     ```table.books.store```
-    Inner join chain, 2 tables are joined
+    Inner join chain, 2 entity types are joined
 
 3. The line with comment *γ*: 
 
     ```table.books.store```
-    Inner join chain, 2 tables are joined
+    Inner join chain, 2 entity types are joined
 
 4. The line with comment *δ*: 
 
     ```table.books.store```
-    Inner join chain, 2 tables are joined
+    Inner join chain, 2 entity types are joined
     
 5. The line with comment *ε*: 
 
     ```table.`books?` ```
-    Left outer join chain, 2 tables are joined
+    Left outer join chain, 1 entity type is joined
     
 6. The line with comment *ζ*: 
 
     ```table.`books?`.`store?` ```
-    Left outer join chain, 2 tables are joined
+    Left outer join chain, 2 entity types are joined
+    
+> In fact, γ and δ are not complete connections, they are semi-connections, which will be described later. You can think for now that kimmer-sql foolishly treats them as full table joins.
+
+
 
 ------------------
 [< Previous: Null safety](./null-safety.md) | [Back to parent](./README.md) | [Next: Contains >](./contains.md)
