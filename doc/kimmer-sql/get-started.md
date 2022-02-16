@@ -144,7 +144,7 @@
       This file used to setup environment
       
       - Uses "database.sql" to create tables and insert data
-      - Specify ORM meta information for the kimmer-ksp
+      - Specify ORM meta information for the kimmer-sql
 
    - [example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/App.kt](../../example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/App.kt)
       
@@ -292,7 +292,7 @@ Recalling the previous steps, we used ksp
 ```
 dependencies {
     ...
-    ksp("org.babyfish.kimmer:kimmer-ksp:0.1.5")
+    ksp("org.babyfish.kimmer:kimmer-ksp:0.1.6")
 }
 
 ksp {
