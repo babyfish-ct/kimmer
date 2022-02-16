@@ -85,7 +85,7 @@ sqlClient.createQuery(YourEntity::class) {
 }
 ```
 
-The intellij will become be froen like dead loop, UI interface is not responding. 
+The intellij will be frozen, UI interface is not responding. 
 
 Eventually, after waiting long enough, OS will ask you if you need to force terminate it.
 
