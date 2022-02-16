@@ -285,26 +285,26 @@
 
       Since the count query does not need *order by* clause, if the *order by* clause of the original query is complex, the count query may have optimization potential. kimmer-sql can automatically optimize the count query. For more details, please check [Pagination](./pagination).
 
-    6. Projection
+   6. Projection
        
-       There are two uses of the select function
+      There are two uses of the select function
        
-       - Select one column
+      - Select one column
        
-          ```kt
-          select(expr)
-          ```
+         ```kt
+         select(expr)
+         ```
        
-       - Select two or more columns
+      - Select two or more columns
        
-          ```
-          select {
-              expr1 then
-              expr2 then
-              ...
-              exprN
-          }
-          ```
+         ```
+         select {
+             expr1 then
+             expr2 then
+             ...
+             exprN
+         }
+         ```
 
 ## 3. What does kimmer-ksp do?
 
