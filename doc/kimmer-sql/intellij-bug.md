@@ -61,11 +61,11 @@ fun <T1, T2, T3, T4, T5, T6, T7, T8, T9> select(
     selection2: Selection<T2>, 
     selection3: Selection<T3>,
     selection4: Selection<T4>,
-    selection4: Selection<T5>,
-    selection4: Selection<T6>,
-    selection4: Selection<T7>,
-    selection4: Selection<T8>,
-    selection4: Selection<T9>,
+    selection5: Selection<T5>,
+    selection6: Selection<T6>,
+    selection7: Selection<T7>,
+    selection8: Selection<T8>,
+    selection9: Selection<T9>,
 ): TypedRootQuery<E, ID, Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>>
 ```
 
