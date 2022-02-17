@@ -65,7 +65,7 @@ for (store in rows) {
 
 The line with comment "α" will result in a compilation error, store is a nullable object because *table.store?* means left join. 
 
-Left join always return nonnull table regardless of whether the association itself is nullable or not.
+Left outer join always return nullable table regardless of whether the association itself is nullable or not.
 
 ## 3. Nonnull column of nullable table
 
