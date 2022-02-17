@@ -3,15 +3,13 @@ package org.babyfish.kimmer.sql.ast
 import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
 import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceElement
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
-import org.babyfish.kimmer.sql.ast.table.impl.accept
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
+import org.babyfish.kimmer.sql.spi.Renderable
 import kotlin.reflect.KClass
 
-interface Expression<T> {
+interface Expression<T> : Ast, Renderable {
 
     @Suppress("UNCHECKED_CAST")
     fun asNonNull() = this as NonNullExpression<T>
@@ -25,7 +23,7 @@ interface NonNullExpression<T>: Expression<T>
 
 internal abstract class AbstractExpression<T: Any>(
     selectedType: Class<*>?
-): NonNullExpression<T>, Selection<T>, Renderable, TableReferenceElement {
+): NonNullExpression<T>, Selection<T>, Renderable, Ast {
 
     private val _selectedType: Class<T>? = selectedType?.let { convertType(it) }
 
@@ -122,10 +120,8 @@ internal class PropExpression<T: Any>(
         table.renderSelection(prop, this, false)
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
-        if (!prop.isId) {
-            visitor.visit(table, prop)
-        }
+    override fun accept(visitor: AstVisitor) {
+        visitor.visitTableReference(table, prop)
     }
 }
 
@@ -159,7 +155,7 @@ internal class CombinedExpression(
         }
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         predicates.forEach { it.accept(visitor) }
     }
 }
@@ -177,7 +173,7 @@ internal class NotExpression(
         sql(")")
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         predicate.accept(visitor)
     }
 }
@@ -230,7 +226,7 @@ internal class LikeExpression(
         }
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         expression.accept(visitor)
     }
 }
@@ -252,7 +248,7 @@ internal class ComparisonExpression<T: Comparable<T>>(
         render(right)
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         left.accept(visitor)
         right.accept(visitor)
     }
@@ -275,7 +271,7 @@ internal class BetweenExpression<T: Comparable<T>>(
         render(max)
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         expression.accept(visitor)
         min.accept(visitor)
         max.accept(visitor)
@@ -301,7 +297,7 @@ internal class BinaryExpression<T: Number>(
         render(right)
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         left.accept(visitor)
         right.accept(visitor)
     }
@@ -325,7 +321,7 @@ internal class ConcatExpression(
         sql(")")
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         first.accept(visitor)
         others.forEach { it.accept(visitor) }
     }
@@ -344,7 +340,7 @@ internal class UnaryExpression<T: Number>(
         render(target)
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         target.accept(visitor)
     }
 }
@@ -366,7 +362,7 @@ internal class NullityExpression(
         }
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         expression.accept(visitor)
     }
 }
@@ -399,7 +395,7 @@ internal class InListExpression<T: Any>(
         }
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         expression.accept(visitor)
     }
 }
@@ -419,7 +415,7 @@ internal class InSubQueryExpression<T: Any>(
         render(subQuery)
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         expression.accept(visitor)
         subQuery.accept(visitor)
     }
@@ -439,8 +435,8 @@ internal class ExistsExpression(
         (subQuery.select(constant(1)) as Renderable).renderTo(this)
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
-        (subQuery as TableReferenceElement).accept(visitor)
+    override fun accept(visitor: AstVisitor) {
+        (subQuery as Ast).accept(visitor)
     }
 }
 
@@ -459,7 +455,7 @@ internal class OperatorSubQueryExpression<T: Any>(
         }
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         subQuery.accept(visitor)
     }
 }
@@ -475,7 +471,7 @@ internal class ValueExpression<T: Any>(
         variable(value)
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {}
+    override fun accept(visitor: AstVisitor) {}
 }
 
 internal class NullValueExpression<T: Any>(
@@ -489,7 +485,7 @@ internal class NullValueExpression<T: Any>(
         nullVariable(type)
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {}
+    override fun accept(visitor: AstVisitor) {}
 }
 
 
@@ -504,7 +500,7 @@ internal class ConstantExpression<T: Number>(
         sql(value.toString())
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {}
+    override fun accept(visitor: AstVisitor) {}
 }
 
 internal class AggregationExpression<T: Any>(
@@ -528,7 +524,8 @@ internal class AggregationExpression<T: Any>(
         }
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
+        visitor.visitAggregation(funName, base, prefix)
         base.accept(visitor)
     }
 }
@@ -594,7 +591,7 @@ internal class ContainsExpression(
         sql("))")
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         thisIdExpression.accept(visitor)
     }
 }

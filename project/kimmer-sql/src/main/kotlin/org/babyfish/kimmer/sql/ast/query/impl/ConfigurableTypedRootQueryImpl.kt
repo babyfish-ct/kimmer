@@ -1,38 +1,50 @@
 package org.babyfish.kimmer.sql.ast.query.impl
 
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.ast.*
+import org.babyfish.kimmer.sql.ast.AbstractSqlBuilder
 import org.babyfish.kimmer.sql.ast.JdbcSqlBuilder
 import org.babyfish.kimmer.sql.ast.R2dbcSqlBuilder
 import org.babyfish.kimmer.sql.ast.Selection
-import org.babyfish.kimmer.sql.ast.SqlBuilder
 import org.babyfish.kimmer.sql.ast.query.selectable.RootSelectable
 import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedRootQuery
 import org.babyfish.kimmer.sql.ast.query.TypedRootQuery
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
-import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
-import org.babyfish.kimmer.sql.meta.EntityProp
+import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
 import org.babyfish.kimmer.sql.runtime.JdbcExecutorContext
 import org.babyfish.kimmer.sql.runtime.R2dbcExecutorContext
+import java.lang.IllegalStateException
 
 internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
     data: TypedQueryData,
-    baseQuery: RootQueryImpl<E, ID>
+    baseQuery: RootMutableQueryImpl<E, ID>
 ): AbstractConfigurableTypedQueryImpl<E, ID, R>(
     data,
     baseQuery
 ), ConfigurableTypedRootQuery<E, ID, R>
     where E: Entity<ID>, ID: Comparable<ID> {
 
-    override val baseQuery: RootQueryImpl<E, ID>
-        get() = super.baseQuery as RootQueryImpl<E, ID>
+    override val baseQuery: RootMutableQueryImpl<E, ID>
+        get() = super.baseQuery as RootMutableQueryImpl<E, ID>
     
     override fun <X: Any> reselect(
         block: RootSelectable<E, ID>.() -> ConfigurableTypedRootQuery<E, ID, X>
     ): ConfigurableTypedRootQuery<E, ID, X> {
+        if (data.oldSelections !== null) {
+            throw IllegalStateException("The current query has been reselected, it cannot be reselect again")
+        }
+        if (baseQuery.isGroupByClauseUsed()) {
+            throw IllegalStateException("The current query uses group by clause, it cannot be reselected")
+        }
+        ReselectValidator().apply {
+            data.selections.forEach { it.accept(this) }
+        }
         val reselected = baseQuery.block()
         val selections = (reselected as ConfigurableTypedRootQueryImpl<E, ID, X>).data.selections
         return ConfigurableTypedRootQueryImpl(
-            data = data.copy(selections = selections),
+            data = data.copy(
+                selections = selections,
+                oldSelections = data.selections
+            ),
             baseQuery = baseQuery
         )
     }
@@ -90,7 +102,7 @@ internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
         return executor(R2dbcExecutorContext(con, data.selections, sql, variables)) as List<R>
     }
 
-    private fun preExecute(builder: SqlBuilder): Pair<String, List<Any>> {
+    private fun preExecute(builder: AbstractSqlBuilder): Pair<String, List<Any>> {
         val visitor = UseTableVisitor(builder)
         accept(visitor)
         renderTo(builder)
@@ -114,12 +126,30 @@ internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
         @JvmStatic
         @Suppress("UNCHECKED_CAST")
         fun <E: Entity<ID>, ID: Comparable<ID>, R> select(
-            query: RootQueryImpl<E, ID>,
+            query: RootMutableQueryImpl<E, ID>,
             selections: List<Selection<*>>
         ): ConfigurableTypedRootQuery<E, ID, R> =
             ConfigurableTypedRootQueryImpl(
                 TypedQueryData(selections.toList()),
                 baseQuery = query
             )
+    }
+
+    private class ReselectValidator: AstVisitor {
+
+        override fun visitSubQuery(
+            subQuery: TypedSubQuery<*, *, *, *, *>
+        ): Boolean = false
+
+        override fun visitAggregation(
+            functionName: String,
+            base: Expression<*>,
+            prefix:
+            String?
+        ) {
+            throw IllegalStateException(
+                "The current query uses aggregation function in select clause, it cannot be reselected"
+            )
+        }
     }
 }

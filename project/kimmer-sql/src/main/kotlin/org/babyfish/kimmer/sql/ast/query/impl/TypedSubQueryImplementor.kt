@@ -10,5 +10,5 @@ where
         E: Entity<ID>,
         ID: Comparable<ID> {
 
-    val baseQuery: SubQueryImpl<P, PID, E, ID>
+    val baseQuery: SubMutableQueryImpl<P, PID, E, ID>
 }

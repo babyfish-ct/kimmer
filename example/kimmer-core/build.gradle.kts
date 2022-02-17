@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "org.babyfish.kimmer.example"
-version = "0.1.3"
+version = "0.1.8"
 
 repositories {
     mavenCentral()
@@ -12,8 +12,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("org.babyfish.kimmer:kimmer:0.1.7")
-    ksp("org.babyfish.kimmer:kimmer-ksp:0.1.7")
+    implementation("org.babyfish.kimmer:kimmer:0.1.8")
+    ksp("org.babyfish.kimmer:kimmer-ksp:0.1.8")
 }
 
 kotlin {

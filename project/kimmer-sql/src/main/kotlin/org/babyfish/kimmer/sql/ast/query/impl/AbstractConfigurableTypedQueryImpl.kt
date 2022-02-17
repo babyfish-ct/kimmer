@@ -2,19 +2,20 @@ package org.babyfish.kimmer.sql.ast.query.impl
 
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.*
-import org.babyfish.kimmer.sql.ast.Renderable
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
-import org.babyfish.kimmer.sql.ast.table.impl.accept
+import org.babyfish.kimmer.sql.spi.Renderable
+import org.babyfish.kimmer.sql.ast.AstVisitor
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.runtime.PaginationContext
 
 internal abstract class AbstractConfigurableTypedQueryImpl<E, ID, R>(
     val data: TypedQueryData,
-    open val baseQuery: AbstractQueryImpl<E, ID>,
+    baseQuery: AbstractMutableQueryImpl<E, ID>,
 ) : TypedQueryImplementor
     where E:
           Entity<ID>,
           ID: Comparable<ID> {
+
+    private val _baseQuery: AbstractMutableQueryImpl<E, ID>
 
     init {
         data.selections.forEach {
@@ -30,7 +31,12 @@ internal abstract class AbstractConfigurableTypedQueryImpl<E, ID, R>(
                     )
             }
         }
+        baseQuery.freeze()
+        _baseQuery = baseQuery
     }
+
+    open val baseQuery: AbstractMutableQueryImpl<E, ID>
+        get() = _baseQuery
 
     override val selections: List<Selection<*>>
         get() = data.selections
@@ -39,7 +45,7 @@ internal abstract class AbstractConfigurableTypedQueryImpl<E, ID, R>(
         if (data.withoutSortingAndPaging || data.limit == Int.MAX_VALUE) {
             builder.renderRenderWithoutPaging()
         } else {
-            val paginationBuilder = builder.createChildBuilder()
+            val paginationBuilder = (builder as AbstractSqlBuilder).createChildBuilder()
             paginationBuilder.renderRenderWithoutPaging()
             paginationBuilder.build {
                 val ctx = PaginationContext(
@@ -55,9 +61,11 @@ internal abstract class AbstractConfigurableTypedQueryImpl<E, ID, R>(
         }
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
-        data.selections.forEach { it.accept(visitor) }
-        baseQuery.accept(visitor, data.withoutSortingAndPaging)
+    override fun accept(visitor: AstVisitor) {
+        data.selections.forEach {
+            it.accept(visitor)
+        }
+        baseQuery.accept(visitor, data.oldSelections, data.withoutSortingAndPaging)
     }
 
     private fun SqlBuilder.renderRenderWithoutPaging() {

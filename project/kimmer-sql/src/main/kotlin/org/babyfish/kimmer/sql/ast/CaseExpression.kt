@@ -1,8 +1,6 @@
 package org.babyfish.kimmer.sql.ast
 
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceElement
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
-import org.babyfish.kimmer.sql.ast.table.impl.accept
+import org.babyfish.kimmer.sql.spi.Renderable
 
 interface SimpleCaseStartBuilder<C: Any> {
 
@@ -187,7 +185,7 @@ interface NullableCaseBuilder<T: Any> {
     ): Expression<T>
 }
 
-internal interface CaseChainNode: Renderable, TableReferenceElement
+internal interface CaseChainNode: Renderable, Ast
 
 internal class SimpleCaseStartBuilderImpl<C: Any>(
     private val expression: Expression<C>
@@ -210,7 +208,7 @@ internal class SimpleCaseStartBuilderImpl<C: Any>(
         (expression as Renderable).renderTo(builder)
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         expression.accept(visitor)
     }
 }
@@ -269,7 +267,7 @@ internal class SimpleCaseBuilderImpl<C: Any, T: Any>(
         (value as Renderable).renderTo(builder)
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         parent.accept(visitor)
         cond.accept(visitor)
         value.accept(visitor)
@@ -294,7 +292,7 @@ internal class CaseStartBuilderImpl: CaseStartBuilder, CaseChainNode {
         builder.sql("case")
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {}
+    override fun accept(visitor: AstVisitor) {}
 }
 
 internal class CaseBuilderImpl<T: Any>(
@@ -352,7 +350,7 @@ internal class CaseBuilderImpl<T: Any>(
         (value as Renderable).renderTo(builder)
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         parent.accept(visitor)
         cond.accept(visitor)
         value.accept(visitor)
@@ -380,7 +378,7 @@ internal class CaseExpression<T: Any>(
         }
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         parent.accept(visitor)
         otherwise.accept(visitor)
     }

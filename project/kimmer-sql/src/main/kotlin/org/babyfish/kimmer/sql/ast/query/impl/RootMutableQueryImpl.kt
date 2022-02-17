@@ -13,10 +13,10 @@ import org.babyfish.kimmer.sql.ast.table.impl.TableAliasAllocator
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import kotlin.reflect.KClass
 
-internal class RootQueryImpl<E, ID>(
+internal class RootMutableQueryImpl<E, ID>(
     sqlClient: SqlClientImpl,
     type: KClass<E>
-): AbstractQueryImpl<E, ID>(TableAliasAllocator(), sqlClient, type),
+): AbstractMutableQueryImpl<E, ID>(TableAliasAllocator(), sqlClient, type),
     MutableRootQuery<E, ID>
     where E:
           Entity<ID>,

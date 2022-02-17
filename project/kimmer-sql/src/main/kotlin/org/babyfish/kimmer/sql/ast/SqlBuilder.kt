@@ -7,10 +7,15 @@ import org.babyfish.kimmer.sql.meta.EntityProp
 import java.lang.StringBuilder
 import kotlin.reflect.KClass
 
+sealed interface SqlBuilder {
+    fun sql(value: String)
+    fun variable(value: Any)
+    fun nullVariable(type: KClass<*>)
+}
 
-internal abstract class SqlBuilder(
-    private val parent: SqlBuilder?
-) {
+internal abstract class AbstractSqlBuilder(
+    private val parent: AbstractSqlBuilder?
+): SqlBuilder {
     private var childBuilderCount = 0
 
     private val builder = StringBuilder()
@@ -25,7 +30,7 @@ internal abstract class SqlBuilder(
         parent?.formulaPropStack ?: mutableSetOf()
 
     init {
-        var p: SqlBuilder? = parent
+        var p: AbstractSqlBuilder? = parent
         while (p !== null) {
             p.childBuilderCount++
             p = p.parent
@@ -42,12 +47,12 @@ internal abstract class SqlBuilder(
     fun isTableUsed(table: Table<*, *>): Boolean =
         usedTables.contains(table)
 
-    fun sql(sql: String) {
+    override fun sql(sql: String) {
         validate()
         builder.append(sql)
     }
 
-    fun variable(value: Any) {
+    override fun variable(value: Any) {
         validate()
         when (value) {
             is Pair<*, *> -> {
@@ -166,7 +171,7 @@ internal abstract class SqlBuilder(
         }
     }
     
-    fun nullVariable(type: KClass<*>) {
+    override fun nullVariable(type: KClass<*>) {
         validate()
         variables += DbNull(type)
     }
@@ -194,7 +199,7 @@ internal abstract class SqlBuilder(
             } else {
                 result
             }
-        var p: SqlBuilder? = parent
+        var p: AbstractSqlBuilder? = parent
         if (p !== null) {
             p.builder.append(transformedResult.first)
             p.variables.addAll(transformedResult.second)
@@ -214,21 +219,21 @@ internal abstract class SqlBuilder(
 
     protected abstract fun singleVariable(value: Any)
 
-    abstract fun createChildBuilder(): SqlBuilder
+    abstract fun createChildBuilder(): AbstractSqlBuilder
 }
 
-internal class JdbcSqlBuilder(parent: JdbcSqlBuilder? = null) : SqlBuilder(parent) {
+internal class JdbcSqlBuilder(parent: JdbcSqlBuilder? = null) : AbstractSqlBuilder(parent) {
 
     override fun singleVariable(value: Any) {
         variables += value
         sql("?")
     }
 
-    override fun createChildBuilder(): SqlBuilder =
+    override fun createChildBuilder(): AbstractSqlBuilder =
         JdbcSqlBuilder(this)
 }
 
-internal class R2dbcSqlBuilder(parent: R2dbcSqlBuilder? = null): SqlBuilder(parent) {
+internal class R2dbcSqlBuilder(parent: R2dbcSqlBuilder? = null): AbstractSqlBuilder(parent) {
 
     override fun singleVariable(value: Any) {
         variables += value
@@ -236,7 +241,7 @@ internal class R2dbcSqlBuilder(parent: R2dbcSqlBuilder? = null): SqlBuilder(pare
         sql(variables.size.toString())
     }
 
-    override fun createChildBuilder(): SqlBuilder =
+    override fun createChildBuilder(): AbstractSqlBuilder =
         R2dbcSqlBuilder(this)
 }
 

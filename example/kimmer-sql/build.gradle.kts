@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "org.babyfish.kimmer.sql.example"
-version = "0.1.1"
+version = "0.1.8"
 
 repositories {
     mavenCentral()
@@ -12,8 +12,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("org.babyfish.kimmer:kimmer-sql:0.1.7")
-    ksp("org.babyfish.kimmer:kimmer-ksp:0.1.7")
+    implementation("org.babyfish.kimmer:kimmer-sql:0.1.8")
+    ksp("org.babyfish.kimmer:kimmer-ksp:0.1.8")
     runtimeOnly("com.h2database:h2:2.1.210")
 }
 

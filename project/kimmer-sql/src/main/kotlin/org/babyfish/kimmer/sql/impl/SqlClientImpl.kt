@@ -3,7 +3,7 @@ package org.babyfish.kimmer.sql.impl
 import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.SqlClient
-import org.babyfish.kimmer.sql.ast.query.impl.RootQueryImpl
+import org.babyfish.kimmer.sql.ast.query.impl.RootMutableQueryImpl
 import org.babyfish.kimmer.sql.ast.query.MutableRootQuery
 import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedRootQuery
 import org.babyfish.kimmer.sql.meta.EntityType
@@ -23,7 +23,7 @@ internal class SqlClientImpl(
         type: KClass<E>,
         block: MutableRootQuery<E, ID>.() -> ConfigurableTypedRootQuery<E, ID, R>
     ): ConfigurableTypedRootQuery<E, ID, R> =
-        RootQueryImpl(this, type).run {
+        RootMutableQueryImpl(this, type).run {
             block()
         }
 }

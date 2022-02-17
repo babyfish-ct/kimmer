@@ -5,6 +5,12 @@ import org.babyfish.kimmer.sql.ast.query.selectable.RootSelectable
 
 interface ConfigurableTypedRootQuery<E: Entity<ID>, ID: Comparable<ID>, R> : TypedRootQuery<E, ID, R> {
 
+    /**
+     * @throws IllegalStateException
+     *
+     * 1. reselected query cannot be reselected again.
+     * 2. current query contains aggregation function or group by.
+     */
     fun <X: Any> reselect(
         block: RootSelectable<E, ID>.() -> ConfigurableTypedRootQuery<E, ID, X>
     ): ConfigurableTypedRootQuery<E, ID, X>

@@ -1,7 +1,5 @@
 package org.babyfish.kimmer.sql.ast
 
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
-import org.babyfish.kimmer.sql.ast.table.impl.accept
 import kotlin.reflect.KClass
 
 class SqlExpressionBuilder internal constructor(
@@ -97,7 +95,7 @@ internal class SqlExpression<T: Any>(
         }
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         parts.forEach { (it as? Expression<*>)?.accept(visitor) }
     }
 }

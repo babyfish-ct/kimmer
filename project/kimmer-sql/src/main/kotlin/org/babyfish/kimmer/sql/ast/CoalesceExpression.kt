@@ -1,8 +1,5 @@
 package org.babyfish.kimmer.sql.ast
 
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
-import org.babyfish.kimmer.sql.ast.table.impl.accept
-
 interface CoalesceBuilder<T: Any> {
 
     fun or(expression: NonNullExpression<T>): NonNullCoalesceBuilder<T>
@@ -62,7 +59,7 @@ internal class CoalesceExpression<T: Any>(
         sql(")")
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         expressions.forEach { it.accept(visitor) }
     }
 }

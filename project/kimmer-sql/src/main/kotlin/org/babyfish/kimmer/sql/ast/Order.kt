@@ -1,14 +1,12 @@
 package org.babyfish.kimmer.sql.ast
 
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceElement
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
-import org.babyfish.kimmer.sql.ast.table.impl.accept
+import org.babyfish.kimmer.sql.spi.Renderable
 
 internal class Order(
     private val expression: Expression<*>,
     private val mode: OrderMode,
     private val nullMode: NullOrderMode
-): Renderable, TableReferenceElement {
+): Renderable, Ast {
 
     override fun renderTo(builder: SqlBuilder) {
         (expression as Renderable).renderTo(builder)
@@ -22,7 +20,7 @@ internal class Order(
         }
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         expression.accept(visitor)
     }
 }

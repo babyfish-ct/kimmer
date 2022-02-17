@@ -2,7 +2,7 @@ package org.babyfish.kimmer.sql.ast.table.impl
 
 import org.babyfish.kimmer.graphql.Connection
 import org.babyfish.kimmer.sql.Entity
-import org.babyfish.kimmer.sql.ast.query.impl.AbstractQueryImpl
+import org.babyfish.kimmer.sql.ast.query.impl.AbstractMutableQueryImpl
 import org.babyfish.kimmer.sql.ast.table.NonNullSubQueryTable
 import org.babyfish.kimmer.sql.ast.table.SubQueryTable
 import org.babyfish.kimmer.sql.meta.EntityProp
@@ -10,7 +10,7 @@ import org.babyfish.kimmer.sql.meta.EntityType
 import kotlin.reflect.KProperty1
 
 internal open class SubQueryTableImpl<E: Entity<ID>, ID: Comparable<ID>>(
-    query: AbstractQueryImpl<*, *>,
+    query: AbstractMutableQueryImpl<*, *>,
     entityType: EntityType,
     parent: TableImpl<*, *>? = null,
     isInverse: Boolean = false,
@@ -26,7 +26,7 @@ internal open class SubQueryTableImpl<E: Entity<ID>, ID: Comparable<ID>>(
 ), NonNullSubQueryTable<E, ID> {
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> createChildTable(
-        query: AbstractQueryImpl<*, *>,
+        query: AbstractMutableQueryImpl<*, *>,
         entityType: EntityType,
         isInverse: Boolean,
         joinProp: EntityProp,

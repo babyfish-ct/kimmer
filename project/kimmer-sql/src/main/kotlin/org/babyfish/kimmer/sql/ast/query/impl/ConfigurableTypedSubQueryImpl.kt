@@ -2,17 +2,14 @@ package org.babyfish.kimmer.sql.ast.query.impl
 
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.Expression
-import org.babyfish.kimmer.sql.ast.Renderable
 import org.babyfish.kimmer.sql.ast.Selection
 import org.babyfish.kimmer.sql.ast.SqlBuilder
 import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedSubQuery
-import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceElement
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.AstVisitor
 
 internal class ConfigurableTypedSubQueryImpl<P, PID, E, ID, R>(
     data: TypedQueryData,
-    baseQuery: SubQueryImpl<P, PID, E, ID>
+    baseQuery: SubMutableQueryImpl<P, PID, E, ID>
 ): AbstractConfigurableTypedQueryImpl<E, ID, R>(
     data,
     baseQuery
@@ -42,8 +39,8 @@ internal class ConfigurableTypedSubQueryImpl<P, PID, E, ID, R>(
         get() = _selectedType ?: error("The current sub query cannot be selected directly")
 
     @Suppress("UNCHECKED_CAST")
-    override val baseQuery: SubQueryImpl<P, PID, E, ID>
-        get() = super.baseQuery as SubQueryImpl<P, PID, E, ID>
+    override val baseQuery: SubMutableQueryImpl<P, PID, E, ID>
+        get() = super.baseQuery as SubMutableQueryImpl<P, PID, E, ID>
 
     override fun limit(limit: Int, offset: Int): ConfigurableTypedSubQuery<P, PID, E, ID, R> =
         if (data.limit == limit && data.offset == offset) {
@@ -80,8 +77,8 @@ internal class ConfigurableTypedSubQueryImpl<P, PID, E, ID, R>(
         builder.sql(")")
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
-        if (!visitor.skipSubQuery()) {
+    override fun accept(visitor: AstVisitor) {
+        if (visitor.visitSubQuery(this)) {
             super.accept(visitor)
         }
     }
@@ -91,7 +88,7 @@ internal class ConfigurableTypedSubQueryImpl<P, PID, E, ID, R>(
         @JvmStatic
         @Suppress("UNCHECKED_CAST")
         fun <P: Entity<PID>, PID: Comparable<PID>, E: Entity<ID>, ID: Comparable<ID>, R> select(
-            query: SubQueryImpl<P, PID, E, ID>,
+            query: SubMutableQueryImpl<P, PID, E, ID>,
             selections: List<Selection<*>>
         ): ConfigurableTypedSubQuery<P, PID, E, ID, R> =
             ConfigurableTypedSubQueryImpl(

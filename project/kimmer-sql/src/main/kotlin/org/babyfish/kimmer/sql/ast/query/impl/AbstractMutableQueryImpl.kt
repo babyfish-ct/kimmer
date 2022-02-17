@@ -4,21 +4,22 @@ import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.Order
-import org.babyfish.kimmer.sql.ast.Renderable
+import org.babyfish.kimmer.sql.spi.Renderable
 import org.babyfish.kimmer.sql.ast.SqlBuilder
 import org.babyfish.kimmer.sql.ast.query.MutableQuery
 import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
 import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
+import org.babyfish.kimmer.sql.ast.table.Table
 import org.babyfish.kimmer.sql.ast.table.impl.TableAliasAllocator
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
-import org.babyfish.kimmer.sql.ast.table.impl.accept
+import org.babyfish.kimmer.sql.ast.AstVisitor
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
+import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 
-internal abstract class AbstractQueryImpl<E, ID>(
+internal abstract class AbstractMutableQueryImpl<E, ID>(
     val tableAliasAllocator: TableAliasAllocator,
     val sqlClient: SqlClientImpl,
     type: KClass<E>
@@ -27,7 +28,7 @@ internal abstract class AbstractQueryImpl<E, ID>(
           Entity<ID>,
           ID: Comparable<ID> {
 
-    protected val entityTypeMap: Map<KClass<out Immutable>, EntityType>
+    private val entityTypeMap: Map<KClass<out Immutable>, EntityType>
         get() = sqlClient.entityTypeMap
 
     private val predicates = mutableListOf<NonNullExpression<Boolean>>()
@@ -37,6 +38,8 @@ internal abstract class AbstractQueryImpl<E, ID>(
     private val havingPredicates = mutableListOf<NonNullExpression<Boolean>>()
 
     private val orders = mutableListOf<Order>()
+
+    private var frozen = false
 
     override val table: TableImpl<E, ID> = createTable0(type)
 
@@ -50,6 +53,9 @@ internal abstract class AbstractQueryImpl<E, ID>(
         TableImpl(this, entityType)
 
     override fun where(vararg predicates: NonNullExpression<Boolean>?) {
+
+        validateMutable()
+
         for (predicate in predicates) {
             predicate?.let {
                 this.predicates += it
@@ -58,16 +64,25 @@ internal abstract class AbstractQueryImpl<E, ID>(
     }
 
     override fun where(block: () -> NonNullExpression<Boolean>?) {
+
+        validateMutable()
+
         block()?.let {
             predicates += it
         }
     }
 
     override fun groupBy(vararg expression: Expression<*>) {
+
+        validateMutable()
+
         groupByExpressions += expression
     }
 
     override fun having(vararg predicates: NonNullExpression<Boolean>?) {
+
+        validateMutable()
+
         for (predicate in predicates) {
             predicate?.let {
                 this.havingPredicates += it
@@ -76,6 +91,9 @@ internal abstract class AbstractQueryImpl<E, ID>(
     }
 
     override fun having(block: () -> NonNullExpression<Boolean>?) {
+
+        validateMutable()
+
         block()?.let {
             havingPredicates += it
         }
@@ -86,24 +104,31 @@ internal abstract class AbstractQueryImpl<E, ID>(
         mode: OrderMode,
         nullMode: NullOrderMode
     ) {
+
+        validateMutable()
+
         expression?.let {
             orders += Order(expression, mode, nullMode)
         }
     }
 
     override fun clearWhereClauses() {
+        validateMutable()
         predicates.clear()
     }
 
     override fun clearGroupByClauses() {
+        validateMutable()
         groupByExpressions.clear()
     }
 
     override fun clearHavingClauses() {
+        validateMutable()
         havingPredicates.clear()
     }
 
     override fun clearOrderByClauses() {
+        validateMutable()
         orders.clear()
     }
 
@@ -112,7 +137,7 @@ internal abstract class AbstractQueryImpl<E, ID>(
         block: MutableSubQuery<E, ID, X, XID>.() -> TypedSubQuery<E, ID, X, XID, R>
     ): TypedSubQuery<E, ID, X, XID, R>
     where X: Entity<XID>, XID: Comparable<XID> =
-        SubQueryImpl(this, type).run {
+        SubMutableQueryImpl(this, type).run {
             block()
         }
 
@@ -121,7 +146,7 @@ internal abstract class AbstractQueryImpl<E, ID>(
         block: MutableSubQuery<E, ID, X, XID>.() -> Unit
     ): MutableSubQuery<E, ID, X, XID>
     where X: Entity<XID>, XID: Comparable<XID> =
-        SubQueryImpl(this, type).apply {
+        SubMutableQueryImpl(this, type).apply {
             block()
         }
 
@@ -179,31 +204,45 @@ internal abstract class AbstractQueryImpl<E, ID>(
         }
     }
 
-    fun accept(visitor: TableReferenceVisitor, withoutSortingAndPaging: Boolean) {
+    fun accept(
+        visitor: AstVisitor,
+        overriddenSelections: List<Selection<*>>?,
+        withoutSortingAndPaging: Boolean
+    ) {
+        if (groupByExpressions.isEmpty() && havingPredicates.isNotEmpty()) {
+            throw IllegalStateException(
+                "Having clause cannot be used without group clause"
+            )
+        }
+        val sqlBuilder = (visitor.sqlBuilder as AbstractSqlBuilder?)
+            ?: error("Internal bug: AbstractQueryImpl.accept can only be used during sql rendering")
         predicates.forEach { it.accept(visitor) }
         groupByExpressions.forEach { it.accept(visitor) }
         havingPredicates.forEach { it.accept(visitor) }
         if (withoutSortingAndPaging) {
-            UseJoinOfIgnoredOrderClauseVisitor(visitor.sqlBuilder).apply {
+            UseJoinOfIgnoredClauseVisitor(sqlBuilder).apply {
                 orders.forEach { it.accept(this) }
             }
         } else {
             orders.forEach { it.accept(visitor) }
         }
+        if (overriddenSelections !== null) {
+            UseJoinOfIgnoredClauseVisitor(sqlBuilder).apply {
+                overriddenSelections.forEach { it.accept(this) }
+            }
+        }
     }
 
-    private class UseJoinOfIgnoredOrderClauseVisitor(
-        override val sqlBuilder: SqlBuilder
-    ): TableReferenceVisitor {
+    private class UseJoinOfIgnoredClauseVisitor(
+        override val sqlBuilder: AbstractSqlBuilder
+    ): AstVisitor {
 
-        override fun skipSubQuery(): Boolean = true
+        override fun visitSubQuery(
+            subQuery: TypedSubQuery<*, *, *, *, *>
+        ): Boolean = false
 
-        override fun visit(table: TableImpl<*, *>, entityProp: EntityProp?) {
-            entityProp ?: error(
-                "Internal bug: star selection cannot be " +
-                    "visited because sub query is skipped"
-            )
-            handle(table, entityProp.isId)
+        override fun visitTableReference(table: Table<*, *>, prop: EntityProp?) {
+            handle(table as TableImpl<*, *>, prop?.isId ?: false)
         }
 
         private fun handle(table: TableImpl<*, *>, isId: Boolean) {
@@ -218,6 +257,19 @@ internal abstract class AbstractQueryImpl<E, ID>(
             table.parent?.let {
                 handle(it, false)
             }
+        }
+    }
+
+    fun isGroupByClauseUsed(): Boolean =
+        groupByExpressions.isNotEmpty()
+
+    fun freeze() {
+        frozen = true
+    }
+
+    fun validateMutable() {
+        if (frozen) {
+            throw IllegalStateException("Cannot mutate the query because it has been frozen")
         }
     }
 }

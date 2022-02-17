@@ -73,9 +73,9 @@ alter table book_author_mapping
                 on delete cascade
 ;
 
-insert into book_store(id, name) values
-    ('d38c10da-6be8-4924-b9b9-5e81899612a0', 'O''REILLY'),
-    ('2fa3955e-3e83-49b9-902e-0465c109c779', 'MANNING')
+insert into book_store(id, name, website) values
+    ('d38c10da-6be8-4924-b9b9-5e81899612a0', 'O''REILLY', 'https://www.oreilly.com/'),
+    ('2fa3955e-3e83-49b9-902e-0465c109c779', 'MANNING', 'https://www.manning.com/')
 ;
 
 insert into book(id, name, edition, price, store_id) values

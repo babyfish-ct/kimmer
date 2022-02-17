@@ -2,7 +2,7 @@ package org.babyfish.kimmer.sql.ast.query.impl
 
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.*
-import org.babyfish.kimmer.sql.ast.Renderable
+import org.babyfish.kimmer.sql.spi.Renderable
 import org.babyfish.kimmer.sql.ast.SqlBuilder
 import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedSubQuery
 import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
@@ -13,23 +13,23 @@ import org.babyfish.kimmer.sql.ast.table.JoinableTable
 import org.babyfish.kimmer.sql.ast.table.NonNullJoinableTable
 import org.babyfish.kimmer.sql.ast.table.Table
 import org.babyfish.kimmer.sql.ast.table.impl.SubQueryTableImpl
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceElement
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.Ast
+import org.babyfish.kimmer.sql.ast.AstVisitor
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.meta.EntityType
 import kotlin.reflect.KClass
 
-internal class SubQueryImpl<P, PID, E, ID>(
-    private val parentQuery: AbstractQueryImpl<P, PID>,
+internal class SubMutableQueryImpl<P, PID, E, ID>(
+    private val parentQuery: AbstractMutableQueryImpl<P, PID>,
     type: KClass<E>,
-): AbstractQueryImpl<E, ID>(
+): AbstractMutableQueryImpl<E, ID>(
         parentQuery.tableAliasAllocator,
         parentQuery.sqlClient,
         type
     ),
     MutableSubQuery<P, PID, E, ID>,
     Renderable,
-    TableReferenceElement
+    Ast
     where
         P: Entity<PID>,
         PID: Comparable<PID>,
@@ -45,8 +45,8 @@ internal class SubQueryImpl<P, PID, E, ID>(
     override val parentTable: Table<P, PID>
         get() = parentQuery.table
 
-    override fun accept(visitor: TableReferenceVisitor) {
-        accept(visitor, false)
+    override fun accept(visitor: AstVisitor) {
+        accept(visitor, null, false)
     }
 
     override fun renderTo(builder: SqlBuilder) {

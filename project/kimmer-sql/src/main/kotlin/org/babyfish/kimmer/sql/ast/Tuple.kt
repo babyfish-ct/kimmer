@@ -1,8 +1,5 @@
 package org.babyfish.kimmer.sql.ast
 
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
-import org.babyfish.kimmer.sql.ast.table.impl.accept
-
 data class Tuple4<out T1, out T2, out T3, out T4>(
     val _1: T1,
     val _2: T2,
@@ -81,7 +78,9 @@ internal class TupleExpression<T: Any>(
         }
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
-        selections.forEach { it.accept(visitor) }
+    override fun accept(visitor: AstVisitor) {
+        selections.forEach {
+            it.accept(visitor)
+        }
     }
 }

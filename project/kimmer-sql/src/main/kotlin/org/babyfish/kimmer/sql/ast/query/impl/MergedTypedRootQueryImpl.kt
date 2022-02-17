@@ -6,7 +6,7 @@ import org.babyfish.kimmer.sql.ast.JdbcSqlBuilder
 import org.babyfish.kimmer.sql.ast.R2dbcSqlBuilder
 import org.babyfish.kimmer.sql.ast.SqlBuilder
 import org.babyfish.kimmer.sql.ast.query.TypedRootQuery
-import org.babyfish.kimmer.sql.ast.table.impl.TableReferenceVisitor
+import org.babyfish.kimmer.sql.ast.AstVisitor
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import org.babyfish.kimmer.sql.runtime.JdbcExecutorContext
 import org.babyfish.kimmer.sql.runtime.R2dbcExecutorContext
@@ -60,12 +60,12 @@ internal class MergedTypedRootQueryImpl<E, ID, R>(
         right.renderTo(builder)
     }
 
-    override fun accept(visitor: TableReferenceVisitor) {
+    override fun accept(visitor: AstVisitor) {
         left.accept(visitor)
         right.accept(visitor)
     }
 
-    private fun preExecute(builder: SqlBuilder): Pair<String, List<Any>> {
+    private fun preExecute(builder: AbstractSqlBuilder): Pair<String, List<Any>> {
         val visitor = UseTableVisitor(builder)
         accept(visitor)
         renderTo(builder)

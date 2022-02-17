@@ -1,9 +1,9 @@
 package org.babyfish.kimmer.sql.ast.table.impl
 
-@JvmInline
-internal value class TableAliasAllocator(
-    private val idRef: IntArray = IntArray(1)
-) {
+internal class TableAliasAllocator {
+
+    private var tableIdSequence = 0
+
     fun allocate(): String =
-        "tb_${++idRef[0]}_"
+        "tb_${++tableIdSequence}_"
 }

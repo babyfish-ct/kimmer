@@ -4,10 +4,10 @@ import org.babyfish.kimmer.graphql.Connection
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.MappingException
 import org.babyfish.kimmer.sql.ast.*
-import org.babyfish.kimmer.sql.ast.query.impl.AbstractQueryImpl
+import org.babyfish.kimmer.sql.ast.query.impl.AbstractMutableQueryImpl
 import org.babyfish.kimmer.sql.ast.ContainsExpression
 import org.babyfish.kimmer.sql.ast.PropExpression
-import org.babyfish.kimmer.sql.ast.Renderable
+import org.babyfish.kimmer.sql.spi.Renderable
 import org.babyfish.kimmer.sql.ast.SqlBuilder
 import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
 import org.babyfish.kimmer.sql.ast.table.JoinableTable
@@ -17,11 +17,12 @@ import org.babyfish.kimmer.sql.meta.EntityType
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.Formula
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
+import org.babyfish.kimmer.sql.ast.AstVisitor
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
-    private val query: AbstractQueryImpl<*, *>,
+    private val query: AbstractMutableQueryImpl<*, *>,
     val entityType: EntityType,
     val parent: TableImpl<*, *>? = null,
     private val isInverse: Boolean = false,
@@ -32,8 +33,6 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     private val alias: String
 
     private val middleTableAlias: String?
-
-    private var _staticallyUsed = parent === null
 
     private val childTableMap = mutableMapOf<String, TableImpl<*, *>>()
 
@@ -52,7 +51,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     }
 
     protected open fun <X: Entity<XID>, XID: Comparable<XID>> createChildTable(
-        query: AbstractQueryImpl<*, *>,
+        query: AbstractMutableQueryImpl<*, *>,
         entityType: EntityType,
         isInverse: Boolean,
         joinProp: EntityProp,
@@ -76,9 +75,6 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
 
     override fun <X: Any> `get?`(prop: KProperty1<E, X?>): Expression<X> {
         val entityProp = entityType.props[prop.name] ?: error("No property '${prop.name}'")
-        if (!entityProp.isId) {
-            staticallyUse()
-        }
         return PropExpression(this, entityProp)
     }
 
@@ -211,6 +207,9 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         outerJoin: Boolean,
         inverse: Boolean
     ): NonNullJoinableTable<X, XID> {
+
+        query.validateMutable()
+
         val joinName = if (!inverse) {
             entityProp.name
         } else {
@@ -247,7 +246,6 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 outerJoin
             )
         childTableMap[joinName] = newTable
-        staticallyUse()
         return newTable
     }
 
@@ -307,7 +305,6 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         }
         return containsAny0(entityProp, xIds, true)
     }
-
     override fun <X : Entity<XID>, XID : Comparable<XID>> listContainsAll(
         prop: KProperty1<E, List<X>>,
         xIds: Collection<XID>
@@ -381,6 +378,10 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 childTable.renderTo(builder)
             }
         }
+    }
+
+    override fun accept(visitor: AstVisitor) {
+        visitor.visitTableReference(this, null)
     }
 
     private fun SqlBuilder.renderSelf() {
@@ -502,15 +503,8 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         sql(newColumnName)
     }
 
-    private fun staticallyUse() {
-        if (!_staticallyUsed) {
-            _staticallyUsed = true
-            parent?.staticallyUse()
-        }
-    }
-
     private fun isUsedBy(builder: SqlBuilder): Boolean =
-        parent === null || (_staticallyUsed && builder.isTableUsed(this))
+        parent === null || (builder as AbstractSqlBuilder).isTableUsed(this)
 
     fun renderAsSelection(builder: SqlBuilder) {
         var sp: String? = null
@@ -551,7 +545,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             }
             val storage = prop.storage
             if (storage is Formula<*, *, *>) {
-                resolveFormula(prop) {
+                (this as AbstractSqlBuilder).resolveFormula(prop) {
                     (storage as Formula<E, ID, Any>).get(this@TableImpl).let {
                         if (starMode && it is MutableSubQuery<*, *, *, *>) {
                             throw MappingException(

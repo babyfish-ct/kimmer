@@ -1,7 +1,4 @@
-import org.babyfish.kimmer.sql.ast.count
-import org.babyfish.kimmer.sql.ast.ilike
-import org.babyfish.kimmer.sql.ast.sql
-import org.babyfish.kimmer.sql.ast.valueIn
+import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.example.AppContext
 import org.babyfish.kimmer.sql.example.model.*
 
@@ -45,6 +42,7 @@ private fun showData(
         }
 
         orderBy(table.name)
+        orderBy(table.edition, OrderMode.DESC)
 
         select {
             table then
