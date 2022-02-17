@@ -86,7 +86,7 @@ Obviously, if the table join does not affect the number of records, it can be re
     </tr>
     <tr>
         <td colspan="2">
-            Table join is ONLY used by *select* or *order by* clause of orginal top-level query
+            Table join is <b>ONLY</b> used by <i>select</i> or <i>order by</i> clause of orginal top-level query
         </td>
     </tr>
     <tr>
