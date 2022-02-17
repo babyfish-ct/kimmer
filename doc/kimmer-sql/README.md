@@ -16,7 +16,7 @@ Why provide a new SQL DSL?
 
 1. **Dynamic table joins**
 
-   While many data accessing solutions support dynamic queries, they all only let you generate dynamic where conditions. This is not enough, each dynamic filter condition may depend on some table joins, and even worse, different dynamic dynamic filter conditions may contain the same tabe join paths. It is difficult to write complex dynamic queries without dynamic table joins.
+   While many data accessing solutions support dynamic queries, they all only let you generate dynamic where conditions. This is not enough, each dynamic filter condition may depend on some table joins, and even worse, different dynamic filter conditions may contain the conflict table joins. It is difficult to write complex dynamic queries without dynamic table joins.
    
    > Dynamic SQL is the primary design goal of this kimmer-sql
 
