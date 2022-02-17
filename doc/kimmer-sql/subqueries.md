@@ -122,6 +122,7 @@ Sub queries are divided into correlated and uncorrelated subqueries.
         select(table)
     }
     ```
+    
 
 ## 2. Correlated subqueries
 
