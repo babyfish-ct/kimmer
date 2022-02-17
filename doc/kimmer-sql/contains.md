@@ -84,5 +84,34 @@ You can modify this switch in gradle.kts file
 - false (default): allow top-level queries to use collection joins
 - true: disable top-level queries from using collection joins
 
+Let's review a query we saw in Chapter [Null safety](./null-safety.md)
+
+```kt
+val sqlClient = ... some code to get sql client ...
+val con = ... some code to get JDBC/R2DBC connection ...
+
+val rows = sqlClient
+    .createQuery(Book::class) {
+        where {
+            tuple {
+                table.name then   // α
+                    table.edition
+            } valueIn subQuery(Book::class) {
+                groupBy(table.name)
+                select {
+                    table.name then    // β
+                        table.edition.max().asNonNull()
+                }
+            }
+        }
+        select(table)
+    }
+    .execute(con)
+```
+
+1. At the line with comment *α*, *table* is an implicit object providered by kimmer-sql, its the primary table of top-level query and its type is [NonNullJoinableTable](../../project/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/ast/table/NonNullJoinableTable.kt)
+
+2. At the line with comment *β*, *table* is another implicit object providered by kimmer-sql, its the primary table of sub-query and its type is [NonNullSubQueryTable](../../project/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/ast/table/NonNullSubQueryTable.kt)
+
 ------------------
 [< Previous: Table joins](./table-joins.md) | [Back to parent](./README.md) | [Next: Subqueries >](./subqueries.md)
