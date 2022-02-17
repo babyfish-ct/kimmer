@@ -144,7 +144,7 @@ sqlClient.createQuery(Book::class) {
 }
 ```
 1. At the line with comment *α*, *parentTable* means the root table of parent query.
-2. At the line with comment *β*, use select the constant *1* because *exists* does not care what the subquery queries
+2. At the line with comment *β*, use select the *constant(1)* because *exists()* does not care the return format of subquery.
 
 > The difference between *value()* and *constant()*
 > 
