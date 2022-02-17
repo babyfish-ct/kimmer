@@ -313,7 +313,7 @@ A --> B
 
 Now, we can only find *B* from *A*, cannot find *A* from *B*.
 
-Of course, subqueries can solve everything, but kimmer-sql still lets you solve this problem with joins, which are called inverse joins.
+Of course, subqueries can solve everything, but kimmer-sql still lets you solve this problem with joins, which are called reverse joins.
 
 > Notice
 >
