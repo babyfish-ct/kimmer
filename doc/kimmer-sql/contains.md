@@ -158,7 +158,7 @@ kimmer-sql provides an alternative that works similarly to phantom joins and hal
 
 ### 4.1. containsAny
 
-If the current object has a collection assocation, checked whether the ids of associated objects contain any element of a specified id list.
+If the current object has a collection assocation, check whether the ids of associated objects contain any element of a specified id list.
 
 1. Example for one-to-many association *BookStore::books* without middle table
     ```kt
@@ -210,7 +210,7 @@ If the current object has a collection assocation, checked whether the ids of as
 
 ### 4.2. containsAll
 
-If the current object has a collection assocation, checked whether the ids of associated objects contain all elements of a specified id list.
+If the current object has a collection assocation, check whether the ids of associated objects contain all elements of a specified id list.
 
 1. Example for one-to-many association *BookStore::books* without middle table
     ```kt
