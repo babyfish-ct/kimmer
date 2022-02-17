@@ -71,6 +71,7 @@
 
       interface BookStore: Entity<UUID> {
           val name: String
+          val website: String?
           val books: List<Book>
       }
       ```
@@ -86,7 +87,7 @@
 
       interface Book: Entity<UUID> {
           val name: String
-          val store: BookStore
+          val store: BookStore?
           val edition: Int
           val price: BigDecimal
           val authors: List<Author>
