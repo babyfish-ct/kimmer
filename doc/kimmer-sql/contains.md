@@ -109,9 +109,9 @@ val rows = sqlClient
     .execute(con)
 ```
 
-1. At the line with comment *α*, *table* is an implicit object providered by kimmer-sql, it's the primary table of top-level query and its type is [NonNullTable](../../project/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/ast/table/NonNullTable.kt)
+1. At the line with comment *α*, *table* is an implicit object providered by kimmer-sql, it's the primary table of top-level query and its type is [Table](../../project/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/ast/table/Table.kt)
 
-2. At the line with comment *β*, *table* is another implicit object providered by kimmer-sql, it's the primary table of sub-query and its type is [NonNullSubQueryTable](../../project/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/ast/table/NonNullSubQueryTable.kt)
+2. At the line with comment *β*, *table* is another implicit object providered by kimmer-sql, it's the primary table of sub-query and its type is [SubQueryTable](../../project/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/ast/table/SubQueryTable.kt)
 
 Use the collection join *Book::authors* to be example
 
