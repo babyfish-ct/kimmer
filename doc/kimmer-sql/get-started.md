@@ -144,7 +144,7 @@
       This file used to setup environment
       
       - Uses "database.sql" to create tables and insert data
-      - Specify ORM meta information for the kimmer-sql
+      - Specify database mapping meta information for the kimmer-sql
 
    - [example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/App.kt](../../example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/App.kt)
       
@@ -153,7 +153,7 @@
       - Dynamic sql
       - Table join
       - Sub quieres
-      - Mix dsl and native sql together
+      - Mix DSL and native sql together
       - Pagination
 
 ## 2. Key code description
