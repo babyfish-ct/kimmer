@@ -114,7 +114,7 @@ In the code above
 
 Obviously, for the code above, these temporary table joins will conflict if multiple dynamic conditions are met at runtime. kimmer-sql can merge several join paths together and remove redundant joins.
 
-#### Path type merge rule
+### Table join path merge rule
 
 Let's look at the following 3 table join paths
 
