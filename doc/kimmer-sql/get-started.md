@@ -131,6 +131,10 @@
    
    It must be ensured that the automatically generated code can be recognized by intellij, otherwise the IDE will not be able to perform intellisense in the subsequent development process.
    
+   So, please click refresh button of gradle pannel
+   
+   ![image](../kimmer-core/images/gradle-refresh.jpeg)
+   
    
 6. Add other code and run
 
