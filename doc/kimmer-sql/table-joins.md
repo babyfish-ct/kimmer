@@ -112,7 +112,7 @@ In the code above
     
 > In fact, γ and δ are not complete table joins, they are half joins, which will be described later. You can think for now that kimmer-sql foolishly treats them as normal table joins. 
 
-Obviously, for the code above, these temporary table joins will conflict if multiple dynamic conditions are met at runtime. kimmer-sql can merge several join paths together and remove redundant connections.
+Obviously, for the code above, these temporary table joins will conflict if multiple dynamic conditions are met at runtime. kimmer-sql can merge several join paths together and remove redundant joins.
 
 #### Path type merge rule
 
