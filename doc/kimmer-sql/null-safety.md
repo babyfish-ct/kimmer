@@ -25,7 +25,7 @@ for ((name, website) in rows) {
 }
 ```
 - The line with comment "α" can be compiled correctly
-- However, the line with comment "β" will result in a compilation error， because BookStore::website is nullable
+- However, the line with comment "β" will result in a compilation error, because BookStore::website is nullable
 
 ## 2. Nullity of table
 
@@ -125,7 +125,7 @@ for ((p1, p2) in rows) {
 
     Both sides of the *+* are non-null expressions, and the result is also nonnullable
     
-- However, the line with comment "β" will result in a compilation error， because BookStore::website is nullable
+- However, the line with comment "β" will result in a compilation error.
 
     Either side of the *+* is a nullable expression, the result is nullable
     
