@@ -55,6 +55,7 @@ Collection join will cause duplicate data after SQL join
 - If there are many columns to be queried (such as querying the entire object, or even querying multiple objects), it is not a good choice to remove duplicates through distinct SQL. People often choose to use java.util.LinkedHashMap on the client side to deduplicate. But this is not good for either the network or the JVM.
 
 - Duplicate data is not friendly to pagination, this is the most developer-headed sentence in the Hibernate log
+
     [firstResult/maxResults specified with collection fetch; applying in memory](https://tech.asimio.net/2021/05/19/Fixing-Hibernate-HHH000104-firstResult-maxResults-warning-using-Spring-Data-JPA.html)
 
 So, the disadvantages of using a collection join in a top-level query are too significant, but there is still value in using a collection join in a subquery.
