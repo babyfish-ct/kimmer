@@ -126,7 +126,7 @@ At the line with comment *α*
 1. *table.store* is inner join
 2. The association *Book::store* is nullable
 
-This situation cannot be automatically optimized, and the final generated SQL contains this JOIN
+This situation cannot be automatically optimized, and the final generated SQL contains JOIN
 
 ```sql
 select count(tb_1_.ID) from BOOK as tb_1_ 
