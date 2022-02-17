@@ -348,7 +348,7 @@ where {
 
 1. The functions of the above three codes are exactly the same
 2. The function names of low level APIs of the reverse joins start with "←"
-3. Inverse join cannot use kimmer-ksp to simplify the code, only the low level API can be used
+3. Reverse join cannot use kimmer-ksp to simplify the code, only the low level API can be used
 
 ------------------
 [< Previous: Null safety](./null-safety.md) | [Back to parent](./README.md) | [Next: Contains >](./contains.md)
