@@ -311,7 +311,7 @@ But there is such a situation, the developer only defines a one-way association
 A --> B
 ```
 
-At this time, we can only find *B* from *A*, but cannot find A from B.
+Now, we can only find *B* from *A*, cannot find *A* from *B*.
 
 Of course, subqueries can solve everything, but kimmer-sql still lets you solve this problem with joins, which are called inverse joins.
 
