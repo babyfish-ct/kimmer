@@ -179,7 +179,9 @@ If the current object has a collection assocation, checked whether the ids of as
     ```sql
     select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE 
     from BOOK_STORE as tb_1_ 
-    where tb_1_.ID = any(select STORE_ID from BOOK where ID in (?, ?))
+    where tb_1_.ID = any(
+        select STORE_ID from BOOK where ID in (?, ?)
+    )
     ```
 
 2. Example for many-to-many association *Author::books* with middle table *BOOK_AUTHOR_MAPPING*
@@ -201,7 +203,9 @@ If the current object has a collection assocation, checked whether the ids of as
     ```sql
     select tb_1_.ID, tb_1_.FIRST_NAME, concat(tb_1_.FIRST_NAME, ?, tb_1_.LAST_NAME), tb_1_.LAST_NAME 
     from AUTHOR as tb_1_ 
-    where tb_1_.ID = any(select AUTHOR_ID from BOOK_AUTHOR_MAPPING where BOOK_ID in (?, ?))
+    where tb_1_.ID = any(
+        select AUTHOR_ID from BOOK_AUTHOR_MAPPING where BOOK_ID in (?, ?)
+    )
     ```
 
 ### 4.2. containsAll
@@ -227,7 +231,9 @@ If the current object has a collection assocation, checked whether the ids of as
     ```sql
     select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE 
     from BOOK_STORE as tb_1_ 
-    where tb_1_.ID = all(select STORE_ID from BOOK where ID in (?, ?))
+    where tb_1_.ID = all(
+        select STORE_ID from BOOK where ID in (?, ?)
+    )
     ```
 
 2. Example for many-to-many association *Author::books* with middle table *BOOK_AUTHOR_MAPPING*
@@ -249,7 +255,9 @@ If the current object has a collection assocation, checked whether the ids of as
     ```sql
     select tb_1_.ID, tb_1_.FIRST_NAME, concat(tb_1_.FIRST_NAME, ?, tb_1_.LAST_NAME), tb_1_.LAST_NAME 
     from AUTHOR as tb_1_ 
-    where tb_1_.ID = all(select AUTHOR_ID from BOOK_AUTHOR_MAPPING where BOOK_ID in (?, ?))
+    where tb_1_.ID = all(
+        select AUTHOR_ID from BOOK_AUTHOR_MAPPING where BOOK_ID in (?, ?)
+    )
     ```
     
 
