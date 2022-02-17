@@ -176,6 +176,10 @@ kimmer-sql merges them like this
 1. If all the conflicting table joins are left outer joins, the left outer join is finally adopted.
 2. If any one of the conflicting table joins is an inner join, the inner join is finally adopted.
 
+#### Unused table joins
+
+No matter what methods you use, if some temporary table joins are not used by any part of SQL at runtime, they will directly be discarded.
+
 ## 2. Phantom join
 
 Phantom join is a very simple concept, just compare it with normal join to understand. 
@@ -233,14 +237,17 @@ Half join is a similar concept to a phantom join, but for associations based on 
 Let's first look at a normal join based on middle table
 
 ```kt
+val sqlClient = ... some code to get sql client ...
+val con = ... some code to get JDBC/R2DBC connection ...
+
 val query = sqlClient.createQuery(Book::class) {
-    where { table.authors.firstName eq "Alex" }
+    where(table.authors.firstName eq "Alex")
     select(table)
 }
 query.execute(con)
 ```
 
-The generated SQL is as follows
+We use table join ```table.books```, this code generates the following SQL
 
 ```sql
 select tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
@@ -259,6 +266,34 @@ We see that the association based on the middle table will generate two SQL join
 - Step2: join to target table
 
     ```inner join AUTHOR as tb_3_ on tb_2_.AUTHOR_ID = tb_3_.ID ```
+
+Next, let's look at half join
+
+```kt
+val sqlClient = ... some code to get sql client ...
+val con = ... some code to get JDBC/R2DBC connection ...
+
+val query = sqlClient.createQuery(Book::class) {
+    where(table.authors.id eq UUID.fromString("1e93da94-af84-44f4-82d1-d8a9fd52ea94"))
+    select(table)
+}
+query.execute(con)
+```
+
+The generated SQL is as follows
+
+```sql
+select tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+from BOOK as tb_1_ 
+inner join BOOK_AUTHOR_MAPPING as tb_2_ on tb_1_.ID = tb_2_.BOOK_ID 
+where tb_2_.AUTHOR_ID = ?
+```
+
+This time, we only see one SQL join, not two
+
+We joined an association based on an middle table, but did not access any properties of the associated object other than id. The id of the associated object is actually a foreign key of middle table, so only need to join to the middle table.
+
+This situation is called half join.
 
 ------------------
 [< Previous: Null safety](./null-safety.md) | [Back to parent](./README.md) | [Next: Contains >](./contains.md)
