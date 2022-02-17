@@ -313,7 +313,15 @@ A --> B
 
 At this time, we can only find *B* from *A*, but cannot find A from B.
 
-Of course, subqueries can solve everything, but kimmer-sql still lets you solve this problem with joins, which are called inverse joins
+Of course, subqueries can solve everything, but kimmer-sql still lets you solve this problem with joins, which are called inverse joins.
+
+> Notice
+>
+> While kimmer-sql supports reverse joins, don't want it to be abused because reverse joins can make code obscure.
+>
+> It should be used in rare cases, and developers do not want to define two-ways associations between entity interfaces for the rare cases.
+> 
+> Conversely, if you need to use reverse joins frequently, you should consider whether you need to define bidirectional associations.
 
 ------------------
 [< Previous: Null safety](./null-safety.md) | [Back to parent](./README.md) | [Next: Contains >](./contains.md)
