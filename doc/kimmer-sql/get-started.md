@@ -16,8 +16,8 @@
    b. Add this section into **dependencies{}**
    
       ```
-      implementation("org.babyfish.kimmer:kimmer-sql:0.1.6")
-      ksp("org.babyfish.kimmer:kimmer-ksp:0.1.6")
+      implementation("org.babyfish.kimmer:kimmer-sql:0.1.9")
+      ksp("org.babyfish.kimmer:kimmer-ksp:0.1.9")
       runtimeOnly("com.h2database:h2:2.1.210")
       ```
    
@@ -182,6 +182,7 @@
         }
 
         orderBy(table.name)
+        orderBy(table.edition, OrderMode.DESC)
 
         select {   // η
             table then
