@@ -154,7 +154,7 @@ Through chapter [Table joins](./table-joins.md), we know phantom joins and half 
 
 Now, collection joins for top-level queries are disabled. Although subqueries can solve everything, kimmer-sql still allows developers to not need to write subqueries for id-based filtering.
 
-kimmer-sql provides an alternative that works similarly to phantom joins and half joins.
+kimmer-sql provides an alternative that works similarly to phantom joins and half joins where collection joins of top-level query is disabled.
 
 ### 4.1. containsAny
 
