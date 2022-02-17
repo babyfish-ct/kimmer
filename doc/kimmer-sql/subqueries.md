@@ -125,7 +125,7 @@ Sub queries are divided into correlated and uncorrelated subqueries.
 
 ## 2. Correlated subqueries
 
-1. *parentTable*
+### 2.1. *parentTable*
 
     In the lambda expression of the subquery function, not only the implicit object *table* is provided to represent the table of the subquery itself, but also the implicit object *parentTable* is provided to represent the table of the parent query.
 
@@ -137,10 +137,10 @@ Sub queries are divided into correlated and uncorrelated subqueries.
                     parentTable.id eq table.books.id, // α
                     table.firstName eq "Alex"
                 )
-                select(table)
+                select(constant(1)) // β
             })
         }
-        select(constant(1)) // β
+        select(table) 
     }
     ```
     1. At the line with comment *α*, *parentTable* means the root table of parent query.
@@ -162,10 +162,10 @@ Sub queries are divided into correlated and uncorrelated subqueries.
                     parentTable.id eq table.books.id, 
                     table.firstName eq "Alex"
                 )
-                select(table)
+                select(table) // α
             })
         }
-        select(table) // α
+        select(table) 
     }
     ```
     
@@ -184,6 +184,28 @@ Sub queries are divided into correlated and uncorrelated subqueries.
     )
     ```
 
+### 2.2 Untyped subquery
+
+    Since *exists()* does not care about the return format of the subquery, *kimmer-sql* supports an *untypedSubQuery* function that allows developers to create an untyped subquery.
+
+    - Developers do not need to specify select clauses for untyped subqueries
+    - The only function of untyped subqueries is to work with *exists()*
+
+    ```kt
+    sqlClient.createQuery(Book::class) {
+        where {
+            exists(untypedSubQuery(Author::class) {
+                where(
+                    parentTable.id eq table.books.id,
+                    table.firstName eq "Alex"
+                )
+                // α
+            })
+        }
+        select(table)
+    }
+    ```
+    At the line of comment *α*, there is not *select clause* for untyped subquery.
 
 ------------------
 [< Previous: Contains](./contains.md) | [Back to parent](./README.md) | [Next: Pagination >](./pagination.md)
