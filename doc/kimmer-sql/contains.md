@@ -46,5 +46,19 @@ In this code we can see joins: ```table.books```, ```table.authors```, they targ
 
 If a join is created by association whose type is collection *(list | connection)*, it is a collection join. This is the precise definition.
 
+## 2. Disadvantages of collection joins
+
+Collection join will cause duplicate data after SQL join
+
+- If the developer forgets to deduplicate, there will be a bug
+
+- If there are many columns to be queried (such as querying the entire object, or even querying multiple objects), it is not a good choice to remove duplicates through distinct SQL. People often choose to use java.util.LinkedHashMap on the client side to deduplicate. But this is not good for either the network or the JVM.
+
+- Duplicate data is not friendly to pagination, this is the most developer-headed sentence in the Hibernate log
+```firstResult/maxResults specified with collection fetch; applying in memory!```
+
+
+
+
 ------------------
 [< Previous: Table joins](./table-joins.md) | [Back to parent](./README.md) | [Next: Subqueries >](./subqueries.md)
