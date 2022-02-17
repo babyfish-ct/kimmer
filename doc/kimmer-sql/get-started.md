@@ -350,10 +350,10 @@ public val SubQueryTable<Book, UUID>.store: NonNullSubQueryTable<BookStore, UUID
 public val SubQueryTable<Book, UUID>.`store?`: SubQueryTable<BookStore, UUID>
   get() = `joinReference?`(Book::store)
 
-public val JoinableTable<Book, UUID>.store: NonNullJoinableTable<BookStore, UUID>
+public val Table<Book, UUID>.store: NonNullTable<BookStore, UUID>
   get() = joinReference(Book::store)
 
-public val JoinableTable<Book, UUID>.`store?`: JoinableTable<BookStore, UUID>
+public val Table<Book, UUID>.`store?`: Table<BookStore, UUID>
   get() = `joinReference?`(Book::store)
 ```
 
