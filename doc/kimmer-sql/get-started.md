@@ -248,13 +248,13 @@
 
    2. Table joins can be initially divided into real joins and phantom joins
     
-      - table.stroe.name,  at comment α
+      - table.stroe.name,  at α
       
          This is real join, because the name of the parent object can only be obtained through table join. 
 
          It will appear in the final generated SQL. Of course, this real join is defined in dynamic conditions so it will only be generated in SQL if the corresponding condition exists.
       
-      - table.store.id, at comment β
+      - table.store.id, at β
       
          This is phantom join, *Book.store* is a many-to-one association based on foreign key. The id of the parent object is actually the foreign key of the child object. 
          Phantom join never appears in the final SQL.
@@ -279,7 +279,7 @@
       
       In the above code, we have called two functions
       
-      - reselect, at comment ε
+      - reselect, at ε
       - withoutSortingAndPaging, at comment ζ
 
       They can quickly create the count query based on data queriy, this is very useful for pagination.
