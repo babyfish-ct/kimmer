@@ -154,5 +154,102 @@ Through chapter [Table joins](./table-joins.md), we know phantom joins and half 
 
 Now, collection joins for top-level queries are disabled, so kimmer-sql provides an alternative that works similarly to phantom joins and half joins.
 
+### 4.1. containsAny
+
+If the current object has a collection assocation, checked whether the ids of associated objects contain any element of a specified id list.
+
+1. Example for one-to-many association *BookStore::books* without middle table
+    ```kt
+    val query = sqlClient.createQuery(BookStore::class) {
+        where {
+            table `books ∩` listOf(
+                UUID.fromString("e110c564-23cc-4811-9e81-d587a13db634"),
+                UUID.fromString("914c8595-35cb-4f67-bbc7-8029e9e6245a")
+            )
+        }
+        select(table)
+    }
+    query.execute(con)
+    ```
+    
+    The generated SQL is as follows
+    
+    ```sql
+    select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE 
+    from BOOK_STORE as tb_1_ 
+    where tb_1_.ID = any(select STORE_ID from BOOK where ID in (?, ?))
+    ```
+
+2. Example for many-to-many association *Author::books* with middle table *BOOK_AUTHOR_MAPPING*
+    ```kt
+    val query = sqlClient.createQuery(Author::class) {
+        where {
+            table `books ∩` listOf(
+                UUID.fromString("e110c564-23cc-4811-9e81-d587a13db634"),
+                UUID.fromString("914c8595-35cb-4f67-bbc7-8029e9e6245a")
+            )
+        }
+        select(table)
+    }
+    query.execute(con)
+    ```
+    
+    The generated SQL is as follows
+    
+    ```sql
+    select tb_1_.ID, tb_1_.FIRST_NAME, concat(tb_1_.FIRST_NAME, ?, tb_1_.LAST_NAME), tb_1_.LAST_NAME 
+    from AUTHOR as tb_1_ 
+    where tb_1_.ID = any(select AUTHOR_ID from BOOK_AUTHOR_MAPPING where BOOK_ID in (?, ?))
+    ```
+
+### 4.2. containsAll
+
+If the current object has a collection assocation, checked whether the ids of associated objects contain all elements of a specified id list.
+
+1. Example for one-to-many association *BookStore::books* without middle table
+    ```kt
+    val query = sqlClient.createQuery(BookStore::class) {
+        where {
+            table `books ∋` listOf(
+                UUID.fromString("e110c564-23cc-4811-9e81-d587a13db634"),
+                UUID.fromString("914c8595-35cb-4f67-bbc7-8029e9e6245a")
+            )
+        }
+        select(table)
+    }
+    query.execute(con)
+    ```
+    
+    The generated SQL is as follows
+    
+    ```sql
+    select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE 
+    from BOOK_STORE as tb_1_ 
+    where tb_1_.ID = all(select STORE_ID from BOOK where ID in (?, ?))
+    ```
+
+2. Example for many-to-many association *Author::books* with middle table *BOOK_AUTHOR_MAPPING*
+    ```kt
+    val query = sqlClient.createQuery(Author::class) {
+        where {
+            table `books ∋` listOf(
+                UUID.fromString("e110c564-23cc-4811-9e81-d587a13db634"),
+                UUID.fromString("914c8595-35cb-4f67-bbc7-8029e9e6245a")
+            )
+        }
+        select(table)
+    }
+    query.execute(con)
+    ```
+    
+    The generated SQL is as follows
+    
+    ```sql
+    select tb_1_.ID, tb_1_.FIRST_NAME, concat(tb_1_.FIRST_NAME, ?, tb_1_.LAST_NAME), tb_1_.LAST_NAME 
+    from AUTHOR as tb_1_ 
+    where tb_1_.ID = all(select AUTHOR_ID from BOOK_AUTHOR_MAPPING where BOOK_ID in (?, ?))
+    ```
+    
+
 ------------------
 [< Previous: Table joins](./table-joins.md) | [Back to parent](./README.md) | [Next: Subqueries >](./subqueries.md)
