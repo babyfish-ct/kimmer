@@ -66,23 +66,31 @@ There are two types of table joins that will not be removed
 2. Table joins shared by *where* cluase
 
     This does not need to be explained, only table joins that are **only** used by the old *select* or *order by* clauses may be removed by optimization.
+    
+Obviously, if the table join does not affect the number of records, it can be removed. there are two possibilities
+
+1. The join type is *left outer join*
+
+3. Although the join type is *inner join*, the foreign key is not null
 
 **Optimization rules**
 
 <table>
     <tr>
-        <td colspan="3">
+        <td rowspan="4">
             AND
         </td>
-        <td>
+        <td colspan="2">
             Association type is many-to-one
         </td>
-        <td>
+    </tr>
+    <tr>
+        <td colspan="2">
             Table join is ONLY used by *select* or *order by* clause of orginal top-level query
         </td>
     </tr>
     <tr>
-        <td>
+        <td rowspan="2">
             OR
         </td>
         <td>
