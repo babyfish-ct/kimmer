@@ -1,6 +1,6 @@
 # [Home](https://github.com/babyfish-ct/kimmer)/[kimmer-sql](./README.md)/Pagination
 
-## 1. reselect & withoutSoringAndPaging
+## 1. Create count query quickly
 
 Paging query requires two SQL statements, one for querying the number of records and one for data of a page, let's call them count-query and data-query. 
 
