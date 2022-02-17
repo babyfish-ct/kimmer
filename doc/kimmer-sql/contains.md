@@ -109,9 +109,9 @@ val rows = sqlClient
     .execute(con)
 ```
 
-1. At the line with comment *α*, *table* is an implicit object providered by kimmer-sql, its the primary table of top-level query and its type is [NonNullJoinableTable](../../project/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/ast/table/NonNullJoinableTable.kt)
+1. At the line with comment *α*, *table* is an implicit object providered by kimmer-sql, it's the primary table of top-level query and its type is [NonNullJoinableTable](../../project/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/ast/table/NonNullJoinableTable.kt)
 
-2. At the line with comment *β*, *table* is another implicit object providered by kimmer-sql, its the primary table of sub-query and its type is [NonNullSubQueryTable](../../project/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/ast/table/NonNullSubQueryTable.kt)
+2. At the line with comment *β*, *table* is another implicit object providered by kimmer-sql, it's the primary table of sub-query and its type is [NonNullSubQueryTable](../../project/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/ast/table/NonNullSubQueryTable.kt)
 
 ------------------
 [< Previous: Table joins](./table-joins.md) | [Back to parent](./README.md) | [Next: Subqueries >](./subqueries.md)
