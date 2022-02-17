@@ -8,7 +8,7 @@ Now let's look at a few joins
 
 1. Join the one-to-many assocaition *BookStore::books*
 
-```
+```kt
 sqlClient.createQuery(BookStore::class) {
     where(table.books.name eq "Learnning GraphQL")
     select(table)
@@ -16,7 +16,7 @@ sqlClient.createQuery(BookStore::class) {
 ```
 
 2. Join the many-to-many assocaition *Book::authors*
-```
+```kt
 sqlClient.createQuery(Book::class) {
     where(table.authors.firstName eq "Alex")
     select(table)
@@ -25,7 +25,7 @@ sqlClient.createQuery(Book::class) {
 
 3. Join the one-to-many assocaition *Auhtor::books*
 
-```
+```kt
 sqlClient.createQuery(Author::class) {
     where(table.books.name eq "Learnning GraphQL")
     select(table)
@@ -34,13 +34,15 @@ sqlClient.createQuery(Author::class) {
 
 In this code we can see joins: ```table.books```, ```table.authors```, they target one-to-many associations or many-to-many associations.
 
-Precise definition
-```
+**Precise definition**
+
 list = kotlin.collections.List<*>
-connection = [org.babyfish.kimmer.graphql.Connection](../../project/kimmer/src/main/kotlin/org/babyfish/kimmer/graphql/Connection.kt)
+
+connection = [org.babyfish.kimmer.graphql.Connection<*>](../../project/kimmer/src/main/kotlin/org/babyfish/kimmer/graphql/Connection.kt)
+
 collection = list + connection
-```
-> [org.babyfish.kimmer.graphql.Connection](../../project/kimmer/src/main/kotlin/org/babyfish/kimmer/graphql/Connection.kt) is used to support [graphql-connection](https://relay.dev/graphql/connections.htm), kimmer-sql cannot support it on its own, it must be supported in conjunction with a new framework for GraphQL in the future. For now, let's ignore the connection for now.
+
+> [org.babyfish.kimmer.graphql.Connection](../../project/kimmer/src/main/kotlin/org/babyfish/kimmer/graphql/Connection.kt) is used to support [graphql-connection](https://relay.dev/graphql/connections.htm), kimmer-sql cannot support it on its own, it must be supported in conjunction with new framework for GraphQL in the future. For now, let's ignore the connection for now.
 
 If a join is created by association whose type is collection *(list + connection)*, it is a collection join. This is the precise definition.
 
