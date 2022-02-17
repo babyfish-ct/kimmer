@@ -37,13 +37,21 @@ val rows = query.limit(limit, offset).execute(con)
 
     Developer creates data query.
 
-3. The line with comment β: 
+2. The line with comment β: 
 
     Call the API specific to kimmer-sql, on the basis of data-query, ignore the *order by* clause and use the new *select* clause to quickly create count-query
     
-5. The line with comment γ: 
+3. The line with comment γ: 
 
     Use the result of count-query to determine the paging range, and use data-query to complete the paging query.
+
+> Usage restrictions
+>   
+>   1. A query created by reselect cannot be further reselected, which will cause an exception.
+>   
+>   2. If the *select* clause of the original top-level query contains aggregate functions, it will cause an exception.
+>   
+>   3. If the original top-level query contains a *group by* clause, it will cause an exception.
 
 
 ------------------
