@@ -152,6 +152,37 @@ Sub queries are divided into correlated and uncorrelated subqueries.
     > 
     > 2. *constant()* is hard-coded into SQL, which is helpful for functional indexes. In order to avoid injection attacks, constant only accepts numeric types.
     
+    In fact, kimmer-sql has a special treatment for exists, no matter what you select, it will be replaced with *select 1*
+
+    ```kt
+    sqlClient.createQuery(Book::class) {
+        where {
+            exists(subQuery(Author::class) {
+                where(
+                    parentTable.id eq table.books.id, 
+                    table.firstName eq "Alex"
+                )
+                select(table)
+            })
+        }
+        select(table) // α
+    }
+    ```
+    
+    At the line with comment *α*, *table.\** is selected, but there is still *select 1* in generated SQL, like this
+    ```sql
+    select 
+        tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
+    from BOOK as tb_1_ 
+    where exists(
+        select 1 from AUTHOR as tb_2_ 
+        inner join BOOK_AUTHOR_MAPPING as tb_3_ on tb_2_.ID = tb_3_.AUTHOR_ID 
+        where 
+            tb_1_.ID = tb_3_.BOOK_ID 
+        and 
+            tb_2_.FIRST_NAME = $1
+    )
+    ```
 
 
 ------------------
