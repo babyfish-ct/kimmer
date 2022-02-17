@@ -52,7 +52,7 @@ Collection join will cause duplicate data after SQL join
 
 - If the developer forgets to deduplicate, there will be a bug
 
-- If there are many columns to be queried (such as querying the entire object, or even querying multiple objects), it is not a good choice to remove duplicates through *select distinct* of SQL. People often choose to use *java.util.LinkedHashSet* on the client side to deduplicate. But this is not good for either the network or the JVM.
+- If not all columns need to be deduplicated(ORM often need only to deduplicate the fields of parent object), the *select distinct* of SQL cannot be used. People often choose to use *java.util.LinkedHashSet* on the client side to deduplicate. But this is not good for either the network or the JVM.
 
 - Duplicate data is not friendly to pagination, this is the most developer-headed sentence in the Hibernate log
 
