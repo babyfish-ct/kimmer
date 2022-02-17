@@ -11,8 +11,11 @@ This project contains 2 sub projects
    SQL DSL for kotlin
 
    - API perspective:
-      As static as posible, problems found while compiling.
+   
+      As static as posible, find problems while compiling.
+      
    - Functional perspective:
+   
       As dynamic as possible, make complex problems easy to solve.
    
    [Click here](./doc/kimmer-sql/README.md) to view more
