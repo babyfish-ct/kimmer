@@ -345,7 +345,7 @@ Actually, the low level API is
 where(table.joinList(Author::books).joinReference(Book::store).get(BookStore.name) eq "MANNING")
 ```
 
-ksp can generate some extension functions for you. *(Use BookStore.store to be example)*
+ksp can generate some extension functions for you. *(Use BookStore::store to be example)*
 
 ```kt
 public val SubQueryTable<Book, UUID>.store: NonNullSubQueryTable<BookStore, UUID>
