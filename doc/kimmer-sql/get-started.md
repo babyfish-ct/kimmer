@@ -303,7 +303,7 @@
        
       - Select two or more columns
        
-         ```
+         ```kt
          select {
              expr1 then
              expr2 then
@@ -311,7 +311,7 @@
              exprN
          }
          ```
-         The two spellings are incompatible. For why this is the case, see [Not good design to avoid intellij's bug](intellij-bug.md)
+         Unfortuntely, these two spellings are incompatible. For why this is the case, see [Not good design to avoid intellij's bug](intellij-bug.md)
 
 ## 3. What does kimmer-ksp do?
 
