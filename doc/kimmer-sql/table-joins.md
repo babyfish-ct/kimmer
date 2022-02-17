@@ -321,7 +321,7 @@ Of course, subqueries can solve everything, but kimmer-sql still lets you solve 
 >
 > It should be used in rare cases, and developers do not want to define two-ways associations between entity interfaces for the rare cases.
 > 
-> Conversely, if you need to use reverse joins frequently, you should consider whether you need to define bidirectional associations.
+> Conversely, if you need to use reverse joins frequently, you should consider whether you need to define two-ways associations.
 
 ------------------
 [< Previous: Null safety](./null-safety.md) | [Back to parent](./README.md) | [Next: Contains >](./contains.md)
