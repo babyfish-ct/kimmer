@@ -3,13 +3,13 @@ package org.babyfish.kimmer.sql.ast
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
 import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
-import org.babyfish.kimmer.sql.ast.table.NonNullJoinableTable
+import org.babyfish.kimmer.sql.ast.table.NonNullTable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 interface Filterable<E: Entity<ID>, ID: Comparable<ID>> {
 
-    val table: NonNullJoinableTable<E, ID>
+    val table: NonNullTable<E, ID>
 
     fun where(vararg predicates: NonNullExpression<Boolean>?)
 

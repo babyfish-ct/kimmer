@@ -3,8 +3,8 @@ package org.babyfish.kimmer.sql.ast.query.selectable
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedSubQuery
-import org.babyfish.kimmer.sql.ast.table.JoinableTable
-import org.babyfish.kimmer.sql.ast.table.NonNullJoinableTable
+import org.babyfish.kimmer.sql.ast.table.Table
+import org.babyfish.kimmer.sql.ast.table.NonNullTable
 import org.babyfish.kimmer.sql.ast.table.NonNullSubQueryTable
 
 interface SubSelectable<P: Entity<PID>, PID: Comparable<PID>, E: Entity<ID>, ID: Comparable<ID>> {
@@ -20,11 +20,11 @@ interface SubSelectable<P: Entity<PID>, PID: Comparable<PID>, E: Entity<ID>, ID:
     ): ConfigurableTypedSubQuery<P, PID, E, ID, X?>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> select(
-        table: NonNullJoinableTable<X, XID>
+        table: NonNullTable<X, XID>
     ): ConfigurableTypedSubQuery<P, PID, E, ID, X>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> select(
-        table: JoinableTable<X, XID>
+        table: Table<X, XID>
     ): ConfigurableTypedSubQuery<P, PID, E, ID, X?>
 
     /**

@@ -4,7 +4,7 @@ import org.babyfish.kimmer.graphql.Connection
 import org.babyfish.kimmer.sql.Entity
 import kotlin.reflect.KProperty1
 
-interface SubQueryTable<E: Entity<ID>, ID: Comparable<ID>>: JoinableTable<E, ID> {
+interface SubQueryTable<E: Entity<ID>, ID: Comparable<ID>>: Table<E, ID> {
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> joinReference(
         prop: KProperty1<E, X?>

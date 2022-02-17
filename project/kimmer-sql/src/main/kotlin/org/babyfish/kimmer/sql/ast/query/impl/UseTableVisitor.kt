@@ -1,9 +1,9 @@
 package org.babyfish.kimmer.sql.ast.query.impl
 
 import org.babyfish.kimmer.sql.ast.AbstractSqlBuilder
-import org.babyfish.kimmer.sql.ast.table.Table
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.ast.AstVisitor
+import org.babyfish.kimmer.sql.ast.table.Table
 import org.babyfish.kimmer.sql.meta.EntityProp
 
 internal class UseTableVisitor(

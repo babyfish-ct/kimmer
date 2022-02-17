@@ -161,7 +161,7 @@ class TableGenerator(
             if (forSubQuery) {
                 sysTypes.subQueryTableType
             } else {
-                sysTypes.joinableTableType
+                sysTypes.tableType
             }.asClassName().parameterizedBy(
                 selfTypeName,
                 entityIDTypeNameProvider[classDeclaration]
@@ -171,7 +171,7 @@ class TableGenerator(
             if (forSubQuery) {
                 sysTypes.nonNullSubQueryTableType
             } else {
-                sysTypes.nonNullJoinableTableType
+                sysTypes.nonNullTableType
             }.asClassName()
                 .parameterizedBy(
                     tgt.asClassName(),
@@ -181,7 +181,7 @@ class TableGenerator(
             if (forSubQuery) {
                 sysTypes.subQueryTableType
             } else {
-                sysTypes.joinableTableType
+                sysTypes.tableType
             }.asClassName()
                 .parameterizedBy(
                     tgt.asClassName(),
@@ -228,7 +228,7 @@ class TableGenerator(
     ) {
         val selfTypeName = classDeclaration.asClassName()
         val receiverTypeName =
-            sysTypes.joinableTableType
+            sysTypes.tableType
             .asClassName().parameterizedBy(
                 selfTypeName,
                 entityIDTypeNameProvider[classDeclaration]

@@ -19,16 +19,6 @@ class TableSysTypes(
         ?.asStarProjectedType()
         ?: noAstType("Table")
 
-    val joinableTableType: KSType = resolver
-        .getClassDeclarationByName("$KIMMER_SQL_AST_TABLE_PACKAGE.JoinableTable")
-        ?.asStarProjectedType()
-        ?: noAstType("JoinableTable")
-
-    val nonNullJoinableTableType: KSType = resolver
-        .getClassDeclarationByName("$KIMMER_SQL_AST_TABLE_PACKAGE.NonNullJoinableTable")
-        ?.asStarProjectedType()
-        ?: noAstType("NonNullJoinableTable")
-
     val subQueryTableType: KSType = resolver
         .getClassDeclarationByName("$KIMMER_SQL_AST_TABLE_PACKAGE.SubQueryTable")
         ?.asStarProjectedType()

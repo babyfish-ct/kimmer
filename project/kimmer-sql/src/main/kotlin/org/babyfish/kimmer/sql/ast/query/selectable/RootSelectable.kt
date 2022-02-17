@@ -3,12 +3,12 @@ package org.babyfish.kimmer.sql.ast.query.selectable
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedRootQuery
-import org.babyfish.kimmer.sql.ast.table.JoinableTable
-import org.babyfish.kimmer.sql.ast.table.NonNullJoinableTable
+import org.babyfish.kimmer.sql.ast.table.Table
+import org.babyfish.kimmer.sql.ast.table.NonNullTable
 
 interface RootSelectable<E: Entity<ID>, ID: Comparable<ID>> {
 
-    val table: NonNullJoinableTable<E, ID>
+    val table: NonNullTable<E, ID>
 
     fun <X: Any> select(
         expression: NonNullExpression<X>
@@ -19,11 +19,11 @@ interface RootSelectable<E: Entity<ID>, ID: Comparable<ID>> {
     ): ConfigurableTypedRootQuery<E, ID, X?>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> select(
-        table: NonNullJoinableTable<X, XID>
+        table: NonNullTable<X, XID>
     ): ConfigurableTypedRootQuery<E, ID, X>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> select(
-        table: JoinableTable<X, XID>
+        table: Table<X, XID>
     ): ConfigurableTypedRootQuery<E, ID, X?>
 
     /**

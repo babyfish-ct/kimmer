@@ -9,10 +9,10 @@ import org.babyfish.kimmer.sql.ast.SqlBuilder
 import org.babyfish.kimmer.sql.ast.query.MutableQuery
 import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
 import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
-import org.babyfish.kimmer.sql.ast.table.Table
 import org.babyfish.kimmer.sql.ast.table.impl.TableAliasAllocator
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.ast.AstVisitor
+import org.babyfish.kimmer.sql.ast.table.Table
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType

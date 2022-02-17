@@ -3,7 +3,6 @@ package org.babyfish.kimmer.sql.meta.config
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.table.NonNullTable
-import org.babyfish.kimmer.sql.ast.table.Table
 
 interface Formula<E: Entity<ID>, ID: Comparable<ID>, T: Any>: Storage {
 

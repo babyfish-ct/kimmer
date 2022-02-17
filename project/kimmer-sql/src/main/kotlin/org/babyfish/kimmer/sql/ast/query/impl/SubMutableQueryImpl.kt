@@ -9,9 +9,8 @@ import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
 import org.babyfish.kimmer.sql.ast.query.selectable.AbstractProjection
 import org.babyfish.kimmer.sql.ast.query.selectable.Projection
 import org.babyfish.kimmer.sql.ast.query.selectable.ProjectionContext
-import org.babyfish.kimmer.sql.ast.table.JoinableTable
-import org.babyfish.kimmer.sql.ast.table.NonNullJoinableTable
 import org.babyfish.kimmer.sql.ast.table.Table
+import org.babyfish.kimmer.sql.ast.table.NonNullTable
 import org.babyfish.kimmer.sql.ast.table.impl.SubQueryTableImpl
 import org.babyfish.kimmer.sql.ast.Ast
 import org.babyfish.kimmer.sql.ast.AstVisitor
@@ -42,7 +41,7 @@ internal class SubMutableQueryImpl<P, PID, E, ID>(
     override fun createTable(entityType: EntityType): TableImpl<E, ID> =
         SubQueryTableImpl(this, entityType)
 
-    override val parentTable: Table<P, PID>
+    override val parentTable: NonNullTable<P, PID>
         get() = parentQuery.table
 
     override fun accept(visitor: AstVisitor) {
@@ -64,12 +63,12 @@ internal class SubMutableQueryImpl<P, PID, E, ID>(
         ConfigurableTypedSubQueryImpl.select(this, listOf(expression as Selection<*>))
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> select(
-        table: NonNullJoinableTable<X, XID>
+        table: NonNullTable<X, XID>
     ): ConfigurableTypedSubQuery<P, PID, E, ID, X> =
         ConfigurableTypedSubQueryImpl.select(this, listOf(table as Selection<*>))
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> select(
-        table: JoinableTable<X, XID>
+        table: Table<X, XID>
     ): ConfigurableTypedSubQuery<P, PID, E, ID, X?> =
         ConfigurableTypedSubQueryImpl.select(this, listOf(table as Selection<*>))
 

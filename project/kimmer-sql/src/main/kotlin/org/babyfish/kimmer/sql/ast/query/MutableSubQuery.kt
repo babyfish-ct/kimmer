@@ -3,7 +3,7 @@ package org.babyfish.kimmer.sql.ast.query
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.query.selectable.SubSelectable
 import org.babyfish.kimmer.sql.ast.table.NonNullSubQueryTable
-import org.babyfish.kimmer.sql.ast.table.Table
+import org.babyfish.kimmer.sql.ast.table.NonNullTable
 
 interface MutableSubQuery<P, PID, E, ID> : MutableQuery<E, ID>, SubSelectable<P, PID, E, ID>
     where
@@ -14,5 +14,5 @@ interface MutableSubQuery<P, PID, E, ID> : MutableQuery<E, ID>, SubSelectable<P,
 
     override val table: NonNullSubQueryTable<E, ID>
 
-    val parentTable: Table<P, PID>
+    val parentTable: NonNullTable<P, PID>
 }

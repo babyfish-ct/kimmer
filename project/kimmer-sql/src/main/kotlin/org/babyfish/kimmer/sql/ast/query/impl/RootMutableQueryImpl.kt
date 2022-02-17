@@ -7,8 +7,8 @@ import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedRootQuery
 import org.babyfish.kimmer.sql.ast.query.selectable.AbstractProjection
 import org.babyfish.kimmer.sql.ast.query.selectable.Projection
 import org.babyfish.kimmer.sql.ast.query.selectable.ProjectionContext
-import org.babyfish.kimmer.sql.ast.table.JoinableTable
-import org.babyfish.kimmer.sql.ast.table.NonNullJoinableTable
+import org.babyfish.kimmer.sql.ast.table.Table
+import org.babyfish.kimmer.sql.ast.table.NonNullTable
 import org.babyfish.kimmer.sql.ast.table.impl.TableAliasAllocator
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import kotlin.reflect.KClass
@@ -33,12 +33,12 @@ internal class RootMutableQueryImpl<E, ID>(
         ConfigurableTypedRootQueryImpl.select(this, listOf(expression as Selection<*>))
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> select(
-        table: NonNullJoinableTable<X, XID>
+        table: NonNullTable<X, XID>
     ): ConfigurableTypedRootQuery<E, ID, X> =
         ConfigurableTypedRootQueryImpl.select(this, listOf(table as Selection<*>))
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> select(
-        table: JoinableTable<X, XID>
+        table: Table<X, XID>
     ): ConfigurableTypedRootQuery<E, ID, X?> =
         ConfigurableTypedRootQueryImpl.select(this, listOf(table as Selection<*>))
 
