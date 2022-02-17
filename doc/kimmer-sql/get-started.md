@@ -59,7 +59,7 @@
 
 4. Add data model interfaces
    
-   Create a package with any path， add threes kotlin files into it
+   Create a package with any path， add three kotlin files into it
 
    a. BookStore.kt
    
