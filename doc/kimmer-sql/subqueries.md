@@ -127,7 +127,7 @@ Sub queries are divided into correlated and uncorrelated subqueries.
 
 ### 2.1. *parentTable*
 
-In the lambda expression of the subquery function, not only the implicit object *table* is provided to represent the table of the subquery itself, but also the implicit object *parentTable* is provided to represent the table of the parent query.
+In the lambda expression of the subquery function, not only the implicit object *table* is provided to represent the table of the subquery itself, but also the implicit object **parentTable** is provided to represent the table of the parent query.
 
 ```kt
 sqlClient.createQuery(Book::class) {
