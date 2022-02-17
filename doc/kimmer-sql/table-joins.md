@@ -2,12 +2,12 @@
 
 In this article, we will touch on four concepts
 
-1. Merged join
+1. Dynamic join
 2. Phantom join
 3. Half join
 4. Reverse join
 
-## 1. Merged join
+## 1. Dynamic join
 
 In kimmer-sql, you can create temporary table joins at will without having to use local variables to remember table joins. Temporary table joins can be created anywhere in SQL.
 
