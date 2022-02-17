@@ -326,7 +326,13 @@ ksp {
 
 What does kimmer-ksp do?
 
-In fact, kimmer-sql can be used without ksp, but it is not concise enough. The user code opens like this
+kimmer-ksp allows you to write simple code like this
+
+```kt
+// table is Aurhor
+where(table.books.store.name eq "MANNING")
+```
+Actually, the low level API is
 
 ```kt
 // table is Aurhor
