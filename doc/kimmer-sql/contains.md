@@ -36,15 +36,15 @@ In this code we can see joins: ```table.books```, ```table.authors```, they targ
 
 **Precise definition**
 
-list = kotlin.collections.List<*>
+*list* = kotlin.collections.List<*>
 
-connection = [org.babyfish.kimmer.graphql.Connection<*>](../../project/kimmer/src/main/kotlin/org/babyfish/kimmer/graphql/Connection.kt)
+*connection* = [org.babyfish.kimmer.graphql.Connection<*>](../../project/kimmer/src/main/kotlin/org/babyfish/kimmer/graphql/Connection.kt)
 
-collection = list + connection
+**collection** = *list* | *connection*
 
 > [org.babyfish.kimmer.graphql.Connection](../../project/kimmer/src/main/kotlin/org/babyfish/kimmer/graphql/Connection.kt) is used to support [graphql-connection](https://relay.dev/graphql/connections.htm), kimmer-sql cannot support it on its own, it must be supported in conjunction with new framework for GraphQL in the future. For now, let's ignore the connection for now.
 
-If a join is created by association whose type is collection *(list + connection)*, it is a collection join. This is the precise definition.
+If a join is created by association whose type is collection *(list | connection)*, it is a collection join. This is the precise definition.
 
 ------------------
 [< Previous: Table joins](./table-joins.md) | [Back to parent](./README.md) | [Next: Subqueries >](./subqueries.md)
