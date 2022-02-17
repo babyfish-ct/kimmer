@@ -143,7 +143,14 @@ Sub queries are divided into correlated and uncorrelated subqueries.
         select(constant(1)) // β
     }
     ```
+    1. At the line with comment *α*, *parentTable* means the root table of parent query.
+    2. At the line with comment *β*, use select the constant *1* because *exists* does not care what the subquery queries
 
+    > The difference between *value()* and *constant()*
+    > 
+    > 1. *value()* implants variables into SQL in the form of JDBC/R2DBC parameters. For JDBC, the parameter placeholder is *?*, and for R2DBC, the parameter placeholder is *$1*, *$2*, ...
+    > 
+    > 2. *constant()* is hard-coded into SQL, which is helpful for functional indexes. In order to avoid injection attacks, constant only accepts numeric types.
     
 
 
