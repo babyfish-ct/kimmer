@@ -149,7 +149,7 @@ val countQuery = query
     .withoutSortingAndPaging()
 val rowCount = countQuery.execute(con)[0]
 ```
-The generated SQL is
+Now, the optimization takes effect. Generated SQL no longer contains JOIN
 ```
 select count(tb_1_.ID) from BOOK as tb_1_ where tb_1_.PRICE between $1 and $2
 ```
