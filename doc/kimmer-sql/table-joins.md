@@ -295,5 +295,25 @@ We joined an association based on an middle table, but did not access any proper
 
 This situation is called half join.
 
+## 4. Reverse join
+
+All of the table joins discussed so far apply only if they are defined as kotlin properties in the Entity interface.
+
+True, if the developer defines a two-ways association between Entity Interfaces
+```
+A <--> B
+```
+
+We can find the other from either end, whether it's from *A* to *B* or *B* to *A*.
+
+But there is such a situation, the developer only defines a one-way association
+```
+A --> B
+```
+
+At this time, we can only find *B* from *A*, but cannot find A from B.
+
+Of course, subqueries can solve everything, but kimmer-sql still lets you solve this problem with joins, which are called inverse joins
+
 ------------------
 [< Previous: Null safety](./null-safety.md) | [Back to parent](./README.md) | [Next: Contains >](./contains.md)
