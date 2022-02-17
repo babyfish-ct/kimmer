@@ -104,7 +104,7 @@ Obviously, if the table join does not affect the number of records, it can be re
     </tr>
 </table>
 
-### 2.1 Example for joins only used by *order by* caluse.
+#### 2.1 Example for joins only used by *order by* caluse of original top-level query.
 
 ```kt
 val query = sqlClient.createQuery(Book::class) {
@@ -153,6 +153,63 @@ Now, the optimization takes effect. Generated SQL no longer contains JOIN
 ```sql
 select count(tb_1_.ID) from BOOK as tb_1_ where tb_1_.PRICE between $1 and $2
 ```
-    
+
+#### 2.1 Example for joins only used by *select* caluse of original top-level query.
+
+```kt
+val query = sqlClient
+    .createQuery(Book::class) {
+        where(table.price.between(BigDecimal(20), BigDecimal(30)))
+        orderBy(table.name)
+        select {
+            table then 
+                table.store    // α
+        }
+    }
+val countQuery = query
+    .reselect {
+        select(table.id.count())
+    }
+    .withoutSortingAndPaging()
+val rowCount = countQuery.execute(con)[0]
+```
+
+At the line with comment *α*
+
+1. *table.store* is inner join
+2. The association *Book::store* is nullable
+
+This situation cannot be automatically optimized, and the final generated SQL contains JOIN
+
+```sql
+select count(tb_1_.ID) 
+from BOOK as tb_1_ 
+inner join BOOK_STORE as tb_2_ on tb_1_.STORE_ID = tb_2_.ID 
+where tb_1_.PRICE between $1 and $2
+```
+
+Either using left outer join or changing *Book::store* to be non-null can make the automatic optimization take effect. Here, we take using left outer connection as an example.
+```kt
+val query = sqlClient
+    .createQuery(Book::class) {
+        where(table.price.between(BigDecimal(20), BigDecimal(30)))
+        orderBy(table.name)
+        select {
+            table then 
+                table.`store?`
+        }
+    }
+val countQuery = query
+    .reselect {
+        select(table.id.count())
+    }
+    .withoutSortingAndPaging()
+val rowCount = countQuery.execute(con)[0]
+```
+Now, the optimization takes effect. Generated SQL no longer contains JOIN
+```sql
+select count(tb_1_.ID) from BOOK as tb_1_ where tb_1_.PRICE between $1 and $2
+```
+
 ------------------
 [< Previous: Subqueries](./subqueries.md) | [Back to parent](./README.md)
