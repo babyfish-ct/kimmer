@@ -108,7 +108,7 @@ class PagingTest: AbstractTest() {
             sql {
                 """select count(tb_1_.ID) 
                     |from BOOK as tb_1_ 
-                    |where tb_1_.PRICE between ${'$'}1 and ${'$'}2"""
+                    |where tb_1_.PRICE between $1 and $2"""
                     .trimMargin()
             }
         }
@@ -150,7 +150,7 @@ class PagingTest: AbstractTest() {
                 """select count(tb_1_.ID) 
                     |from BOOK as tb_1_ 
                     |inner join BOOK_STORE as tb_2_ on tb_1_.STORE_ID = tb_2_.ID 
-                    |where tb_1_.PRICE between ${'$'}1 and ${'$'}2"""
+                    |where tb_1_.PRICE between $1 and $2"""
                     .trimMargin()
             }
         }
