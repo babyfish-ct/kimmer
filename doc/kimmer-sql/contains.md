@@ -55,10 +55,18 @@ Collection join will cause duplicate data after SQL join
 - If there are many columns to be queried (such as querying the entire object, or even querying multiple objects), it is not a good choice to remove duplicates through distinct SQL. People often choose to use java.util.LinkedHashMap on the client side to deduplicate. But this is not good for either the network or the JVM.
 
 - Duplicate data is not friendly to pagination, this is the most developer-headed sentence in the Hibernate log
-```firstResult/maxResults specified with collection fetch; applying in memory!```
+    [firstResult/maxResults specified with collection fetch; applying in memory](https://tech.asimio.net/2021/05/19/Fixing-Hibernate-HHH000104-firstResult-maxResults-warning-using-Spring-Data-JPA.html)
 
+So, the disadvantages of using a collection join in a top-level query are too significant, but there is still value in using a collection join in a subquery.
 
+kimmer-ksp support useful a useful switch for the developer, it's *kimmer.table.collection-join-only-for-sub-query*
 
+If the developer turns on this switch, the following can be achieved at compile time
+
+1. Prohibit the use of collection joins in top-level queries
+2. Allow collection joins in subqueries
+
+### 3. kimmer.table.collection-join-only-for-sub-query of kimmer-ksp
 
 ------------------
 [< Previous: Table joins](./table-joins.md) | [Back to parent](./README.md) | [Next: Subqueries >](./subqueries.md)
