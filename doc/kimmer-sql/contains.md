@@ -152,7 +152,7 @@ Now, let's get to the main topic of this article
 
 Through chapter [Table joins](./table-joins.md), we know phantom joins and half joins, which are very helpful for performance when the query condition of the associated object is only for the *id* field.
 
-Now, collection joins for top-level queries are disabled. Although subqueries can solve everything, However, kimmer-sql still allows developers to not need to write subqueries for id-based filtering.
+Now, collection joins for top-level queries are disabled. Although subqueries can solve everything, kimmer-sql still allows developers to not need to write subqueries for id-based filtering.
 
 kimmer-sql provides an alternative that works similarly to phantom joins and half joins.
 
