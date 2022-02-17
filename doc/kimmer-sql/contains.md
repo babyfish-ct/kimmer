@@ -75,7 +75,9 @@ Now let's discuss the switch of kimmer-ksp, what is the difference between the c
 ksp {
     arg("kimmer.draft", "false")
     arg("kimmer.table", "true")
-    arg("kimmer.table.collection-join-only-for-sub-query", "false") // Here it is, set true if you want to open it
+
+    // Here it is, set true if you want to open it
+    arg("kimmer.table.collection-join-only-for-sub-query", "false") 
 }
 ```
 
