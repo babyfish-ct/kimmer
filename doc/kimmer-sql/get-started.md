@@ -269,7 +269,7 @@
 
    4. SQL DSL and native SQL can mixed together
 
-      In the above code, we called "sql", at comment γ and δ 
+      In the above code, we called "sql", at *γ* and *δ* 
       
       In the lambda expression of the *sql* function, we use the *expressions* function to inject DSL expressions into native SQL, the arguments correspond one-to-one with *"%e"* in the native sql string template.
 
