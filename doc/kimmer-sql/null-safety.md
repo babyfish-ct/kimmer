@@ -4,7 +4,7 @@ Kimmer-ksp provide null safety for SQL, like the null safety of kotlin
 
 ## 1. Nullity of column
 
-BookStore supports two properties, *BookStore::name* and *BookStorewebsite*. 
+BookStore supports two properties, *BookStore::name* and *BookStore::website*. 
 
 *BookStore::name* is non null, *BookStore::website* is nullable
 
