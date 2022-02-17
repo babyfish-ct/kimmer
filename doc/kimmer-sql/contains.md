@@ -1,4 +1,4 @@
-# [Home](https://github.com/babyfish-ct/kimmer)/[kimmer-sql](./README.md)/Containss
+# [Home](https://github.com/babyfish-ct/kimmer)/[kimmer-sql](./README.md)/Contains
 
 ## 1. Collection join
 
