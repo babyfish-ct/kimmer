@@ -55,7 +55,7 @@ val rows = query.limit(limit, offset).execute(con)
 
 ## 2. Automatic optimization for count-query
 
-In order to make the performance of count query as high as possiblem, kimmer-sql can remove unnecessary table joins of top-level query of count-query.
+In order to make the performance of count query as high as possible, kimmer-sql can remove unnecessary table joins of top-level query of count-query.
 
 There are two types of table joins that will not be removed
 
