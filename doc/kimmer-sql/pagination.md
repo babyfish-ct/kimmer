@@ -53,6 +53,50 @@ val rows = query.limit(limit, offset).execute(con)
 >   
 >   3. If the original top-level query contains a *group by* clause, it will cause an exception.
 
+## 2. Automatic optimization for count-query
+
+In order to make the performance of count query as high as possiblem, kimmer-sql can remove unnecessary table joins of top-level query of count-query.
+
+There are two types of table joins that will not be removed
+
+1. Collection join
+    
+    Collection table joins for one-to-many or many-to-many associations inevitably affect the number of records, so kimmer-sql keep them forever in count query.
+
+2. Table joins shared by *where* cluase
+
+    This does not need to be explained, only table joins that are **only** used by the old *select* or *order by* clauses may be removed by optimization.
+
+**Optimization rules**
+
+<table>
+    <tr>
+        <td colspan="3">
+            AND
+        </td>
+        <td>
+            Association type is many-to-one
+        </td>
+        <td>
+            Table join is ONLY used by *select* or *order by* clause of orginal top-level query
+        </td>
+    </tr>
+    <tr>
+        <td>
+            OR
+        </td>
+        <td>
+            Join type is LEFT OUTER JOIN
+        </td>
+    </tr>
+    <tr>
+        <td>
+            The type of many-to-one association is nonnull 
+        </td>
+    </tr>
+</table>
+
+### 2.1 Table joins that ONLY be used by original order by.
 
 ------------------
 [< Previous: Subqueries](./subqueries.md) | [Back to parent](./README.md)
