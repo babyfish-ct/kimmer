@@ -51,7 +51,7 @@
       
    - "kimmer.table.collection-join-only-for-sub-query"
    
-      This argument will be discussed in detail in Chapter "[Contains](../contains.md)", it is recommended to open.
+      This argument will be discussed in detail in Chapter "[Contains](./contains.md)", it is recommended to open.
       
 3. Refresh gradle to download all dependencies and plugins
 
