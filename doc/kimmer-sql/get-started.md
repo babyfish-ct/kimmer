@@ -280,7 +280,7 @@
       In the above code, we have called two functions
       
       - reselect, at ε
-      - withoutSortingAndPaging, at comment ζ
+      - withoutSortingAndPaging, at ζ
 
       They can quickly create the count query based on data queriy, this is very useful for pagination.
 
@@ -306,7 +306,7 @@
              exprN
          }
          ```
-         The two spellings are incompatible. For why this is the case, see [A design to avoid intellij's bug](intellij-bug.md)
+         The two spellings are incompatible. For why this is the case, see [Not good design to avoid intellij's bug](intellij-bug.md)
 
 ## 3. What does kimmer-ksp do?
 
@@ -339,8 +339,6 @@ Actually, the low level API is
 // table is Aurhor
 where(table.joinList(Author::books).joinReference(Book::store).get(BookStore.name) eq "MANNING")
 ```
-
-Although such code is also type-safe, it is very cumbersome
 
 ksp can generate some extension functions for you. *(Use BookStore.store to be example)*
 
