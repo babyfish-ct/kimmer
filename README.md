@@ -9,5 +9,13 @@ This project contains 2 sub projects
 2. **kimmer-sql**
 
    SQL DSL for kotlin
+
+   - API perspective:
+   
+      As static as posible, find problems while compiling.
+      
+   - Functional perspective:
+   
+      As dynamic as possible, make complex problems easy to solve.
    
    [Click here](./doc/kimmer-sql/README.md) to view more

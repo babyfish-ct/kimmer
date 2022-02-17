@@ -16,8 +16,8 @@
    b. Add this section into **dependencies{}**
    
       ```
-      implementation("org.babyfish.kimmer:kimmer-sql:0.1.6")
-      ksp("org.babyfish.kimmer:kimmer-ksp:0.1.6")
+      implementation("org.babyfish.kimmer:kimmer-sql:0.1.9")
+      ksp("org.babyfish.kimmer:kimmer-ksp:0.1.9")
       runtimeOnly("com.h2database:h2:2.1.210")
       ```
    
@@ -144,7 +144,7 @@
       This file used to setup environment
       
       - Uses "database.sql" to create tables and insert data
-      - Specify ORM meta information for the kimmer-sql
+      - Specify database mapping meta information for the kimmer-sql
 
    - [example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/App.kt](../../example/kimmer-sql/src/main/kotlin/org/babyfish/kimmer/sql/example/App.kt)
       
@@ -153,7 +153,7 @@
       - Dynamic sql
       - Table join
       - Sub quieres
-      - Mix dsl and native sql together
+      - Mix DSL and native sql together
       - Pagination
 
 ## 2. Key code description
@@ -182,6 +182,7 @@
         }
 
         orderBy(table.name)
+        orderBy(table.edition, OrderMode.DESC)
 
         select {   // η
             table then
@@ -247,13 +248,13 @@
 
    2. Table joins can be initially divided into real joins and phantom joins
     
-      - table.stroe.name,  at comment α
+      - table.stroe.name,  at α
       
          This is real join, because the name of the parent object can only be obtained through table join. 
 
          It will appear in the final generated SQL. Of course, this real join is defined in dynamic conditions so it will only be generated in SQL if the corresponding condition exists.
       
-      - table.store.id, at comment β
+      - table.store.id, at β
       
          This is phantom join, *Book.store* is a many-to-one association based on foreign key. The id of the parent object is actually the foreign key of the child object. 
          Phantom join never appears in the final SQL.
@@ -268,7 +269,7 @@
 
    4. SQL DSL and native SQL can mixed together
 
-      In the above code, we called "sql", at comment γ and δ 
+      In the above code, we called "sql", at *γ* and *δ* 
       
       In the lambda expression of the *sql* function, we use the *expressions* function to inject DSL expressions into native SQL, the arguments correspond one-to-one with *"%e"* in the native sql string template.
 
@@ -278,8 +279,8 @@
       
       In the above code, we have called two functions
       
-      - reselect, at comment ε
-      - withoutSortingAndPaging, at comment ζ
+      - reselect, at ε
+      - withoutSortingAndPaging, at ζ
 
       They can quickly create the count query based on data queriy, this is very useful for pagination.
 
@@ -305,7 +306,7 @@
              exprN
          }
          ```
-         The two spellings are incompatible. For why this is the case, see [A design to avoid intellij's bug](intellij-bug.md)
+         The two spellings are incompatible. For why this is the case, see [Not good design to avoid intellij's bug](intellij-bug.md)
 
 ## 3. What does kimmer-ksp do?
 
@@ -339,8 +340,6 @@ Actually, the low level API is
 where(table.joinList(Author::books).joinReference(Book::store).get(BookStore.name) eq "MANNING")
 ```
 
-Although such code is also type-safe, it is very cumbersome
-
 ksp can generate some extension functions for you. *(Use BookStore.store to be example)*
 
 ```kt
@@ -350,10 +349,10 @@ public val SubQueryTable<Book, UUID>.store: NonNullSubQueryTable<BookStore, UUID
 public val SubQueryTable<Book, UUID>.`store?`: SubQueryTable<BookStore, UUID>
   get() = `joinReference?`(Book::store)
 
-public val JoinableTable<Book, UUID>.store: NonNullJoinableTable<BookStore, UUID>
+public val Table<Book, UUID>.store: NonNullTable<BookStore, UUID>
   get() = joinReference(Book::store)
 
-public val JoinableTable<Book, UUID>.`store?`: JoinableTable<BookStore, UUID>
+public val Table<Book, UUID>.`store?`: Table<BookStore, UUID>
   get() = `joinReference?`(Book::store)
 ```
 
