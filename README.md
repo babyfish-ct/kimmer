@@ -12,7 +12,7 @@ This project contains 2 sub projects
 
    - API perspective:
    
-      As static as posible, find problems while compiling.
+      As static as posible, find problems while compiling, and bring kotlin null safety to SQL.
       
    - Functional perspective:
    
