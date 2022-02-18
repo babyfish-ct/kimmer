@@ -11,7 +11,7 @@ Among these to-do options
 
 There is currently no ability to associate and fetch the queried object, which is why kimmer-sql claims to be a SQL DSL rather than an ORM.
 
-But there is one exception, for a many-to-one relationship implemented based on foreign keys, you will get a kimmer object with no fields other than id, because this is zero cost.
+> But there is one exception, for a many-to-one relationship implemented based on foreign keys, you will get a kimmer object with no fields other than id, because this is zero cost.
 
 In fact, it doesn't make sense to capture the associated objects of the object fixedly in the data layer. A better way is to dynamically capture the associated objects in GraphQL according to the client's needs. (In fact, kimmer-sql is the underlying framework for my future GraphQL framework)
 
