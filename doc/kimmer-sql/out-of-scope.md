@@ -44,3 +44,7 @@ Right join is not difficult to handle, it only needs developers to make a workar
 The real trouble is full join, but I think that full join is mostly used in OLAP field, and OLTP field where developers are highly involved should be rarely used, even if OLTP project needs full join in some occasions, it is handled as native sql, Just bypass the framework.
 
 Compared to Null safety, I think Null safety for SQL is more important.
+
+------------------
+
+[< Previous: Pagination](./pagination.md) | [Back to parent](./README.md) | [Not good design to avoid intellij's bug >](./intellij-bug.md)
