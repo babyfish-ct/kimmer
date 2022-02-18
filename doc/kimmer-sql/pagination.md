@@ -99,7 +99,7 @@ Obviously, if the table join does not affect the number of records, it can be re
     </tr>
     <tr>
         <td>
-            The type of many-to-one association is nonnull 
+            The many-to-one association is nonnull 
         </td>
     </tr>
 </table>
