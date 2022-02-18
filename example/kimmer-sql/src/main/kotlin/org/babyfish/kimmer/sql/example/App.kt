@@ -1,5 +1,6 @@
+package org.babyfish.kimmer.sql.example
+
 import org.babyfish.kimmer.sql.ast.*
-import org.babyfish.kimmer.sql.example.AppContext
 import org.babyfish.kimmer.sql.example.model.*
 
 fun main(args: Array<String>) {
