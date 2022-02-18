@@ -241,4 +241,4 @@ val d = createSqlClient(dialect = OracleDialect()) {
 
 
 ------------------
-[< Previous: Subqueries](./subqueries.md) | [Back to parent](./README.md)
+[< Previous: Subqueries](./subqueries.md) | [Back to parent](./README.md) | [Out of scope >](./out-of-scope.md)
