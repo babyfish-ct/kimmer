@@ -9,13 +9,13 @@ Among these to-do options
 
 ## 1. Associative fetching like ORM
 
-There is currently no ability to associate and fetch the queried object, which is why kimmer-sql claims to be a SQL DSL rather than an ORM.
+There is currently no ability fetch associated objects of queried object, which is why kimmer-sql claims to be a SQL DSL rather than an ORM.
 
-> But there is one exception, for a many-to-one relationship implemented based on foreign keys, you will get a kimmer object with no fields other than id, because this is zero cost.
+> But there is one exception, for a many-to-one relationship implemented based on foreign keys, you will get an associated kimmer object with no fields other than id, because this is zero cost.
 
-In fact, it doesn't make sense to capture the associated objects of the object fixedly in the data layer. A better way is to dynamically capture the associated objects in GraphQL according to the client's needs. (In fact, kimmer-sql is the underlying framework for my future GraphQL framework)
+In fact, it doesn't make sense to fetch the associated objects of the object fixedly in the data layer. A better way is to dynamically fetch the associated objects in GraphQL according to the client's needs. (In fact, kimmer-sql is the underlying framework for my future GraphQL framework)
 
-Of course, after building the upper-level GraphQL framework, I may think, without using GraphQL, how to make kimmer-sql as powerful as GraphQL to capture dynamically associated objects.
+Of course, after building the upper-level GraphQL framework, I may think, without using GraphQL, how to make kimmer-sql as powerful as GraphQL to dynamically fetch  associated objects.
 
 In any case, either there is none, or there is a stronger and smarter solution.
 
@@ -23,7 +23,7 @@ In any case, either there is none, or there is a stronger and smarter solution.
 
 Now, all functions are queries, insert/update/delete are not discussed in the documentation and examples.
 
-This function will definitely be available in the future. In fact, the GraphQL framework I will develop based on kimmer-sql needs a very powerful and intelligent modification function.
+This feature will definitely be available in the future. In fact, the GraphQL framework I will develop based on kimmer-sql needs a very powerful and intelligent modification function.
 
 ## 3. TransactionManager
 
@@ -37,10 +37,10 @@ If you are careful, you may find that all the documents discuss inner join and l
 
 This is not allowed by design.
 
-A notable feature of kimmer-sql is the same null safety as kotlin, inner join indicates that the target table is not null, and left join indicates that the target table can be null, but in any case, inner join and left join do not To change the nullability of the current table, it is possible to design an API that supports null safety. However, right join and full join will change the nullability of the current table, and designing a null-safe API will no longer be possible.
+A notable feature of kimmer-sql is the same null safety as kotlin, inner join indicates that the target table is not null, and left join indicates that the target table is nullable, but in any case, inner join and left join cannot change the nullability of the current table so that it is possible to design API supports null safety. However, right join and full join can change the nullability of the current table, and designing null-safe API will no longer be possible.
 
 Right join is not difficult to handle, it only needs developers to make a workaround in SQL writing.
 
-The real trouble is full join, but I think that full join is mostly used in OLAP field, and OLTP field where developers are highly involved should be rarely used, even if OLTP project needs full join in some occasions, it is handled as native sql, Just bypass the frame.
+The real trouble is full join, but I think that full join is mostly used in OLAP field, and OLTP field where developers are highly involved should be rarely used, even if OLTP project needs full join in some occasions, it is handled as native sql, Just bypass the framework.
 
 Compared to Null safety, I think Null safety for SQL is more important.
