@@ -1,4 +1,4 @@
-# A design to avoid Intellij's bug
+# [Home](https://github.com/babyfish-ct/kimmer)/[kimmer-sql](./README.md)/Non good design to avoid intellij's bug
 
 Since 0.1.7, the select function can be used by two ways
 
