@@ -2,12 +2,12 @@
 
 In this article, we will touch on four concepts
 
-1. Merged join
+1. Dynamic join
 2. Phantom join
 3. Half join
 4. Reverse join
 
-## 1. Merged join
+## 1. Dynamic join
 
 In kimmer-sql, you can create temporary table joins at will without having to use local variables to remember table joins. Temporary table joins can be created anywhere in SQL.
 
@@ -112,9 +112,9 @@ In the code above
     
 > In fact, γ and δ are not complete table joins, they are half joins, which will be described later. You can think for now that kimmer-sql foolishly treats them as normal table joins. 
 
-Obviously, for the code above, these temporary table joins will conflict if multiple dynamic conditions are met at runtime. kimmer-sql can merge several join paths together and remove redundant connections.
+Obviously, for the code above, these temporary table joins will conflict if multiple dynamic conditions are met at runtime. kimmer-sql can merge several join paths together and remove redundant joins.
 
-#### Path type merge rule
+### Table join path merge rule
 
 Let's look at the following 3 table join paths
 
@@ -313,7 +313,7 @@ A --> B
 
 Now, we can only find *B* from *A*, cannot find *A* from *B*.
 
-Of course, subqueries can solve everything, but kimmer-sql still lets you solve this problem with joins, which are called inverse joins.
+Of course, subqueries can solve everything, but kimmer-sql still lets you solve this problem with joins, which are called reverse joins.
 
 > Notice
 >

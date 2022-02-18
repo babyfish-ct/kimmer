@@ -51,7 +51,7 @@
       
    - "kimmer.table.collection-join-only-for-sub-query"
    
-      This argument will be discussed in detail in Chapter "[Contains](../contains.md)", it is recommended to open.
+      This argument will be discussed in detail in Chapter "[Contains](./contains.md)", it is recommended to open.
       
 3. Refresh gradle to download all dependencies and plugins
 
@@ -59,7 +59,7 @@
 
 4. Add data model interfaces
    
-   Create a package with any path， add threes kotlin files into it
+   Create a package with any path， add three kotlin files into it
 
    a. BookStore.kt
    
@@ -71,6 +71,7 @@
 
       interface BookStore: Entity<UUID> {
           val name: String
+          val website: String?
           val books: List<Book>
       }
       ```
@@ -86,7 +87,7 @@
 
       interface Book: Entity<UUID> {
           val name: String
-          val store: BookStore
+          val store: BookStore?
           val edition: Int
           val price: BigDecimal
           val authors: List<Author>
@@ -129,6 +130,10 @@
    ```
    
    It must be ensured that the automatically generated code can be recognized by intellij, otherwise the IDE will not be able to perform intellisense in the subsequent development process.
+   
+   So, please click refresh button of gradle pannel
+   
+   ![image](../kimmer-core/images/gradle-refresh.jpeg)
    
    
 6. Add other code and run
@@ -298,7 +303,7 @@
        
       - Select two or more columns
        
-         ```
+         ```kt
          select {
              expr1 then
              expr2 then
@@ -306,7 +311,7 @@
              exprN
          }
          ```
-         The two spellings are incompatible. For why this is the case, see [Not good design to avoid intellij's bug](intellij-bug.md)
+         Unfortuntely, these two spellings are incompatible. For why this is the case, see [Not good design to avoid intellij's bug](intellij-bug.md)
 
 ## 3. What does kimmer-ksp do?
 
@@ -340,7 +345,7 @@ Actually, the low level API is
 where(table.joinList(Author::books).joinReference(Book::store).get(BookStore.name) eq "MANNING")
 ```
 
-ksp can generate some extension functions for you. *(Use BookStore.store to be example)*
+ksp can generate some extension functions for you. *(Use BookStore::store to be example)*
 
 ```kt
 public val SubQueryTable<Book, UUID>.store: NonNullSubQueryTable<BookStore, UUID>

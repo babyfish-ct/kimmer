@@ -4,7 +4,7 @@ Kimmer-ksp provide null safety for SQL, like the null safety of kotlin
 
 ## 1. Nullity of column
 
-BookStore supports two properties, *BookStore::name* and *BookStorewebsite*. 
+BookStore supports two properties, *BookStore::name* and *BookStore::website*. 
 
 *BookStore::name* is non null, *BookStore::website* is nullable
 
@@ -25,7 +25,7 @@ for ((name, website) in rows) {
 }
 ```
 - The line with comment "α" can be compiled correctly
-- However, the line with comment "β" will result in a compilation error， because BookStore::website is nullable
+- However, the line with comment "β" will result in a compilation error, because BookStore::website is nullable
 
 ## 2. Nullity of table
 
@@ -65,7 +65,7 @@ for (store in rows) {
 
 The line with comment "α" will result in a compilation error, store is a nullable object because *table.store?* means left join. 
 
-Left join always return nonnull table regardless of whether the association itself is nullable or not.
+Left outer join always return nullable table regardless of whether the association itself is nullable or not.
 
 ## 3. Nonnull column of nullable table
 
@@ -125,7 +125,7 @@ for ((p1, p2) in rows) {
 
     Both sides of the *+* are non-null expressions, and the result is also nonnullable
     
-- However, the line with comment "β" will result in a compilation error， because BookStore::website is nullable
+- However, the line with comment "β" will result in a compilation error.
 
     Either side of the *+* is a nullable expression, the result is nullable
     
