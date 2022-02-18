@@ -93,5 +93,6 @@ Eventually, after waiting long enough, OS will ask you if you need to force term
 
 -----------------
 
-[Back to document](./README.md)
+
+[< Previous: Out of scope](./out-of-scope.md) | [Back to parent](./README.md)
  
