@@ -1,5 +1,7 @@
 # [Home](https://github.com/babyfish-ct/kimmer)/[kimmer-sql](./README.md)/Non good design to avoid intellij's bug
 
+## 1. Current design
+
 Since 0.1.7, the select function can be used by two ways
 
 1. This way can only be used to select one field
@@ -27,8 +29,10 @@ Since 0.1.7, the select function can be used by two ways
     }
     ```
     
-Obviously, these are two incompatible ways of writing
- 
+Obviously, these are two incompatible ways of writing.
+
+## 2. My expected design
+
 In 0.1.6, the old design style is (Use *TypedRootQuery* to be example)
  
 ```kt
@@ -89,22 +93,24 @@ The intellij will be frozen, UI interface is not responding.
 
 Eventually, after waiting long enough, OS will ask you if you need to force terminate it.
 
-Environment 
+## 3. My environment 
 
-> IntelliJ IDEA 2021.3.1 (Community Edition)
-> Build #IC-213.6461.79, built on December 29, 2021
-> Runtime version: 11.0.13+7-b1751.21 aarch64
-> VM: OpenJDK 64-Bit Server VM by JetBrains s.r.o.
-> macOS 11.4
-> GC: G1 Young Generation, G1 Old Generation
-> Memory: 2048M
-> Cores: 8
-> Non-Bundled Plugins:
->    org.toml.lang (213.5744.224)
->    org.jetbrains.kotlin (213-1.6.10-release-944-IJ6461.79)
->    org.rust.lang (0.4.164.4409-213)
->
->Kotlin: 213-1.6.10-release-944-IJ6461.79
+```
+IntelliJ IDEA 2021.3.1 (Community Edition)
+Build #IC-213.6461.79, built on December 29, 2021
+Runtime version: 11.0.13+7-b1751.21 aarch64
+VM: OpenJDK 64-Bit Server VM by JetBrains s.r.o.
+macOS 11.4
+GC: G1 Young Generation, G1 Old Generation
+Memory: 2048M
+Cores: 8
+Non-Bundled Plugins:
+    org.toml.lang (213.5744.224)
+    org.jetbrains.kotlin (213-1.6.10-release-944-IJ6461.79)
+    org.rust.lang (0.4.164.4409-213)
+
+Kotlin: 213-1.6.10-release-944-IJ6461.79
+```
 
 -----------------
 
