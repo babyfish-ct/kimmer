@@ -44,6 +44,8 @@ Why provide a new SQL DSL?
 4. [Contains](./contains.md)
 5. [Subqueries](./subqueries.md)
 6. [Pagination](./pagination.md)
+7. [Out of scope](./out-of-scope.md)
+8. [Non good design to avoid intellij's bug](intellij-bug.md)
 
 ## 3. Note 
 
