@@ -2,7 +2,7 @@
 
 ## 1. Create count query quickly
 
-Paging query requires two SQL statements, one for querying the number of records and one for data of a page, let's call them count-query and data-query. 
+Paging query requires two SQL statements, one for querying the number of records and one for data of a page, let's call them **count-query** and **data-query**. 
 
 These two SQL statements have both the same parts and different parts, it is difficult to share the code unless that SQL logic is very simple.
 
