@@ -12,10 +12,10 @@ This project contains 2 sub projects
 
    - API perspective:
    
-      As static as posible, find problems while compiling, and bring kotlin null safety to SQL.
+      As static as posible, find problems while compiling, bring kotlin null safety to SQL.
       
    - Functional perspective:
    
-      As dynamic as possible, make complex problems easy to solve.
+      As dynamic as possible, make complex problems easy to solve. Not only dynamic where predicates, but also dynamic table joins. Support Automatic SQL optimization too.
    
    [Click here](./doc/kimmer-sql/README.md) to view more
