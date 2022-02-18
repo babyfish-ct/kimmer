@@ -112,6 +112,10 @@ Non-Bundled Plugins:
 Kotlin: 213-1.6.10-release-944-IJ6461.79
 ```
 
+## 4. Bug link
+
+https://youtrack.jetbrains.com/issue/IDEA-289122
+
 -----------------
 
 
