@@ -234,7 +234,7 @@ The dialects currently offered are
 Take Oracle as an example, the *SqlClient* should be created like this
 
 ```kt
-val d = createSqlClient(dialect = OracleDialect()) {
+val sqlClient = createSqlClient(dialect = OracleDialect()) {
     ... Some code to config database mapping metadata ...    
 }
 ```
