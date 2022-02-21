@@ -223,7 +223,7 @@ The line with comment "α" will result in a compilation error, Coalesce expressi
 >  
 >   ```select(coalesce(table.website, "https://www.jetbrains.com/"))```
 
-## 7. asNonNullable
+## 7. asNonNull
 
 In most cases, null-safety can work well to help you get more secure code.
 
