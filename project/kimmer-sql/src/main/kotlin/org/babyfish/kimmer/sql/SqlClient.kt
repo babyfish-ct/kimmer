@@ -1,6 +1,5 @@
 package org.babyfish.kimmer.sql
 
-import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.sql.ast.query.MutableRootQuery
 import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedRootQuery
 import org.babyfish.kimmer.sql.meta.EntityType
@@ -9,7 +8,7 @@ import kotlin.reflect.KClass
 
 interface SqlClient {
 
-    val entityTypeMap: Map<KClass<out Immutable>, EntityType>
+    val entityTypeMap: Map<KClass<out Entity<*>>, EntityType>
 
     val dialect: Dialect
 

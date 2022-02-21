@@ -26,30 +26,19 @@ open class EntityPropImpl(
 
     private var _storage: Storage? = null
 
+    private var _targetType: EntityType? = null
+
     override val immutableProp: ImmutableProp =
         declaringType.immutableType.props[kotlinProp.name]
             ?: throw IllegalArgumentException("No prop '${kotlinProp.name}' of type '${declaringType.kotlinType.qualifiedName}'")
 
     override val isId: Boolean = kotlinProp.name == Entity<*>::id.name
 
-    override var targetType: EntityType? = null
+    override val targetType: EntityType?
+        get() = _targetType
 
-    override var oppositeProp: EntityProp? = null
-
-    override var storage: Storage?
+    override val storage: Storage?
         get() = _storage
-        set(value) {
-            if (_mappedBy !== null) {
-                throw MappingException("Cannot configure storage for the inverse association '$kotlinProp'")
-            }
-            if ((isList || isConnection) && value !is MiddleTable) {
-                throw MappingException("list/connection association '$kotlinProp' only accept middle table")
-            }
-            if (isReference && value is Formula<*, *, *>) {
-                throw MappingException("reference association '$kotlinProp' does not accept formula")
-            }
-            _storage = value
-        }
 
     override val returnType: KClass<*>
         get() = immutableProp.returnType
@@ -75,7 +64,7 @@ open class EntityPropImpl(
     override val opposite: EntityProp?
         get() = _opposite
 
-    fun setMappedByName(name: String) {
+    internal fun setMappedByName(name: String) {
         if (_mappedBy !== null) {
             throw MappingException(
                 "Cannot set mappedBy of '${kotlinProp}' " +
@@ -83,6 +72,19 @@ open class EntityPropImpl(
             )
         }
         _mappedBy = name
+    }
+
+    internal fun setStorage(storage: Storage) {
+        if (_mappedBy !== null) {
+            throw MappingException("Cannot configure storage for the inverse association '$kotlinProp'")
+        }
+        if ((isList || isConnection) && storage !is MiddleTable) {
+            throw MappingException("list/connection association '$kotlinProp' only accept middle table")
+        }
+        if (isReference && storage is Formula<*, *, *>) {
+            throw MappingException("reference association '$kotlinProp' does not accept formula")
+        }
+        _storage = storage
     }
 
     internal fun resolve(builder: EntityMappingBuilderImpl, phase: ResolvingPhase) {
@@ -97,28 +99,28 @@ open class EntityPropImpl(
     private fun resolveTarget(builder: EntityMappingBuilderImpl) {
         immutableProp.targetType?.let {
             val tgtType = builder[it]
-            targetType = tgtType
+            _targetType = tgtType
         }
     }
 
     private fun resolvedMappedBy(builder: EntityMappingBuilderImpl) {
         if (_mappedBy is String) {
-            val mappedByProp = (targetType!!.props[_mappedBy] as EntityPropImpl?)
+            val mappedByProp = (_targetType!!.props[_mappedBy] as EntityPropImpl?)
                 ?: throw MappingException(
                     "The attribute 'mappedBy' of property '${kotlinProp}' is specified as '${_mappedBy}', " +
-                        "but there is not property named '${_mappedBy}' in the target type '${targetType}' "
+                        "but there is not property named '${_mappedBy}' in the target type '${_targetType}' "
                 )
-            if (mappedByProp.targetType !== declaringType) {
+            if (mappedByProp._targetType !== declaringType) {
                 throw MappingException(
                     "The attribute 'mappedBy' of property '${kotlinProp}' is specified as '${_mappedBy}'," +
-                        "but the property named '${_mappedBy}' in the target type '${targetType}' is not " +
+                        "but the property named '${_mappedBy}' in the target type '${_targetType}' is not " +
                         "association point to current type '${declaringType}'"
                 )
             }
             if (mappedByProp._mappedBy !== null) {
                 throw MappingException(
                     "The attribute 'mappedBy' of property '${kotlinProp}' is specified as '${_mappedBy}'," +
-                        "but the property named '${_mappedBy}' in the target type '${targetType}' is specified " +
+                        "but the property named '${_mappedBy}' in the target type '${_targetType}' is specified " +
                         "with 'mappedBy' too, this is not allowed"
                 )
             }
@@ -134,12 +136,13 @@ open class EntityPropImpl(
             !isList &&
             !isConnection
         ) {
-            storage =
+            setStorage(
                 if (isReference) {
                     Column(databaseIdentifier("${name}_id"))
                 } else {
                     Column(databaseIdentifier(name))
                 }
+            )
         }
     }
 

@@ -1,6 +1,5 @@
 package org.babyfish.kimmer.sql.ast.query.impl
 
-import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.Order
@@ -28,7 +27,7 @@ internal abstract class AbstractMutableQueryImpl<E, ID>(
           Entity<ID>,
           ID: Comparable<ID> {
 
-    private val entityTypeMap: Map<KClass<out Immutable>, EntityType>
+    private val entityTypeMap: Map<KClass<out Entity<*>>, EntityType>
         get() = sqlClient.entityTypeMap
 
     private val predicates = mutableListOf<NonNullExpression<Boolean>>()

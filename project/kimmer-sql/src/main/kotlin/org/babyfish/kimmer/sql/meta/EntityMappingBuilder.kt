@@ -1,7 +1,9 @@
 package org.babyfish.kimmer.sql.meta
 
-import org.babyfish.kimmer.Immutable
+import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.meta.config.Storage
+import org.babyfish.kimmer.sql.meta.spi.EntityPropImpl
+import org.babyfish.kimmer.sql.meta.spi.EntityTypeImpl
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
@@ -16,13 +18,15 @@ import kotlin.reflect.KProperty1
  */
 interface EntityMappingBuilder {
 
-    fun tableName(type: KClass<out Immutable>, tableName: String)
+    fun entity(type: KClass<out Entity<*>>): EntityTypeImpl
 
-    fun prop(prop: KProperty1<out Immutable, *>, storage: Storage? = null)
+    fun tableName(type: KClass<out Entity<*>>, tableName: String)
 
-    fun inverseProp(prop: KProperty1<out Immutable, *>, mappedBy: KProperty1<out Immutable, *>)
+    fun prop(prop: KProperty1<out Entity<*>, *>, storage: Storage? = null): EntityPropImpl
 
-    fun storage(prop: KProperty1<out Immutable, *>, storage: Storage)
+    fun inverseProp(prop: KProperty1<out Entity<*>, *>, mappedBy: KProperty1<out Entity<*>, *>): EntityPropImpl
 
-    fun build(): Map<KClass<out Immutable>, EntityType>
+    fun storage(prop: KProperty1<out Entity<*>, *>, storage: Storage)
+
+    fun build(): Map<KClass<out Entity<*>>, EntityType>
 }

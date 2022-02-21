@@ -1,9 +1,9 @@
 package org.babyfish.kimmer.sql.meta.impl
 
-import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.graphql.Connection
 import org.babyfish.kimmer.graphql.Input
 import org.babyfish.kimmer.meta.ImmutableType
+import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.MappingException
 import org.babyfish.kimmer.sql.meta.EntityMappingBuilder
 import org.babyfish.kimmer.sql.meta.EntityType
@@ -20,38 +20,48 @@ internal class EntityMappingBuilderImpl(
 
     private val entityTypeMap = mutableMapOf<ImmutableType, EntityTypeImpl>()
 
-    override fun tableName(type: KClass<out Immutable>, tableName: String) {
-        this[ImmutableType.of(type)].tableName = tableName
+    override fun entity(type: KClass<out Entity<*>>): EntityTypeImpl =
+        this[ImmutableType.of(type)]
+
+    override fun tableName(type: KClass<out Entity<*>>, tableName: String) {
+        this[ImmutableType.of(type)].setTableName(tableName)
     }
 
-    override fun prop(prop: KProperty1<out Immutable, *>, storage: Storage?) {
+    override fun prop(
+        prop: KProperty1<out Entity<*>, *>,
+        storage: Storage?
+    ): EntityPropImpl =
         createProp(prop).apply {
             storage?.let {
-                this.storage = it
+                this.setStorage(it)
             }
         }
-    }
 
-    override fun inverseProp(prop: KProperty1<out Immutable, *>, mappedBy: KProperty1<out Immutable, *>) {
+    override fun inverseProp(
+        prop: KProperty1<out Entity<*>, *>,
+        mappedBy: KProperty1<out Entity<*>, *>
+    ): EntityPropImpl =
         createProp(prop).apply {
             if (!immutableProp.isAssociation) {
                 throw MappingException("Cannot map the non-association prop '$prop' as association prop")
             }
             setMappedByName(mappedBy.name)
         }
+
+    override fun storage(prop: KProperty1<out Entity<*>, *>, storage: Storage) {
+        getProp(prop).setStorage(storage)
     }
 
-    override fun storage(prop: KProperty1<out Immutable, *>, storage: Storage) {
-        getProp(prop).apply {
-            this.storage = storage
-        }
-    }
-
-    override fun build(): Map<KClass<out Immutable>, EntityType> {
+    @Suppress("UNCHECKED_CAST")
+    override fun build(): Map<KClass<out Entity<*>>, EntityType> {
         for (phase in ResolvingPhase.values()) {
             resolve(phase)
         }
-        val map = entityTypeMap.entries.associateBy({it.key.kotlinType}) {it.value }
+        val map = entityTypeMap.entries.associateBy(
+            {it.key.kotlinType as KClass<out Entity<*>>}
+        ) {
+            it.value
+        }
         entityTypeMap.clear()
         return map
     }
@@ -65,10 +75,11 @@ internal class EntityMappingBuilderImpl(
     operator fun get(immutableType: ImmutableType): EntityTypeImpl =
         entityTypeMap[immutableType] ?: create(immutableType)
 
-    private fun get(prop: KProperty1<out Immutable, *>): EntityTypeImpl {
+    @Suppress("UNCHECKED_CAST")
+    private fun get(prop: KProperty1<out Entity<*>, *>): EntityTypeImpl {
         val type = prop.parameters[0].type.classifier as? KClass<*>
             ?: throw MappingException("Cannot map '$prop' because it does not belong to class")
-        val immutableType = ImmutableType.of(type as KClass<out Immutable>)
+        val immutableType = ImmutableType.of(type as KClass<out Entity<*>>)
         val entityType = try {
             get(immutableType)
         } catch (ex: Throwable) {
@@ -106,11 +117,11 @@ internal class EntityMappingBuilderImpl(
         return entityType
     }
 
-    private fun getProp(prop: KProperty1<out Immutable, *>): EntityPropImpl =
+    private fun getProp(prop: KProperty1<out Entity<*>, *>): EntityPropImpl =
         get(prop).declaredProps[prop.name] ?: error("Cannot configure the prop '$prop' because it has not been mapped")
 
     @Suppress("UNCHECKED_CAST")
-    private fun createProp(prop: KProperty1<out Immutable, *>): EntityPropImpl {
+    private fun createProp(prop: KProperty1<out Entity<*>, *>): EntityPropImpl {
         val entityType = get(prop)
         if (entityType.declaredProps.containsKey(prop.name)) {
             throw MappingException("Cannot map '$prop' because its already been mapped")

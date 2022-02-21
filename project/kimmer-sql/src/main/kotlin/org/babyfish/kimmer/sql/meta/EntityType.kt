@@ -1,7 +1,7 @@
 package org.babyfish.kimmer.sql.meta
 
-import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.meta.ImmutableType
+import org.babyfish.kimmer.sql.Entity
 import kotlin.reflect.KClass
 
 interface EntityType {
@@ -10,8 +10,9 @@ interface EntityType {
 
     val immutableType: ImmutableType
 
-    val kotlinType: KClass<out Immutable>
-        get() = immutableType.kotlinType
+    @Suppress("UNCHECKED_CAST")
+    val kotlinType: KClass<out Entity<*>>
+        get() = immutableType.kotlinType as KClass<out Entity<*>>
 
     val superType: EntityType?
 

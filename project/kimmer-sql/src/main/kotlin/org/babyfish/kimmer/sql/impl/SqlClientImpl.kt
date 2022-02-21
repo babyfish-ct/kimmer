@@ -1,6 +1,5 @@
 package org.babyfish.kimmer.sql.impl
 
-import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.ast.query.impl.RootMutableQueryImpl
@@ -13,7 +12,7 @@ import org.babyfish.kimmer.sql.runtime.R2dbcExecutor
 import kotlin.reflect.KClass
 
 internal class SqlClientImpl(
-    override val entityTypeMap: Map<KClass<out Immutable>, EntityType>,
+    override val entityTypeMap: Map<KClass<out Entity<*>>, EntityType>,
     override val dialect: Dialect,
     internal val jdbcExecutor: JdbcExecutor,
     internal val r2dbcExecutor: R2dbcExecutor

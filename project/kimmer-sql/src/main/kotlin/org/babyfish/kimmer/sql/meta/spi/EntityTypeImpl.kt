@@ -40,19 +40,20 @@ open class EntityTypeImpl(
     override val name: String
         get() = immutableType.simpleName
 
-    override var isMapped: Boolean = false
+    override val isMapped: Boolean = false
 
-    override var tableName: String
+    override val tableName: String
         get() = _tableName ?: databaseIdentifier(kotlinType.simpleName!!)
-        set(value) {
-            if (_tableName !== null) {
-                throw MappingException(
-                    "Cannot set the table name of ${kotlinType.qualifiedName} " +
-                        "because it has already been set"
-                )
-            }
-            _tableName = value
+
+    internal fun setTableName(tableName: String) {
+        if (_tableName !== null) {
+            throw MappingException(
+                "Cannot set the table name of ${kotlinType.qualifiedName} " +
+                    "because it has already been set"
+            )
         }
+        _tableName = tableName
+    }
 
     override val superType: EntityType?
         get() = _superType

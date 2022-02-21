@@ -1,8 +1,6 @@
 package org.babyfish.kimmer.sql.meta
 
 import org.babyfish.kimmer.meta.ImmutableProp
-import org.babyfish.kimmer.sql.meta.config.Column
-import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import org.babyfish.kimmer.sql.meta.config.Storage
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -18,8 +16,6 @@ interface EntityProp {
 
     val name: String
         get() = kotlinProp.name
-
-    val oppositeProp: EntityProp?
 
     val isId: Boolean
 
