@@ -73,7 +73,8 @@ Sub queries are divided into correlated and uncorrelated subqueries.
     }
     ```
     
-    Here, *select* and *order By* use same subquery, you can use local variable to record the subquery and reuse it twice instead of writing the subquery itself twice.
+    1. Here, *select* and *order By* use same subquery, you can use local variable to record the subquery and reuse it twice instead of writing the subquery itself twice.
+    2. This is not uncorrelated subquery, it's correlated subquery because its ues *parentTable*, which will be discussed later.
     
 5. Use subquery in *any()*
 

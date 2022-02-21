@@ -7,7 +7,7 @@ Among these to-do options
 1. Some are temporarily out of energy to do, although not now, but there may be in the future
 2. Some are not allowed by design and will never be
 
-## 1. Associative fetching like ORM
+## 1. Association fetching like ORM
 
 There is currently no ability fetch associated objects of queried object, which is why kimmer-sql claims to be a SQL DSL rather than an ORM.
 
