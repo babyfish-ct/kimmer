@@ -118,7 +118,7 @@ internal class EntityMappingBuilderImpl(
     }
 
     private fun getProp(prop: KProperty1<out Entity<*>, *>): EntityPropImpl =
-        get(prop).declaredProps[prop.name] ?: error("Cannot configure the prop '$prop' because it has not been mapped")
+        get(prop).mutableDeclaredProps[prop.name] ?: error("Cannot configure the prop '$prop' because it has not been mapped")
 
     @Suppress("UNCHECKED_CAST")
     private fun createProp(prop: KProperty1<out Entity<*>, *>): EntityPropImpl {
@@ -127,7 +127,7 @@ internal class EntityMappingBuilderImpl(
             throw MappingException("Cannot map '$prop' because its already been mapped")
         }
         val entityProp = metaFactory.createEntityProp(entityType, prop)
-        entityType.declaredProps[prop.name] = entityProp
+        entityType.mutableDeclaredProps[prop.name] = entityProp
         return entityProp
     }
 }

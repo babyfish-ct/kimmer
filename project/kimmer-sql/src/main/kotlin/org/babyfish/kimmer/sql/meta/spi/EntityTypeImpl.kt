@@ -29,6 +29,8 @@ open class EntityTypeImpl(
 
     private val _derivedTypes = mutableListOf<EntityTypeImpl>()
 
+    internal val mutableDeclaredProps = sortedMapOf<String, EntityPropImpl>()
+
     private var _props: Map<String, EntityProp>? = null
 
     private var _idProp: EntityProp? = null
@@ -39,8 +41,6 @@ open class EntityTypeImpl(
 
     override val name: String
         get() = immutableType.simpleName
-
-    override val isMapped: Boolean = false
 
     override val tableName: String
         get() = _tableName ?: databaseIdentifier(kotlinType.simpleName!!)
@@ -64,7 +64,8 @@ open class EntityTypeImpl(
     override val idProp: EntityProp
         get() = _idProp ?: error("Id property has not been resolved")
 
-    override val declaredProps = sortedMapOf<String, EntityPropImpl>()
+    override val declaredProps: Map<String, EntityProp>
+        get() = mutableDeclaredProps
 
     override val props: Map<String, EntityProp>
         get() = _props ?: error("Properties have not been resolved")
@@ -130,7 +131,7 @@ open class EntityTypeImpl(
                             "but it is not mapped"
                     )
                 }
-                declaredProps[immutableProp.name] = metaFactory.createEntityProp(
+                mutableDeclaredProps[immutableProp.name] = metaFactory.createEntityProp(
                     this,
                     immutableProp.kotlinProp
                 )
@@ -146,18 +147,16 @@ open class EntityTypeImpl(
             sp.resolve(builder, ResolvingPhase.PROPS)
             val map = sortedMapOf<String, EntityProp>()
             map += declaredProps
-            if (builder[sp.immutableType].isMapped) {
-                for (superProp in sp.props.values) {
-                    val prop = map[superProp.name]
-                    if (prop !== null) {
-                        if (!superProp.isId) {
-                            throw MappingException(
-                                "Duplicate properties: '$superProp' and '$prop'"
-                            )
-                        }
-                    } else {
-                        map[superProp.name] = superProp
+            for (superProp in sp.props.values) {
+                val prop = map[superProp.name]
+                if (prop !== null) {
+                    if (!superProp.isId) {
+                        throw MappingException(
+                            "Duplicate properties: '$superProp' and '$prop'"
+                        )
                     }
+                } else {
+                    map[superProp.name] = superProp
                 }
             }
             _props = map
@@ -165,7 +164,7 @@ open class EntityTypeImpl(
     }
 
     private fun resolvePropDetail(builder: EntityMappingBuilderImpl, phase: ResolvingPhase) {
-        for (declaredProp in declaredProps.values) {
+        for (declaredProp in mutableDeclaredProps.values) {
             declaredProp.resolve(builder, phase)
         }
     }
