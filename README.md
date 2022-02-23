@@ -1,18 +1,18 @@
-This project contains 2 sub projects
+# This project contains 2 sub projects
 
-1. **kimmer**
+## 1. kimmer
 
    Port [https://github.com/immerjs/immer](https://github.com/immerjs/immer) for kotlin/jvm.
    
    [Click here](./doc/kimmer-core/README.md) to view more
 
-2. **kimmer-sql**
+## 2. kimmer-sql
 
    SQL DSL for kotlin
 
    - API perspective:
    
-      As static as posible, find problems while compiling, bring kotlin null safety to SQL.
+      As static as possible, find problems while compiling, bring kotlin null safety to SQL.
       
    - Functional perspective:
    
