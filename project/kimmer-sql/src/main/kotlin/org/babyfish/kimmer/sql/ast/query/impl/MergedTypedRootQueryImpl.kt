@@ -40,16 +40,16 @@ internal class MergedTypedRootQueryImpl<E, ID, R>(
 
     @Suppress("UNCHECKED_CAST")
     override fun execute(con: java.sql.Connection): List<R> {
-        val (sql, variables) = preExecute(JdbcSqlBuilder())
+        val (sql, variables) = preExecute(JdbcSqlBuilder(sqlClient))
         val executor = sqlClient.jdbcExecutor
-        return executor(JdbcExecutorContext(con, selections, sql, variables)) as List<R>
+        return executor(JdbcExecutorContext(con, sqlClient, selections, sql, variables)) as List<R>
     }
 
     @Suppress("UNCHECKED_CAST")
     override suspend fun execute(con: io.r2dbc.spi.Connection): List<R> {
-        val (sql, variables) = preExecute(R2dbcSqlBuilder())
+        val (sql, variables) = preExecute(R2dbcSqlBuilder(sqlClient))
         val executor = sqlClient.r2dbcExecutor
-        return executor(R2dbcExecutorContext(con, selections, sql, variables)) as List<R>
+        return executor(R2dbcExecutorContext(con, sqlClient, selections, sql, variables)) as List<R>
     }
 
     override fun renderTo(builder: SqlBuilder) {

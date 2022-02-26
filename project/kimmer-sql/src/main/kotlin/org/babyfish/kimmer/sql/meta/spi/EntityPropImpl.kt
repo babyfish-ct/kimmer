@@ -5,6 +5,7 @@ import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.MappingException
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
+import org.babyfish.kimmer.sql.meta.ScalarProvider
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.Formula
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
@@ -24,6 +25,8 @@ open class EntityPropImpl(
 
     private var _opposite: EntityProp? = null
 
+    private var _scalarProvider: ScalarProvider<*, *>? = null
+
     private var _storage: Storage? = null
 
     private var _targetType: EntityType? = null
@@ -36,6 +39,9 @@ open class EntityPropImpl(
 
     override val targetType: EntityType?
         get() = _targetType
+
+    override val scalarProvider: ScalarProvider<*, *>?
+        get() = _scalarProvider
 
     override val storage: Storage?
         get() = _storage
@@ -89,10 +95,21 @@ open class EntityPropImpl(
 
     internal fun resolve(builder: EntityMappingBuilderImpl, phase: ResolvingPhase) {
         when (phase) {
+            ResolvingPhase.PROP_SCALAR_PROVIDER -> resolveScalarProvider(builder)
             ResolvingPhase.PROP_TARGET -> resolveTarget(builder)
             ResolvingPhase.PROP_MAPPED_BY -> resolvedMappedBy(builder)
             ResolvingPhase.PROP_DEFAULT_COLUMN -> resolveDefaultColumn()
             ResolvingPhase.ON_INITIALIZE_SPI -> onInitialize()
+        }
+    }
+
+    private fun resolveScalarProvider(builder: EntityMappingBuilderImpl) {
+        _scalarProvider = builder.scalarProvider(returnType)
+        if (returnType.java.isEnum && _scalarProvider === null) {
+            throw MappingException(
+                "The property '${kotlinProp}' returns enum type '${returnType}', " +
+                    "but there is no scalar provider for that enum type"
+            )
         }
     }
 

@@ -1,9 +1,11 @@
 package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.sql.MappingException
+import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.ast.table.Table
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.meta.EntityProp
+import org.babyfish.kimmer.sql.meta.ScalarProvider
 import java.lang.StringBuilder
 import kotlin.reflect.KClass
 
@@ -14,7 +16,8 @@ sealed interface SqlBuilder {
 }
 
 internal abstract class AbstractSqlBuilder(
-    private val parent: AbstractSqlBuilder?
+    protected val sqlClient: SqlClient,
+    private val parent: AbstractSqlBuilder?,
 ): SqlBuilder {
     private var childBuilderCount = 0
 
@@ -173,7 +176,14 @@ internal abstract class AbstractSqlBuilder(
     
     override fun nullVariable(type: KClass<*>) {
         validate()
-        variables += DbNull(type)
+        val scalarProvider = sqlClient.scalarProviderMap[type]
+        variables += DbNull(scalarProvider?.sqlType ?: type)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun singleVariable(value: Any) {
+        val scalarProvider = sqlClient.scalarProviderMap[value::class] as ScalarProvider<Any, Any>?
+        onAppendVariable(scalarProvider?.toSql(value) ?: value)
     }
 
     fun resolveFormula(formulaProp: EntityProp, block: () -> Unit) {
@@ -217,32 +227,38 @@ internal abstract class AbstractSqlBuilder(
         }
     }
 
-    protected abstract fun singleVariable(value: Any)
+    protected abstract fun onAppendVariable(value: Any)
 
     abstract fun createChildBuilder(): AbstractSqlBuilder
 }
 
-internal class JdbcSqlBuilder(parent: JdbcSqlBuilder? = null) : AbstractSqlBuilder(parent) {
+internal class JdbcSqlBuilder(
+    sqlClient: SqlClient,
+    parent: JdbcSqlBuilder? = null
+) : AbstractSqlBuilder(sqlClient, parent) {
 
-    override fun singleVariable(value: Any) {
+    override fun onAppendVariable(value: Any) {
         variables += value
         sql("?")
     }
 
     override fun createChildBuilder(): AbstractSqlBuilder =
-        JdbcSqlBuilder(this)
+        JdbcSqlBuilder(sqlClient, this)
 }
 
-internal class R2dbcSqlBuilder(parent: R2dbcSqlBuilder? = null): AbstractSqlBuilder(parent) {
+internal class R2dbcSqlBuilder(
+    sqlClient: SqlClient,
+    parent: R2dbcSqlBuilder? = null
+): AbstractSqlBuilder(sqlClient, parent) {
 
-    override fun singleVariable(value: Any) {
+    override fun onAppendVariable(value: Any) {
         variables += value
         sql("$")
         sql(variables.size.toString())
     }
 
     override fun createChildBuilder(): AbstractSqlBuilder =
-        R2dbcSqlBuilder(this)
+        R2dbcSqlBuilder(sqlClient, this)
 }
 
 internal data class DbNull(val type: KClass<*>)

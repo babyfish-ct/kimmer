@@ -3,17 +3,19 @@ package org.babyfish.kimmer.sql.runtime
 import io.r2dbc.spi.Row
 import org.babyfish.kimmer.Draft
 import org.babyfish.kimmer.produce
-import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ExecutionException
+import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.meta.EntityType
+import org.babyfish.kimmer.sql.meta.ScalarProvider
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.sql.ResultSet
 import kotlin.reflect.KClass
 
 internal abstract class ResultMapper(
+    private val sqlClient: SqlClient,
     baseIndex: Int = 0
 ) {
     private var index = baseIndex
@@ -67,21 +69,31 @@ internal abstract class ResultMapper(
         }
     }
 
-    private fun read(expectedType: KClass<*>): Any? {
+    @SuppressWarnings("UNCHECKED_CAST")
+    private fun read(type: KClass<*>): Any? {
         val value = read(index++)
-        return if (value === null || value::class.java === expectedType.java) {
-            value
+        val scalarProvider = sqlClient.scalarProviderMap[type]
+        val expectedJavaType = scalarProvider?.sqlType?.java ?: type.javaObjectType
+        val sqlValue =
+            if (value === null || value::class.java === expectedJavaType) {
+                value
+            } else {
+                convert(value, expectedJavaType) ?:
+                    throw ExecutionException(
+                        "Failed the convert the result value at column ${index - 1}, " +
+                            "the expected type is '${type.qualifiedName}', " +
+                            "but the actual type is '${value::class.qualifiedName}'"
+                    )
+            }
+        return if (scalarProvider !== null && sqlValue !== null) {
+            (scalarProvider as ScalarProvider<Any, Any>).toScalar(sqlValue)
         } else {
-            convert(value, expectedType.javaObjectType) ?:
-                throw ExecutionException(
-                    "Failed the convert the result value at column ${index - 1}, " +
-                        "the expected type is '${expectedType.qualifiedName}', " +
-                        "but the actual type is '${value::class.qualifiedName}'"
-                )
+            sqlValue
         }
     }
 
     private fun convert(value: Any, expectedType: Class<*>): Any? {
+
         if (value is Number) {
             return when (expectedType) {
                 Boolean::class.javaObjectType, Boolean::class.javaPrimitiveType ->
@@ -120,16 +132,18 @@ internal abstract class ResultMapper(
 }
 
 internal class JdbcResultMapper(
+    sqlClient: SqlClient,
     private val resultSet: ResultSet
-): ResultMapper(1) {
+): ResultMapper(sqlClient, 1) {
 
     override fun read(index: Int): Any? =
         resultSet.getObject(index)
 }
 
 internal class R2dbcResultMapper(
+    sqlClient: SqlClient,
     private val row: Row
-): ResultMapper() {
+): ResultMapper(sqlClient) {
 
     override fun read(index: Int): Any? =
         row.get(index)

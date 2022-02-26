@@ -1,5 +1,6 @@
 package org.babyfish.kimmer.sql.meta.impl
 
+import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.graphql.Connection
 import org.babyfish.kimmer.graphql.Input
 import org.babyfish.kimmer.meta.ImmutableType
@@ -7,6 +8,7 @@ import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.MappingException
 import org.babyfish.kimmer.sql.meta.EntityMappingBuilder
 import org.babyfish.kimmer.sql.meta.EntityType
+import org.babyfish.kimmer.sql.meta.ScalarProvider
 import org.babyfish.kimmer.sql.meta.config.Storage
 import org.babyfish.kimmer.sql.meta.spi.EntityPropImpl
 import org.babyfish.kimmer.sql.meta.spi.EntityTypeImpl
@@ -19,6 +21,8 @@ internal class EntityMappingBuilderImpl(
 ): EntityMappingBuilder {
 
     private val entityTypeMap = mutableMapOf<ImmutableType, EntityTypeImpl>()
+
+    private val scalarProviderMap = mutableMapOf<KClass<*>, ScalarProvider<*, *>>()
 
     override fun entity(type: KClass<out Entity<*>>): EntityTypeImpl =
         this[ImmutableType.of(type)]
@@ -52,8 +56,29 @@ internal class EntityMappingBuilderImpl(
         getProp(prop).setStorage(storage)
     }
 
+    override fun scalar(scalarProvider: ScalarProvider<*, *>) {
+        val type = scalarProvider.scalarType
+        if (type.javaPrimitiveType !== null) {
+            throw IllegalArgumentException(
+                "Illegal ScalarTypeProvider, it's scalar type cannot be primitive types of their box types"
+            )
+        }
+        if (Immutable::class.java.isAssignableFrom(type.java)) {
+            throw IllegalArgumentException(
+                "Illegal ScalarTypeProvider, it's scalar type cannot inherits '${Immutable::class.qualifiedName}'"
+            )
+        }
+        if (scalarProviderMap.containsKey(type)) {
+            throw MappingException("The enum provider of '${type}' has been registered")
+        }
+        scalarProviderMap[type] = scalarProvider
+    }
+
     @Suppress("UNCHECKED_CAST")
-    override fun build(): Map<KClass<out Entity<*>>, EntityType> {
+    fun build(): Pair<
+        Map<KClass<out Entity<*>>, EntityType>,
+        Map<KClass<*>, ScalarProvider<*, *>>
+    > {
         for (phase in ResolvingPhase.values()) {
             resolve(phase)
         }
@@ -63,7 +88,7 @@ internal class EntityMappingBuilderImpl(
             it.value
         }
         entityTypeMap.clear()
-        return map
+        return map to scalarProviderMap
     }
 
     private fun resolve(phase: ResolvingPhase) {
@@ -74,6 +99,9 @@ internal class EntityMappingBuilderImpl(
 
     operator fun get(immutableType: ImmutableType): EntityTypeImpl =
         entityTypeMap[immutableType] ?: create(immutableType)
+
+    fun scalarProvider(type: KClass<*>): ScalarProvider<*, *>? =
+        scalarProviderMap[type]
 
     @Suppress("UNCHECKED_CAST")
     private fun get(prop: KProperty1<out Entity<*>, *>): EntityTypeImpl {

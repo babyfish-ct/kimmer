@@ -11,6 +11,7 @@ import org.babyfish.kimmer.sql.ast.model.*
 import org.babyfish.kimmer.sql.ast.value
 import org.babyfish.kimmer.sql.meta.config.Formula
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
+import org.babyfish.kimmer.sql.meta.enumProviderByString
 import org.babyfish.kimmer.sql.runtime.Dialect
 import org.babyfish.kimmer.sql.runtime.defaultJdbcExecutor
 import org.babyfish.kimmer.sql.runtime.defaultR2dbcExecutor
@@ -61,6 +62,13 @@ abstract class AbstractTest {
         prop(Author::fullName, Formula.of<Author, UUID, String> {
             concat(firstName, value(" "), lastName)
         })
+
+        scalar(
+            enumProviderByString(Gender::class) {
+                map(Gender.MALE, "M")
+                map(Gender.FEMALE, "F")
+            }
+        )
     }
 
     private var _sql: String? = null

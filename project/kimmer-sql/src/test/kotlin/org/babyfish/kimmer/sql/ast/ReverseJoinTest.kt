@@ -30,7 +30,8 @@ class ReverseJoinTest: AbstractTest() {
             select(constant(1))
         }.executeAndExpect {
             sql {
-                """select 1 from AUTHOR as tb_1_ 
+                """select 1 
+                    |from AUTHOR as tb_1_ 
                     |inner join BOOK_AUTHOR_MAPPING as tb_2_ on tb_1_.ID = tb_2_.AUTHOR_ID 
                     |inner join BOOK as tb_3_ on tb_2_.BOOK_ID = tb_3_.ID 
                     |where tb_3_.NAME = $1""".trimMargin()

@@ -90,16 +90,18 @@ internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
 
     @Suppress("UNCHECKED_CAST")
     override fun execute(con: java.sql.Connection): List<R> {
-        val (sql, variables) = preExecute(JdbcSqlBuilder())
-        val executor = baseQuery.sqlClient.jdbcExecutor
-        return executor(JdbcExecutorContext(con, data.selections, sql, variables)) as List<R>
+        val sqlClient = baseQuery.sqlClient
+        val (sql, variables) = preExecute(JdbcSqlBuilder(sqlClient))
+        val executor = sqlClient.jdbcExecutor
+        return executor(JdbcExecutorContext(con, sqlClient, data.selections, sql, variables)) as List<R>
     }
 
     @Suppress("UNCHECKED_CAST")
     override suspend fun execute(con: io.r2dbc.spi.Connection): List<R> {
-        val (sql, variables) = preExecute(R2dbcSqlBuilder())
-        val executor = baseQuery.sqlClient.r2dbcExecutor
-        return executor(R2dbcExecutorContext(con, data.selections, sql, variables)) as List<R>
+        val sqlClient = baseQuery.sqlClient
+        val (sql, variables) = preExecute(R2dbcSqlBuilder(sqlClient))
+        val executor = sqlClient.r2dbcExecutor
+        return executor(R2dbcExecutorContext(con, sqlClient, data.selections, sql, variables)) as List<R>
     }
 
     private fun preExecute(builder: AbstractSqlBuilder): Pair<String, List<Any>> {

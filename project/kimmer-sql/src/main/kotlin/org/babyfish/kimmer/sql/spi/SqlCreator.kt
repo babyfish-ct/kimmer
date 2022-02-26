@@ -17,7 +17,7 @@ fun createSqlClient(
     block: EntityMappingBuilder.() -> Unit
 ): SqlClient {
 
-    val entityMap = EntityMappingBuilderImpl(
+    val (entityMap, entityProviderMap) = EntityMappingBuilderImpl(
         metaFactory ?: DefaultMetaFactory
     ).run {
         block()
@@ -25,6 +25,7 @@ fun createSqlClient(
     }
     return SqlClientImpl(
         entityMap,
+        entityProviderMap,
         dialect ?: DefaultDialect(),
         jdbcExecutor,
         r2dbcExecutor

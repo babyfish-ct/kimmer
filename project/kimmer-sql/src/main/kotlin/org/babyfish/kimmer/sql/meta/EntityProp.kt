@@ -37,5 +37,7 @@ interface EntityProp {
 
     val opposite: EntityProp?
 
+    val scalarProvider: ScalarProvider<*, *>?
+
     val storage: Storage?
 }

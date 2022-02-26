@@ -28,5 +28,5 @@ interface EntityMappingBuilder {
 
     fun storage(prop: KProperty1<out Entity<*>, *>, storage: Storage)
 
-    fun build(): Map<KClass<out Entity<*>>, EntityType>
+    fun scalar(scalarProvider: ScalarProvider<*, *>)
 }

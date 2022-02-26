@@ -1,5 +1,6 @@
 package org.babyfish.kimmer.sql.runtime
 
+import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.ast.DbNull
 import org.babyfish.kimmer.sql.ast.Selection
 import java.math.BigDecimal
@@ -15,6 +16,7 @@ typealias JdbcExecutor = JdbcExecutorContext.() -> List<Any?>
 
 data class JdbcExecutorContext internal constructor(
     val connection: Connection,
+    internal val sqlClient: SqlClient,
     internal val selections: List<Selection<*>>,
     val sql: String,
     val variables: List<Any>
@@ -37,7 +39,7 @@ private fun JdbcExecutorContext.defaultImpl(): List<Any?> =
         stmt.executeQuery().use { rs ->
             val rows = mutableListOf<Any?>()
             while (rs.next()) {
-                rows += JdbcResultMapper(rs).map(selections)
+                rows += JdbcResultMapper(sqlClient, rs).map(selections)
             }
             rows
         }

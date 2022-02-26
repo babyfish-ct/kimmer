@@ -4,6 +4,7 @@ import io.r2dbc.spi.Connection
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
+import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.ast.DbNull
 import org.babyfish.kimmer.sql.ast.Selection
 
@@ -11,6 +12,7 @@ typealias R2dbcExecutor = suspend R2dbcExecutorContext.() -> List<Any?>
 
 data class R2dbcExecutorContext internal constructor(
     val connection: Connection,
+    internal val sqlClient: SqlClient,
     internal val selections: List<Selection<*>>,
     val sql: String,
     val variables: List<Any>
@@ -34,7 +36,7 @@ private suspend fun R2dbcExecutorContext.defaultImpl(): List<Any?> {
         .execute()
         .awaitSingle()
         .map { row, _ ->
-            R2dbcResultMapper(row).map(selections)
+            R2dbcResultMapper(sqlClient, row).map(selections)
                 ?: Null // Why "asFlow" requires "T: Any"?
         }
         .asFlow()
