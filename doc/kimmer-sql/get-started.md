@@ -16,8 +16,8 @@
    b. Add this section into **dependencies{}**
    
       ```
-      implementation("org.babyfish.kimmer:kimmer-sql:0.1.9")
-      ksp("org.babyfish.kimmer:kimmer-ksp:0.1.9")
+      implementation("org.babyfish.kimmer:kimmer-sql:0.2.3")
+      ksp("org.babyfish.kimmer:kimmer-ksp:0.2.3")
       runtimeOnly("com.h2database:h2:2.1.210")
       ```
    
@@ -106,7 +106,13 @@
           val firstName: String
           val lastName: String
           val fullName: String
+          val gender: Gender
           val books: List<Book>
+      }
+
+      enum class Gender {
+          MALE,
+          FEMALE
       }
       ```
       
