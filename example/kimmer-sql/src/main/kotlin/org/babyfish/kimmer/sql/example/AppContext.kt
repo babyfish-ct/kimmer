@@ -9,6 +9,7 @@ import org.babyfish.kimmer.sql.example.model.Book
 import org.babyfish.kimmer.sql.example.model.BookStore
 import org.babyfish.kimmer.sql.meta.config.Formula
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
+import org.babyfish.kimmer.sql.meta.enumProviderByString
 import org.babyfish.kimmer.sql.runtime.defaultJdbcExecutor
 import org.babyfish.kimmer.sql.spi.createSqlClient
 import java.io.InputStreamReader
@@ -43,6 +44,13 @@ object AppContext {
         prop(Author::fullName, Formula.of<Author, UUID, String> {
             concat(firstName, value(" "), lastName)
         })
+
+        scalar(
+            enumProviderByString(Gender::class) {
+                map(Gender.MALE, "M")
+                map(Gender.FEMALE, "F")
+            }
+        )
     }
 
     fun <R> jdbc(block: Connection.() -> R): R =

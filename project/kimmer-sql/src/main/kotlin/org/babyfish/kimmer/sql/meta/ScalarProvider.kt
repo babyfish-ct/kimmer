@@ -33,7 +33,7 @@ fun <E: Enum<E>> enumProviderByInt(
         }
     }.build()
 
-private class EnumProvider<E: Enum<E>, S: Any> internal constructor(
+private class EnumProvider<E: Enum<E>, S: Any>(
     override val scalarType: KClass<E>,
     override val sqlType: KClass<S>,
     private val enumMap: Map<S, E>,
