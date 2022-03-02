@@ -46,6 +46,7 @@ class TableGenerator(
                             .apply {
                                 addMember("\"RedundantVisibilityModifier\"")
                                 addMember("\"Unused\"")
+                                addMember("\"DANGEROUS_CHARACTERS\"")
                             }
                             .build()
                     )
@@ -105,7 +106,7 @@ class TableGenerator(
                 selfTypeName,
                 entityIDTypeNameProvider[classDeclaration]
             )
-        val returnTypeName = ClassName(KIMMER_SQL_AST_PACKAGE, "Expression")
+        val returnTypeName = ClassName(KIMMER_SQL_AST_PACKAGE, "PropExpression")
             .parameterizedBy(propMeta.returnType)
         val nonNullReceiverTypeName =
             if (!propMeta.isNullable) {
@@ -121,7 +122,7 @@ class TableGenerator(
                 PropertySpec
                     .builder(
                         prop.simpleName.asString(),
-                        ClassName(KIMMER_SQL_AST_PACKAGE, "NonNullExpression")
+                        ClassName(KIMMER_SQL_AST_PACKAGE, "NonNullPropExpression")
                             .parameterizedBy(propMeta.returnType)
                     )
                     .apply {

@@ -4,9 +4,8 @@ import org.babyfish.kimmer.graphql.Connection
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.MappingException
 import org.babyfish.kimmer.sql.ast.*
-import org.babyfish.kimmer.sql.ast.query.impl.AbstractMutableQueryImpl
 import org.babyfish.kimmer.sql.ast.ContainsExpression
-import org.babyfish.kimmer.sql.ast.PropExpression
+import org.babyfish.kimmer.sql.ast.PropExpressionImpl
 import org.babyfish.kimmer.sql.spi.Renderable
 import org.babyfish.kimmer.sql.ast.SqlBuilder
 import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
@@ -18,23 +17,24 @@ import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.Formula
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import org.babyfish.kimmer.sql.ast.AstVisitor
+import org.babyfish.kimmer.sql.impl.AbstractMutableStatement
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
-    private val query: AbstractMutableQueryImpl<*, *>,
+    private val statement: AbstractMutableStatement,
     val entityType: EntityType,
     val parent: TableImpl<*, *>? = null,
-    private val isInverse: Boolean = false,
-    private val joinProp: EntityProp? = null,
-    private var isOuterJoin: Boolean = false
-): NonNullTable<E, ID>, Renderable, Selection<E> {
+    val isInverse: Boolean = false,
+    val joinProp: EntityProp? = null,
+    private var _isOuterJoin: Boolean = false
+): NonNullTable<E, ID>, Renderable, Selection<E>, Ast {
 
-    private val alias: String
+    internal val alias: String
 
     private val middleTableAlias: String?
 
-    private val childTableMap = mutableMapOf<String, TableImpl<*, *>>()
+    internal val childTableMap = mutableMapOf<String, TableImpl<*, *>>()
 
     init {
         if ((parent === null) != (joinProp === null)) {
@@ -44,21 +44,21 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             ?.storage
             ?.let {
                 (it as? MiddleTable)?.let {
-                    query.tableAliasAllocator.allocate()
+                    statement.tableAliasAllocator.allocate()
                 }
             }
-        alias = query.tableAliasAllocator.allocate()
+        alias = statement.tableAliasAllocator.allocate()
     }
 
     protected open fun <X: Entity<XID>, XID: Comparable<XID>> createChildTable(
-        query: AbstractMutableQueryImpl<*, *>,
+        statement: AbstractMutableStatement,
         entityType: EntityType,
         isInverse: Boolean,
         joinProp: EntityProp,
         outerJoin: Boolean
     ): TableImpl<X, XID> =
         TableImpl(
-            query,
+            statement,
             if (isInverse) joinProp.declaringType else joinProp.targetType!!,
             this,
             isInverse,
@@ -66,16 +66,16 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             outerJoin
         )
 
-    override val id: NonNullExpression<ID>
+    override val id: NonNullPropExpression<ID>
         get() =
-            PropExpression(this, entityType.idProp)
+            PropExpressionImpl(this, entityType.idProp)
 
-    override fun <X : Any> get(prop: KProperty1<E, X>): NonNullExpression<X> =
-        `get?`(prop).asNonNull()
+    override fun <X : Any> get(prop: KProperty1<E, X>): NonNullPropExpression<X> =
+        `get?`(prop) as NonNullPropExpression<X>
 
-    override fun <X: Any> `get?`(prop: KProperty1<E, X?>): Expression<X> {
+    override fun <X: Any> `get?`(prop: KProperty1<E, X?>): PropExpression<X> {
         val entityProp = entityType.props[prop.name] ?: error("No property '${prop.name}'")
-        return PropExpression(this, entityProp)
+        return PropExpressionImpl(this, entityProp)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -208,7 +208,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         inverse: Boolean
     ): NonNullTable<X, XID> {
 
-        query.validateMutable()
+        statement.validateMutable()
 
         val joinName = if (!inverse) {
             entityProp.name
@@ -233,13 +233,13 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         val existing = childTableMap[joinName]
         if (existing !== null) {
             if (!outerJoin) {
-                existing.isOuterJoin = false
+                existing._isOuterJoin = false
             }
             return existing as NonNullTable<X, XID>
         }
         val newTable =
             this.createChildTable<X, XID>(
-                query,
+                statement,
                 if (inverse) joinProp.declaringType else joinProp.targetType!!,
                 inverse,
                 joinProp,
@@ -259,7 +259,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             ?.filterIsInstance<KClass<*>>()
             ?.firstOrNull()
             ?.let {
-                query.sqlClient.entityTypeMap[it]
+                statement.sqlClient.entityTypeMap[it]
             } ?: error("The declaring type of reversed prop is not mapped entity")
 
     override fun <X: Entity<XID>, XID: Comparable<XID>> listContainsAny(
@@ -380,15 +380,32 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         }
     }
 
+    fun renderJoinAsFrom(builder: SqlBuilder, mode: RenderMode) {
+        if (parent === null) {
+            error("Internal bug: renderJoinAsFrom can only be called base on joined tables")
+        }
+        if (mode === RenderMode.NORMAL) {
+            error("Internal bug: renderJoinAsFrom does not accept render mode ALL")
+        }
+        if (isUsedBy(builder)) {
+            builder.renderSelf(mode)
+            if (mode == RenderMode.DEEPER_JOIN_ONLY) {
+                for (childTable in childTableMap.values) {
+                    childTable.renderTo(builder)
+                }
+            }
+        }
+    }
+
     override fun accept(visitor: AstVisitor) {
         visitor.visitTableReference(this, null)
     }
 
-    private fun SqlBuilder.renderSelf() {
+    private fun SqlBuilder.renderSelf(mode: RenderMode = RenderMode.NORMAL) {
         if (isInverse) {
-            renderInverseJoin()
+            renderInverseJoin(mode)
         } else if (joinProp !== null) {
-            renderJoin()
+            renderJoin(mode)
         } else {
             sql(" from ")
             sql(entityType.tableName)
@@ -397,10 +414,10 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         }
     }
 
-    private fun SqlBuilder.renderJoin() {
+    private fun SqlBuilder.renderJoin(mode: RenderMode) {
 
         val parent = parent!!
-        val isOuterJoin = isOuterJoin
+        val isOuterJoin = _isOuterJoin
         val middleTable = joinProp!!.storage as? MiddleTable
 
         if (middleTable !== null) {
@@ -411,9 +428,9 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 middleTable.tableName,
                 middleTableAlias!!,
                 middleTable.joinColumnName,
-                false
+                mode
             )
-            if (isUsedBy(this)) {
+            if (isUsedBy(this) && (mode == RenderMode.NORMAL || mode == RenderMode.DEEPER_JOIN_ONLY)) {
                 joinImpl(
                     isOuterJoin,
                     middleTableAlias!!,
@@ -421,7 +438,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                     entityType.tableName,
                     alias,
                     (entityType.idProp.storage as Column).name,
-                    false
+                    RenderMode.NORMAL
                 )
             }
         } else if (isUsedBy(this)) {
@@ -432,15 +449,15 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 entityType.tableName,
                 alias,
                 (parent.entityType.idProp.storage as Column).name,
-                false
+                mode
             )
         }
     }
 
-    private fun SqlBuilder.renderInverseJoin() {
+    private fun SqlBuilder.renderInverseJoin(mode: RenderMode) {
 
         val parent = parent!!
-        val isOuterJoin = isOuterJoin
+        val isOuterJoin = _isOuterJoin
         val middleTable = joinProp!!.storage as? MiddleTable
 
         if (middleTable !== null) {
@@ -451,9 +468,9 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 middleTable.tableName,
                 middleTableAlias!!,
                 middleTable.targetJoinColumnName,
-                true
+                mode
             )
-            if (isUsedBy(this)) {
+            if (isUsedBy(this) && (mode == RenderMode.NORMAL || mode == RenderMode.DEEPER_JOIN_ONLY)) {
                 joinImpl(
                     isOuterJoin,
                     middleTableAlias!!,
@@ -461,7 +478,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                     entityType.tableName,
                     alias,
                     (entityType.idProp.storage as Column).name,
-                    true
+                    RenderMode.NORMAL
                 )
             }
         } else { // One-to-many join cannot be optimized by "_used"
@@ -472,7 +489,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 entityType.tableName,
                 alias,
                 (joinProp.storage as Column).name,
-                true
+                mode
             )
         }
     }
@@ -484,23 +501,37 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         newTableName: String,
         newAlias: String,
         newColumnName: String,
-        inverse: Boolean
+        mode: RenderMode
     ) {
-        val jt = if (isOuterJoin) "left" else "inner"
-        sql(" ")
-        sql(jt)
-        sql(" join ")
-        sql(newTableName)
-        sql(" as ")
-        sql(newAlias)
-        sql(" on ")
-        sql(previousAlias)
-        sql(".")
-        sql(previousColumnName)
-        sql(" = ")
-        sql(newAlias)
-        sql(".")
-        sql(newColumnName)
+        if (mode !== RenderMode.NORMAL && isOuterJoin) {
+            error("Internal bug: outer join cannot be accepted by abnormal render mode")
+        }
+        when (mode) {
+            RenderMode.NORMAL -> {
+                val jt = if (isOuterJoin) "left" else "inner"
+                sql(" ")
+                sql(jt)
+                sql(" join ")
+                sql(newTableName)
+                sql(" as ")
+                sql(newAlias)
+                sql(" on ")
+            }
+            RenderMode.FROM_ONLY -> {
+                sql(newTableName)
+                sql(" as ")
+                sql(newAlias)
+            }
+        }
+        if (mode == RenderMode.NORMAL || mode == RenderMode.WHERE_ONLY) {
+            sql(previousAlias)
+            sql(".")
+            sql(previousColumnName)
+            sql(" = ")
+            sql(newAlias)
+            sql(".")
+            sql(newColumnName)
+        }
     }
 
     private fun isUsedBy(builder: SqlBuilder): Boolean =
@@ -563,6 +594,9 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         }
     }
 
+    val isOuterJoin: Boolean
+        get() = _isOuterJoin
+
     val destructive: Destructive
         get() {
             if (joinProp === null) {
@@ -577,15 +611,40 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
             if (prop.isList || prop.isConnection) {
                 return Destructive.BREAK_REPEATABILITY
             }
-            if (prop.isNullable && !isOuterJoin) {
+            if (prop.isNullable && !_isOuterJoin) {
                 return Destructive.BREAK_ROW_COUNT
             }
             return Destructive.NONE
+        }
+
+    override fun toString(): String =
+        when {
+            joinProp === null ->
+                entityType.kotlinType.simpleName!!
+            isInverse ->
+                joinProp.opposite?.let {
+                    "$parent.${it.name}"
+                } ?: "← $parent.${joinProp.name}"
+            else ->
+                "$parent.${joinProp.name}"
+        }.let {
+            if (_isOuterJoin) {
+                "$it?"
+            } else {
+                it
+            }
         }
 
     enum class Destructive {
         NONE, // Left join for nullable reference, Left/Inner join for non-null reference
         BREAK_ROW_COUNT, // inner join for nullable-reference
         BREAK_REPEATABILITY // Any join for Collection
+    }
+
+    enum class RenderMode {
+        NORMAL,
+        FROM_ONLY,
+        WHERE_ONLY,
+        DEEPER_JOIN_ONLY;
     }
 }

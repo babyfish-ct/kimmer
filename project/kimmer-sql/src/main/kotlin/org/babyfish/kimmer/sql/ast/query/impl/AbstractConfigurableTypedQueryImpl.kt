@@ -63,7 +63,7 @@ internal abstract class AbstractConfigurableTypedQueryImpl<E, ID, R>(
 
     override fun accept(visitor: AstVisitor) {
         data.selections.forEach {
-            it.accept(visitor)
+            (it as Ast).accept(visitor)
         }
         baseQuery.accept(visitor, data.oldSelections, data.withoutSortingAndPaging)
     }

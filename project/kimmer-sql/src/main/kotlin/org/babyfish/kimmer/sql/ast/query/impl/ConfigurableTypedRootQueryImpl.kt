@@ -36,7 +36,7 @@ internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
             throw IllegalStateException("The current query uses group by clause, it cannot be reselected")
         }
         ReselectValidator().apply {
-            data.selections.forEach { it.accept(this) }
+            data.selections.forEach { (it as Ast).accept(this) }
         }
         val reselected = baseQuery.block()
         val selections = (reselected as ConfigurableTypedRootQueryImpl<E, ID, X>).data.selections
@@ -111,16 +111,16 @@ internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
         return builder.build()
     }
 
-    override fun union(right: TypedRootQuery<E, ID, R>): TypedRootQuery<E, ID, R> =
+    override fun union(right: TypedRootQuery<R>): TypedRootQuery<R> =
         MergedTypedRootQueryImpl(baseQuery.sqlClient, "union", this, right)
 
-    override fun unionAll(right: TypedRootQuery<E, ID, R>): TypedRootQuery<E, ID, R> =
+    override fun unionAll(right: TypedRootQuery<R>): TypedRootQuery<R> =
         MergedTypedRootQueryImpl(baseQuery.sqlClient, "union all", this, right)
 
-    override fun minus(right: TypedRootQuery<E, ID, R>): TypedRootQuery<E, ID, R> =
+    override fun minus(right: TypedRootQuery<R>): TypedRootQuery<R> =
         MergedTypedRootQueryImpl(baseQuery.sqlClient, "minus", this, right)
 
-    override fun intersect(right: TypedRootQuery<E, ID, R>): TypedRootQuery<E, ID, R> =
+    override fun intersect(right: TypedRootQuery<R>): TypedRootQuery<R> =
         MergedTypedRootQueryImpl(baseQuery.sqlClient, "intersect", this, right)
 
     companion object {
@@ -140,7 +140,7 @@ internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
     private class ReselectValidator: AstVisitor {
 
         override fun visitSubQuery(
-            subQuery: TypedSubQuery<*, *, *, *, *>
+            subQuery: TypedSubQuery<*>
         ): Boolean = false
 
         override fun visitAggregation(

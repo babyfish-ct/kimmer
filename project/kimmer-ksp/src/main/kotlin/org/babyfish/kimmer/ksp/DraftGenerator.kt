@@ -52,6 +52,8 @@ class DraftGenerator(
                             addNewFun(classDeclaration, isAsync = true, forDraft = false)
                             addNewFun(classDeclaration, isAsync = false, forDraft = true)
                             addNewFun(classDeclaration, isAsync = true, forDraft = true)
+                            addAddFun(classDeclaration, isAsync = false)
+                            addAddFun(classDeclaration, isAsync = true)
                         }
                     }
                 }.build()
@@ -233,6 +235,63 @@ class DraftGenerator(
                             ClassName(KIMMER_PACKAGE, "produce$suffix")
                         )
                     }
+                }
+                .build()
+        )
+    }
+
+    private fun FileSpec.Builder.addAddFun(
+        declaration: KSClassDeclaration,
+        isAsync: Boolean
+    ) {
+        val mode = if (isAsync) "Async" else "Sync"
+        val suffix = if (isAsync) "Async" else ""
+        addFunction(
+            FunSpec
+                .builder("by")
+                .apply {
+                    modifiers += KModifier.INLINE
+                    if (isAsync) {
+                        modifiers += KModifier.SUSPEND
+                    }
+                    receiver(
+                        ClassName(KIMMER_PACKAGE, "DraftList${mode}Adder")
+                            .parameterizedBy(
+                                declaration
+                                    .asClassName { "$it$DRAFT_SUFFIX" }
+                                    .parameterizedBy(
+                                        WildcardTypeName.producerOf(
+                                            declaration.asClassName()
+                                        )
+                                    )
+                            )
+                    )
+                    addParameter(
+                        ParameterSpec
+                            .builder(
+                                "base",
+                                declaration.asClassName().copy(nullable = true)
+                            )
+                            .apply {
+                                defaultValue("null")
+                            }
+                            .build()
+                    )
+                    addParameter(
+                        "block",
+                        LambdaTypeName.get(
+                            declaration
+                                .asClassName { "${it}Draft.$mode" },
+                            emptyList(),
+                            ClassName("kotlin", "Unit")
+                        ).copy(suspending = isAsync),
+                        KModifier.NOINLINE
+                    )
+                    addCode(
+                        "list.add(%T(%T::class, base, block))",
+                        ClassName(KIMMER_PACKAGE, "produceDraft$suffix"),
+                        declaration.asClassName()
+                    )
                 }
                 .build()
         )

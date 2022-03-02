@@ -20,10 +20,10 @@ import kotlin.reflect.KClass
  *     val book = new(Book::class).by {
  *         name = "The book"
  *         store().name = "The store"
- *         authors() += new(Book::class).by {
+ *         authors() += new(Author::class).by {
  *             name = "The first author"
  *         }
- *         authors() += new(Book::class).by {
+ *         authors() += new(Author::class).by {
  *             name = "The second author"
  *         }
  *     }
@@ -58,11 +58,11 @@ inline fun<T: Immutable> new(type: KClass<T>): SyncCreator<T> =
  *         delay(100)
  *         name = "The book"
  *         store().name = "The store"
- *         authors() += newAsync(Book::class).by {
+ *         authors() += newAsync(Author::class).by {
  *             delay(100)
  *             name = "The first author"
  *         }
- *         authors() += newAsync(Book::class).by {
+ *         authors() += newAsync(Author::class).by {
  *             delay(100)
  *             name = "The second author"
  *         }

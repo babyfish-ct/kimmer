@@ -5,6 +5,9 @@ import org.babyfish.kimmer.sql.runtime.PaginationContext
 
 open class DefaultDialect : Dialect {
 
+    override val updateJoin: UpdateJoin?
+        get() = null
+
     override fun pagination(ctx: PaginationContext) {
         ctx.apply {
             origin()

@@ -40,6 +40,7 @@ internal fun ClassVisitor.writeType(type: ImmutableType) {
     writeConstructor(args)
     writeProxyMethods(args)
     writeNew()
+    writeGetAdder()
 
     visitEnd()
 }

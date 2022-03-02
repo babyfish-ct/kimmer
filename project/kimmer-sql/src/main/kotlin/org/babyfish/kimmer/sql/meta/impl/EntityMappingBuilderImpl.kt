@@ -63,6 +63,11 @@ internal class EntityMappingBuilderImpl(
                 "Illegal ScalarTypeProvider, it's scalar type cannot be primitive types of their box types"
             )
         }
+        if (type == String::class) {
+            throw IllegalArgumentException(
+                "Illegal ScalarTypeProvider, it's scalar type cannot be String"
+            )
+        }
         if (Immutable::class.java.isAssignableFrom(type.java)) {
             throw IllegalArgumentException(
                 "Illegal ScalarTypeProvider, it's scalar type cannot inherits '${Immutable::class.qualifiedName}'"

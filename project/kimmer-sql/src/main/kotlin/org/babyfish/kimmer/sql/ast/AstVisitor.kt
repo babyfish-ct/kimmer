@@ -11,7 +11,7 @@ interface AstVisitor {
 
     fun visitTableReference(table: Table<*, *>, prop: EntityProp?) {}
 
-    fun visitSubQuery(subQuery: TypedSubQuery<*, *, *, *, *>): Boolean = true
+    fun visitSubQuery(subQuery: TypedSubQuery<*>): Boolean = true
 
     fun visitAggregation(functionName: String, base: Expression<*>, prefix: String?) {}
 }

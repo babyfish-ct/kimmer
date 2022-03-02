@@ -54,26 +54,26 @@ internal class SubMutableQueryImpl<P, PID, E, ID>(
 
     override fun <X : Any> select(
         expression: NonNullExpression<X>
-    ): ConfigurableTypedSubQuery<P, PID, E, ID, X> =
+    ): ConfigurableTypedSubQuery<X> =
         ConfigurableTypedSubQueryImpl.select(this, listOf(expression as Selection<*>))
 
     override fun <X : Any> select(
         expression: Expression<X>
-    ): ConfigurableTypedSubQuery<P, PID, E, ID, X?> =
+    ): ConfigurableTypedSubQuery<X?> =
         ConfigurableTypedSubQueryImpl.select(this, listOf(expression as Selection<*>))
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> select(
         table: NonNullTable<X, XID>
-    ): ConfigurableTypedSubQuery<P, PID, E, ID, X> =
+    ): ConfigurableTypedSubQuery<X> =
         ConfigurableTypedSubQueryImpl.select(this, listOf(table as Selection<*>))
 
     override fun <X : Entity<XID>, XID : Comparable<XID>> select(
         table: Table<X, XID>
-    ): ConfigurableTypedSubQuery<P, PID, E, ID, X?> =
+    ): ConfigurableTypedSubQuery<X?> =
         ConfigurableTypedSubQueryImpl.select(this, listOf(table as Selection<*>))
 
     override fun <X: Any> select(
         block: ProjectionContext.() -> Projection<X>
-    ): ConfigurableTypedSubQuery<P, PID, E, ID, X> =
+    ): ConfigurableTypedSubQuery<X> =
         ConfigurableTypedSubQueryImpl.select(this, (ProjectionContext.block() as AbstractProjection).selections)
 }

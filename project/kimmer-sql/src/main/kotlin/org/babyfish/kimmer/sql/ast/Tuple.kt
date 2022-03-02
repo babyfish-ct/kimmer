@@ -80,7 +80,7 @@ internal class TupleExpression<T: Any>(
 
     override fun accept(visitor: AstVisitor) {
         selections.forEach {
-            it.accept(visitor)
+            (it as Ast).accept(visitor)
         }
     }
 }

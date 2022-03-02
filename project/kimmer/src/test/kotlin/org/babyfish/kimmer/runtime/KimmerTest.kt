@@ -18,10 +18,10 @@ class KimmerTest {
         val book = new(Book::class).by {
             name = "book"
             store().name = "store"
-            authors() += new(Author::class).by {
+            authors().add.by {
                 name = "Jim"
             }
-            authors() += new(Author::class).by {
+            authors().add.by {
                 name = "Kate"
             }
         }
@@ -203,11 +203,11 @@ class KimmerTest {
                 delay(500)
                 name = "The book"
                 store().name = "The store"
-                authors() += newAsync(Author::class).by {
+                authors().add.by {
                     delay(500)
                     name = "Jim"
                 }
-                authors() += newAsync(Author::class).by {
+                authors().add.by {
                     delay(500)
                     name = "Kate"
                 }
@@ -307,10 +307,10 @@ class KimmerTest {
         val book = new(Book::class).by {
             name = "The book"
             store().name = "Store"
-            authors() += new(Author::class).by {
+            authors().add.by {
                 name = "Author1"
             }
-            authors() += new(Author::class).by {
+            authors().add.by {
                 name = "Author2"
             }
         }

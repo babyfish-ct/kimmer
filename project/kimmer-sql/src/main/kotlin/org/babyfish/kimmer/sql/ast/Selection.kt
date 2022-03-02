@@ -1,3 +1,3 @@
 package org.babyfish.kimmer.sql.ast
 
-internal interface Selection<T> : Ast
+internal interface Selection<T>

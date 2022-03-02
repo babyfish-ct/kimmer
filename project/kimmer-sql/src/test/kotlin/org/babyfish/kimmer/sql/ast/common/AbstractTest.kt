@@ -77,7 +77,7 @@ abstract class AbstractTest {
 
     private var _rows: List<Any?>? = null
 
-    protected fun <R: Any> TypedRootQuery<*, *, R>.executeAndExpect(
+    protected fun <R: Any> TypedRootQuery<R>.executeAndExpect(
         testWay: TestWay = TestWay.BOTH,
         block: QueryTestContext<R>.() -> Unit
     ) {

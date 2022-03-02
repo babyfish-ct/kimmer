@@ -1,21 +1,14 @@
 package org.babyfish.kimmer.sql.ast.query
 
-import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.ast.Executable
 
-interface TypedRootQuery<E, ID, R>
-    where E:
-          Entity<ID>,
-          ID: Comparable<ID> {
+interface TypedRootQuery<R>: Executable<List<R>> {
 
-    fun execute(con: java.sql.Connection): List<R>
+    infix fun union(right: TypedRootQuery<R>): TypedRootQuery<R>
 
-    suspend fun execute(con: io.r2dbc.spi.Connection): List<R>
+    infix fun unionAll(right: TypedRootQuery<R>): TypedRootQuery<R>
 
-    infix fun union(right: TypedRootQuery<E, ID, R>): TypedRootQuery<E, ID, R>
+    infix fun minus(right: TypedRootQuery<R>): TypedRootQuery<R>
 
-    infix fun unionAll(right: TypedRootQuery<E, ID, R>): TypedRootQuery<E, ID, R>
-
-    infix fun minus(right: TypedRootQuery<E, ID, R>): TypedRootQuery<E, ID, R>
-
-    infix fun intersect(right: TypedRootQuery<E, ID, R>): TypedRootQuery<E, ID, R>
+    infix fun intersect(right: TypedRootQuery<R>): TypedRootQuery<R>
 }

@@ -3,7 +3,7 @@ package org.babyfish.kimmer.sql.runtime.dialect
 import org.babyfish.kimmer.sql.runtime.Dialect
 import org.babyfish.kimmer.sql.runtime.PaginationContext
 
-class OracleDialect : Dialect {
+class OracleDialect : DefaultDialect() {
 
     override fun pagination(ctx: PaginationContext) {
         ctx.apply {

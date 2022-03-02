@@ -3,7 +3,7 @@ package org.babyfish.kimmer.sql.ast.query
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.query.selectable.RootSelectable
 
-interface ConfigurableTypedRootQuery<E: Entity<ID>, ID: Comparable<ID>, R> : TypedRootQuery<E, ID, R> {
+interface ConfigurableTypedRootQuery<E: Entity<ID>, ID: Comparable<ID>, R> : TypedRootQuery<R> {
 
     /**
      * @throws IllegalStateException

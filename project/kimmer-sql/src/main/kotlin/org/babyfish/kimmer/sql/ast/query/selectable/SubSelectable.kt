@@ -13,19 +13,19 @@ interface SubSelectable<P: Entity<PID>, PID: Comparable<PID>, E: Entity<ID>, ID:
 
     fun <X: Any> select(
         expression: NonNullExpression<X>
-    ): ConfigurableTypedSubQuery<P, PID, E, ID, X>
+    ): ConfigurableTypedSubQuery<X>
 
     fun <X: Any> select(
         expression: Expression<X>
-    ): ConfigurableTypedSubQuery<P, PID, E, ID, X?>
+    ): ConfigurableTypedSubQuery<X?>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> select(
         table: NonNullTable<X, XID>
-    ): ConfigurableTypedSubQuery<P, PID, E, ID, X>
+    ): ConfigurableTypedSubQuery<X>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> select(
         table: Table<X, XID>
-    ): ConfigurableTypedSubQuery<P, PID, E, ID, X?>
+    ): ConfigurableTypedSubQuery<X?>
 
     /**
      * select {
@@ -37,5 +37,5 @@ interface SubSelectable<P: Entity<PID>, PID: Comparable<PID>, E: Entity<ID>, ID:
      */
     fun <X: Any> select(
         block: ProjectionContext.() -> Projection<X>
-    ): ConfigurableTypedSubQuery<P, PID, E, ID, X>
+    ): ConfigurableTypedSubQuery<X>
 }

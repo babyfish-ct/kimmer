@@ -2,6 +2,7 @@ package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
 import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
+import org.babyfish.kimmer.sql.ast.table.Table
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.config.Column
@@ -20,6 +21,13 @@ interface Expression<T> : Ast, Renderable {
 }
 
 interface NonNullExpression<T>: Expression<T>
+
+interface PropExpression<T>: Expression<T> {
+    val table: Table<*, *>
+    val prop: EntityProp
+}
+
+interface NonNullPropExpression<T>: PropExpression<T>, NonNullExpression<T>
 
 internal abstract class AbstractExpression<T: Any>(
     selectedType: Class<*>?
@@ -94,10 +102,10 @@ internal abstract class AbstractExpression<T: Any>(
     }
 }
 
-internal class PropExpression<T: Any>(
-    val table: TableImpl<*, *>,
-    val prop: EntityProp
-): AbstractExpression<T>(prop.returnType.java) {
+internal class PropExpressionImpl<T: Any>(
+    override val table: TableImpl<*, *>,
+    override val prop: EntityProp
+): AbstractExpression<T>(prop.returnType.java), NonNullPropExpression<T> {
 
     init {
         if (prop.targetType !== null) {
@@ -403,7 +411,7 @@ internal class InListExpression<T: Any>(
 internal class InSubQueryExpression<T: Any>(
     private val negative: Boolean,
     private val expression: Expression<T>,
-    private val subQuery: TypedSubQuery<*, *, *, *, T>
+    private val subQuery: TypedSubQuery<T>
 ): AbstractExpression<Boolean>(Boolean::class.java) {
 
     override val precedence: Int
@@ -442,7 +450,7 @@ internal class ExistsExpression(
 
 internal class OperatorSubQueryExpression<T: Any>(
     private val operator: String,
-    private val subQuery: TypedSubQuery<*, *, *, *, T>
+    private val subQuery: TypedSubQuery<T>
 ): AbstractExpression<T>(subQuery.selectedType) {
 
     override val precedence: Int

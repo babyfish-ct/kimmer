@@ -31,8 +31,8 @@ interface Filterable<E: Entity<ID>, ID: Comparable<ID>> {
 
     fun <X, XID, R: Any> subQuery(
         type: KClass<X>,
-        block: MutableSubQuery<E, ID, X, XID>.() -> TypedSubQuery<E, ID, X, XID, R>
-    ): TypedSubQuery<E, ID, X, XID, R>
+        block: MutableSubQuery<E, ID, X, XID>.() -> TypedSubQuery<R>
+    ): TypedSubQuery<R>
     where X: Entity<XID>, XID: Comparable<XID>
 
     fun <X, XID> untypedSubQuery(

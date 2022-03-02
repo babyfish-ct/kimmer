@@ -6,7 +6,7 @@ import org.babyfish.kimmer.sql.ast.AstVisitor
 import org.babyfish.kimmer.sql.ast.table.Table
 import org.babyfish.kimmer.sql.meta.EntityProp
 
-internal class UseTableVisitor(
+internal open class UseTableVisitor(
     override val sqlBuilder: AbstractSqlBuilder
 ): AstVisitor {
 
@@ -16,7 +16,11 @@ internal class UseTableVisitor(
             if (table.entityType.starProps.size > 1) {
                 sqlBuilder.useTable(tableImpl)
             }
-        } else if (!entityProp.isId) {
+        } else if (entityProp.isId) {
+            tableImpl.parent?.let {
+                sqlBuilder.useTable(it)
+            }
+        } else {
             sqlBuilder.useTable(tableImpl)
         }
     }

@@ -18,6 +18,7 @@ class SqlExpressionBuilder internal constructor(
         this.values = values.toList()
     }
 
+    @Suppress("UNCHECKED_CAST")
     internal fun <T: Any> build(sql: String): NonNullExpression<T> {
 
         if (sql.indexOf('\'') != -1) {
@@ -71,7 +72,7 @@ class SqlExpressionBuilder internal constructor(
         if (index + 1 < sqlLen) {
             parts += sql.substring(index)
         }
-        return SqlExpression(type.java, parts)
+        return SqlExpression<T>(type.java, parts) as NonNullExpression<T>
     }
 }
 

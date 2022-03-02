@@ -54,11 +54,27 @@ interface Draft<out T: Immutable> {
 }
 
 interface SyncDraft<out T: Immutable>: Draft<T> {
+
     fun <X: Immutable> new(type: KClass<X>): SyncDraftCreator<X> =
         SyncDraftCreator(type)
+
+    val <X: Immutable> MutableList<X>.add: DraftListSyncAdder<X>
 }
 
 interface AsyncDraft<out T: Immutable>: Draft<T> {
+
     fun <X: Immutable> newAsync(type: KClass<X>) =
         AsyncDraftCreator(type)
+
+    val <X: Immutable> MutableList<X>.add: DraftListAsyncAdder<X>
 }
+
+@JvmInline
+value class DraftListSyncAdder<E: Immutable>(
+    val list: MutableList<E>
+)
+
+@JvmInline
+value class DraftListAsyncAdder<E: Immutable>(
+    val list: MutableList<E>
+)

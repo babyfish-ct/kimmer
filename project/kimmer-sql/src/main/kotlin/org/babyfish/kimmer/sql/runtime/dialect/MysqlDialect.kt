@@ -1,9 +1,11 @@
 package org.babyfish.kimmer.sql.runtime.dialect
 
-import org.babyfish.kimmer.sql.runtime.Dialect
 import org.babyfish.kimmer.sql.runtime.PaginationContext
 
-class MysqlDialect: Dialect {
+class MysqlDialect: DefaultDialect() {
+
+    override val updateJoin: UpdateJoin?
+        get() = UpdateJoin(true, UpdateJoin.From.UNNECESSARY)
 
     override fun pagination(ctx: PaginationContext) {
         ctx.apply {

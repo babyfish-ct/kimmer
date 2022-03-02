@@ -303,12 +303,12 @@ infix fun <T: Any> Expression<T>.valueNotIn(
 
 
 infix fun <T: Any> Expression<T>.valueIn(
-    subQuery: TypedSubQuery<*, *, *, *, T>
+    subQuery: TypedSubQuery<T>
 ): NonNullExpression<Boolean> =
     InSubQueryExpression(false, this, subQuery)
 
 infix fun <T: Any> Expression<T>.valueNotIn(
-    subQuery: TypedSubQuery<*, *, *, *, T>
+    subQuery: TypedSubQuery<T>
 ): NonNullExpression<Boolean> =
     InSubQueryExpression(true, this, subQuery)
 
@@ -325,28 +325,28 @@ fun notExists(
 
 
 fun exists(
-    subQuery: TypedSubQuery<*, *, *, *, *>
+    subQuery: TypedSubQuery<*>
 ): NonNullExpression<Boolean> =
     exists((subQuery as TypedSubQueryImplementor<*, *, *, *, *>).baseQuery)
 
 fun notExists(
-    subQuery: TypedSubQuery<*, *, *, *, *>
+    subQuery: TypedSubQuery<*>
 ): NonNullExpression<Boolean> =
     notExists((subQuery as TypedSubQueryImplementor<*, *, *, *, *>).baseQuery)
 
 
 fun <T: Any> all(
-    subQuery: TypedSubQuery<*, *, *, *, T>
+    subQuery: TypedSubQuery<T>
 ): Expression<T> =
     OperatorSubQueryExpression("all", subQuery)
 
 fun <T: Any> any(
-    subQuery: TypedSubQuery<*, *, *, *, T>
+    subQuery: TypedSubQuery<T>
 ): Expression<T> =
     OperatorSubQueryExpression("any", subQuery)
 
 fun <T: Any> some(
-    subQuery: TypedSubQuery<*, *, *, *, T>
+    subQuery: TypedSubQuery<T>
 ): Expression<T> =
     OperatorSubQueryExpression("some", subQuery)
 

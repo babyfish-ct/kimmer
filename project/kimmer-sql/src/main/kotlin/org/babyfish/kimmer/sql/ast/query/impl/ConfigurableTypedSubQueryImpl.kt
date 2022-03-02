@@ -13,7 +13,7 @@ internal class ConfigurableTypedSubQueryImpl<P, PID, E, ID, R>(
 ): AbstractConfigurableTypedQueryImpl<E, ID, R>(
     data,
     baseQuery
-), ConfigurableTypedSubQuery<P, PID, E, ID, R>,
+), ConfigurableTypedSubQuery<R>,
     TypedSubQueryImplementor<P, PID, E, ID, R>
     where
         P: Entity<PID>,
@@ -42,7 +42,7 @@ internal class ConfigurableTypedSubQueryImpl<P, PID, E, ID, R>(
     override val baseQuery: SubMutableQueryImpl<P, PID, E, ID>
         get() = super.baseQuery as SubMutableQueryImpl<P, PID, E, ID>
 
-    override fun limit(limit: Int, offset: Int): ConfigurableTypedSubQuery<P, PID, E, ID, R> =
+    override fun limit(limit: Int, offset: Int): ConfigurableTypedSubQuery<R> =
         if (data.limit == limit && data.offset == offset) {
             this
         } else {
@@ -61,7 +61,7 @@ internal class ConfigurableTypedSubQueryImpl<P, PID, E, ID, R>(
             )
         }
 
-    override fun distinct(distinct: Boolean): ConfigurableTypedSubQuery<P, PID, E, ID, R> =
+    override fun distinct(distinct: Boolean): ConfigurableTypedSubQuery<R> =
         if (data.distinct === distinct) {
             this
         } else {
@@ -90,7 +90,7 @@ internal class ConfigurableTypedSubQueryImpl<P, PID, E, ID, R>(
         fun <P: Entity<PID>, PID: Comparable<PID>, E: Entity<ID>, ID: Comparable<ID>, R> select(
             query: SubMutableQueryImpl<P, PID, E, ID>,
             selections: List<Selection<*>>
-        ): ConfigurableTypedSubQuery<P, PID, E, ID, R> =
+        ): ConfigurableTypedSubQuery<R> =
             ConfigurableTypedSubQueryImpl(
                 TypedQueryData(selections.toList()),
                 baseQuery = query

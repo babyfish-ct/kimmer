@@ -12,6 +12,7 @@ import org.babyfish.kimmer.sql.ast.table.impl.TableAliasAllocator
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.ast.AstVisitor
 import org.babyfish.kimmer.sql.ast.table.Table
+import org.babyfish.kimmer.sql.impl.AbstractMutableStatement
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
@@ -19,16 +20,16 @@ import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 
 internal abstract class AbstractMutableQueryImpl<E, ID>(
-    val tableAliasAllocator: TableAliasAllocator,
-    val sqlClient: SqlClientImpl,
+    tableAliasAllocator: TableAliasAllocator,
+    sqlClient: SqlClientImpl,
     type: KClass<E>
-): MutableQuery<E, ID>
+): AbstractMutableStatement(
+    tableAliasAllocator,
+    sqlClient
+), MutableQuery<E, ID>
     where E:
           Entity<ID>,
           ID: Comparable<ID> {
-
-    private val entityTypeMap: Map<KClass<out Entity<*>>, EntityType>
-        get() = sqlClient.entityTypeMap
 
     private val predicates = mutableListOf<NonNullExpression<Boolean>>()
 
@@ -44,7 +45,7 @@ internal abstract class AbstractMutableQueryImpl<E, ID>(
 
     private fun createTable0(type: KClass<E>): TableImpl<E, ID> =
         createTable(
-            entityTypeMap[type]
+            sqlClient.entityTypeMap[type]
                 ?: throw IllegalArgumentException("Cannot create query for unmapped type '${type.qualifiedName}'")
         )
 
@@ -133,8 +134,8 @@ internal abstract class AbstractMutableQueryImpl<E, ID>(
 
     override fun <X, XID, R: Any> subQuery(
         type: KClass<X>,
-        block: MutableSubQuery<E, ID, X, XID>.() -> TypedSubQuery<E, ID, X, XID, R>
-    ): TypedSubQuery<E, ID, X, XID, R>
+        block: MutableSubQuery<E, ID, X, XID>.() -> TypedSubQuery<R>
+    ): TypedSubQuery<R>
     where X: Entity<XID>, XID: Comparable<XID> =
         SubMutableQueryImpl(this, type).run {
             block()
@@ -227,7 +228,7 @@ internal abstract class AbstractMutableQueryImpl<E, ID>(
         }
         if (overriddenSelections !== null) {
             UseJoinOfIgnoredClauseVisitor(sqlBuilder).apply {
-                overriddenSelections.forEach { it.accept(this) }
+                overriddenSelections.forEach { (it as Ast).accept(this) }
             }
         }
     }
@@ -237,7 +238,7 @@ internal abstract class AbstractMutableQueryImpl<E, ID>(
     ): AstVisitor {
 
         override fun visitSubQuery(
-            subQuery: TypedSubQuery<*, *, *, *, *>
+            subQuery: TypedSubQuery<*>
         ): Boolean = false
 
         override fun visitTableReference(table: Table<*, *>, prop: EntityProp?) {
@@ -261,14 +262,4 @@ internal abstract class AbstractMutableQueryImpl<E, ID>(
 
     fun isGroupByClauseUsed(): Boolean =
         groupByExpressions.isNotEmpty()
-
-    fun freeze() {
-        frozen = true
-    }
-
-    fun validateMutable() {
-        if (frozen) {
-            throw IllegalStateException("Cannot mutate the query because it has been frozen")
-        }
-    }
 }

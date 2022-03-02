@@ -32,6 +32,7 @@ internal fun ClassVisitor.writeType(type: ImmutableType) {
 
     writeConstructor(type)
     writeNew()
+    writeGetAdder()
 
     visitEnd()
 }

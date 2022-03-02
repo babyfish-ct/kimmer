@@ -4,19 +4,21 @@ import org.babyfish.kimmer.graphql.Connection
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.Expression
 import org.babyfish.kimmer.sql.ast.NonNullExpression
+import org.babyfish.kimmer.sql.ast.PropExpression
 import kotlin.reflect.KProperty1
 
+@Suppress("DANGEROUS_CHARACTERS")
 interface Table<E: Entity<ID>, ID: Comparable<ID>> {
 
-    val id: Expression<ID>
+    val id: PropExpression<ID>
 
     fun <X: Any> get(
         prop: KProperty1<E, X>
-    ): Expression<X>
+    ): PropExpression<X>
 
     fun <X: Any> `get?`(
         prop: KProperty1<E, X?>
-    ): Expression<X>
+    ): PropExpression<X>
 
     fun <X: Entity<XID>, XID: Comparable<XID>> joinReference(
         prop: KProperty1<E, X?>

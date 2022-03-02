@@ -11,17 +11,14 @@ import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import org.babyfish.kimmer.sql.runtime.JdbcExecutorContext
 import org.babyfish.kimmer.sql.runtime.R2dbcExecutorContext
 
-internal class MergedTypedRootQueryImpl<E, ID, R>(
+internal class MergedTypedRootQueryImpl<R>(
     private val sqlClient: SqlClientImpl,
     private val operator: String,
-    left: TypedRootQuery<E, ID, R>,
-    right: TypedRootQuery<E, ID, R>
+    left: TypedRootQuery<R>,
+    right: TypedRootQuery<R>
 ) :
-    TypedRootQuery<E, ID, R>,
-    TypedQueryImplementor
-    where
-        E: Entity<ID>,
-        ID: Comparable<ID> {
+    TypedRootQuery<R>,
+    TypedQueryImplementor {
 
     private val _selections: List<Selection<*>>
 
@@ -72,15 +69,15 @@ internal class MergedTypedRootQueryImpl<E, ID, R>(
         return builder.build()
     }
 
-    override fun union(right: TypedRootQuery<E, ID, R>): TypedRootQuery<E, ID, R> =
+    override fun union(right: TypedRootQuery<R>): TypedRootQuery<R> =
         MergedTypedRootQueryImpl(sqlClient, "union", this, right)
 
-    override fun unionAll(right: TypedRootQuery<E, ID, R>): TypedRootQuery<E, ID, R> =
+    override fun unionAll(right: TypedRootQuery<R>): TypedRootQuery<R> =
         MergedTypedRootQueryImpl(sqlClient, "union all", this, right)
 
-    override fun minus(right: TypedRootQuery<E, ID, R>): TypedRootQuery<E, ID, R> =
+    override fun minus(right: TypedRootQuery<R>): TypedRootQuery<R> =
         MergedTypedRootQueryImpl(sqlClient, "minus", this, right)
 
-    override fun intersect(right: TypedRootQuery<E, ID, R>): TypedRootQuery<E, ID, R> =
+    override fun intersect(right: TypedRootQuery<R>): TypedRootQuery<R> =
         MergedTypedRootQueryImpl(sqlClient, "intersect", this, right)
 }
