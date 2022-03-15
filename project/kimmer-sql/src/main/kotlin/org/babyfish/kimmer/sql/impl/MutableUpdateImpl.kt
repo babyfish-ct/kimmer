@@ -10,7 +10,6 @@ import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.runtime.Dialect
-import org.babyfish.kimmer.sql.runtime.dialect.PostgresDialect
 import org.babyfish.kimmer.sql.runtime.dialect.UpdateJoin
 import java.lang.IllegalStateException
 import kotlin.reflect.KClass

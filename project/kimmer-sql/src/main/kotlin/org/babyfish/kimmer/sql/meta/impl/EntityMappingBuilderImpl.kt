@@ -9,7 +9,9 @@ import org.babyfish.kimmer.sql.MappingException
 import org.babyfish.kimmer.sql.meta.EntityMappingBuilder
 import org.babyfish.kimmer.sql.meta.EntityType
 import org.babyfish.kimmer.sql.meta.ScalarProvider
+import org.babyfish.kimmer.sql.meta.config.IdGenerator
 import org.babyfish.kimmer.sql.meta.config.Storage
+import org.babyfish.kimmer.sql.meta.config.UserIdGenerator
 import org.babyfish.kimmer.sql.meta.spi.EntityPropImpl
 import org.babyfish.kimmer.sql.meta.spi.EntityTypeImpl
 import org.babyfish.kimmer.sql.meta.spi.MetaFactory
@@ -33,13 +35,29 @@ internal class EntityMappingBuilderImpl(
 
     override fun prop(
         prop: KProperty1<out Entity<*>, *>,
-        storage: Storage?
+        storage: Storage?,
+        idGenerator: IdGenerator?,
+        isVersion: Boolean
     ): EntityPropImpl =
         createProp(prop).apply {
             storage?.let {
-                this.setStorage(it)
+                setStorage(it)
+            }
+            idGenerator?.let {
+                setIdGenerator(it)
+            }
+            if (isVersion) {
+                setVersion()
             }
         }
+
+    override fun <ID : Comparable<ID>> prop(
+        prop: KProperty1<out Entity<ID>, ID>,
+        storage: Storage?,
+        idGenerator: UserIdGenerator<ID>,
+        isVersion: Boolean
+    ): EntityPropImpl =
+        prop(prop, storage, idGenerator as IdGenerator, isVersion)
 
     override fun inverseProp(
         prop: KProperty1<out Entity<*>, *>,

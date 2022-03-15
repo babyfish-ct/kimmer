@@ -2,6 +2,7 @@ package org.babyfish.kimmer.runtime.asm.draft
 
 import org.babyfish.kimmer.meta.ImmutableProp
 import org.babyfish.kimmer.runtime.asm.*
+import org.babyfish.kimmer.sql.Entity
 import org.springframework.asm.ClassVisitor
 import org.springframework.asm.MethodVisitor
 import org.springframework.asm.Opcodes
@@ -25,6 +26,26 @@ internal fun ClassVisitor.writeSetter(prop: ImmutableProp, args: GeneratorArgs) 
         "($typeDesc)V"
     ) {
         visitSetter(prop, args)
+    }
+    val isId = prop.name == "id" && Entity::class.java.isAssignableFrom(prop.declaringType.kotlinType.java)
+    if (isId) {
+        writeMethod(
+            Opcodes.ACC_PUBLIC or Opcodes.ACC_BRIDGE or Opcodes.ACC_SYNTHETIC,
+            setterName,
+            "($COMPARABLE_DESCRIPTOR)V"
+        ) {
+            visitVarInsn(Opcodes.ALOAD, 0)
+            visitVarInsn(Opcodes.ALOAD, 1)
+            visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(parameterType))
+            visitMethodInsn(
+                Opcodes.INVOKEVIRTUAL,
+                args.draftImplInternalName,
+                setterName,
+                "($typeDesc)V",
+                false
+            )
+            visitInsn(Opcodes.RETURN)
+        }
     }
 }
 

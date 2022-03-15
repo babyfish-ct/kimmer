@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
 
 internal abstract class ResultMapper(
     private val sqlClient: SqlClient,
-    baseIndex: Int = 0
+    baseIndex: Int
 ) {
     private var index = baseIndex
 
@@ -57,8 +57,10 @@ internal abstract class ResultMapper(
                     val targetType = prop.targetType
                     if (targetType !== null) {
                         val targetId = read(targetType.idProp.returnType)
-                        val target = produce(targetType.kotlinType) {
-                            Draft.set(this, targetType.idProp.immutableProp, targetId)
+                        val target = targetId?.let {
+                            produce(targetType.kotlinType) {
+                                Draft.set(this, targetType.idProp.immutableProp, it)
+                            }
                         }
                         Draft.set(this, prop.immutableProp, target)
                     } else {
@@ -75,8 +77,8 @@ internal abstract class ResultMapper(
         val scalarProvider = sqlClient.scalarProviderMap[type]
         val expectedJavaType = scalarProvider?.sqlType?.java ?: type.javaObjectType
         val sqlValue =
-            if (value === null || value::class.java === expectedJavaType) {
-                value
+            if (value === null) {
+                null
             } else {
                 convert(value, expectedJavaType) ?:
                     throw ExecutionException(
@@ -92,49 +94,13 @@ internal abstract class ResultMapper(
         }
     }
 
-    private fun convert(value: Any, expectedType: Class<*>): Any? {
-
-        if (value is Number) {
-            return when (expectedType) {
-                Boolean::class.javaObjectType, Boolean::class.javaPrimitiveType ->
-                    value.toInt() != 0
-                Byte::class.javaObjectType, Byte::class.javaPrimitiveType ->
-                    value.toByte()
-                Short::class.javaObjectType, Short::class.javaPrimitiveType ->
-                    value.toShort()
-                Int::class.javaObjectType, Int::class.javaPrimitiveType ->
-                    value.toInt()
-                Long::class.javaObjectType, Long::class.javaPrimitiveType ->
-                    value.toLong()
-                Float::class.javaObjectType, Float::class.javaPrimitiveType ->
-                    value.toFloat()
-                Double::class.javaObjectType, Double::class.javaPrimitiveType ->
-                    value.toDouble()
-                BigInteger::class.java ->
-                    when (value) {
-                        is BigDecimal -> value.toBigInteger()
-                        else -> BigInteger.valueOf(value.toLong())
-                    }
-                BigDecimal::class.java ->
-                    when (value) {
-                        is BigInteger -> value.toBigDecimal()
-                        is Float, is Double -> BigDecimal.valueOf(value.toLong())
-                        else -> BigDecimal.valueOf(value.toDouble())
-                    }
-                else ->
-                    null
-            }
-        }
-        return null
-    }
-
     protected abstract fun read(index: Int): Any?
 }
 
 internal class JdbcResultMapper(
     sqlClient: SqlClient,
     private val resultSet: ResultSet
-): ResultMapper(sqlClient, 1) {
+): ResultMapper(sqlClient, JDBC_BASE_INDEX) {
 
     override fun read(index: Int): Any? =
         resultSet.getObject(index)
@@ -143,7 +109,7 @@ internal class JdbcResultMapper(
 internal class R2dbcResultMapper(
     sqlClient: SqlClient,
     private val row: Row
-): ResultMapper(sqlClient) {
+): ResultMapper(sqlClient, R2DBC_BASE_INDEX) {
 
     override fun read(index: Int): Any? =
         row.get(index)

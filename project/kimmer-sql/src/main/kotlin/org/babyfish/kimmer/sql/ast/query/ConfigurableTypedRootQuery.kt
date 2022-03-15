@@ -20,4 +20,6 @@ interface ConfigurableTypedRootQuery<E: Entity<ID>, ID: Comparable<ID>, R> : Typ
     fun limit(limit: Int, offset: Int = 0): ConfigurableTypedRootQuery<E, ID, R>
 
     fun withoutSortingAndPaging(without: Boolean = true): ConfigurableTypedRootQuery<E, ID, R>
+
+    fun forUpdate(update: Boolean = true): ConfigurableTypedRootQuery<E, ID, R>
 }

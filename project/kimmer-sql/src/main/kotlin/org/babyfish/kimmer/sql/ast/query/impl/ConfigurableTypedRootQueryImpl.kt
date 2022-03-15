@@ -10,8 +10,8 @@ import org.babyfish.kimmer.sql.ast.query.selectable.RootSelectable
 import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedRootQuery
 import org.babyfish.kimmer.sql.ast.query.TypedRootQuery
 import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
-import org.babyfish.kimmer.sql.runtime.JdbcExecutorContext
-import org.babyfish.kimmer.sql.runtime.R2dbcExecutorContext
+import org.babyfish.kimmer.sql.runtime.JdbcSelector
+import org.babyfish.kimmer.sql.runtime.R2dbcSelector
 import java.lang.IllegalStateException
 
 internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
@@ -88,20 +88,28 @@ internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
             )
         }
 
+    override fun forUpdate(update: Boolean): ConfigurableTypedRootQuery<E, ID, R> =
+        if (data.forUpdate == update) {
+            this
+        } else {
+            ConfigurableTypedRootQueryImpl(
+                data = data.copy(forUpdate = update),
+                baseQuery = baseQuery
+            )
+        }
+
     @Suppress("UNCHECKED_CAST")
     override fun execute(con: java.sql.Connection): List<R> {
         val sqlClient = baseQuery.sqlClient
         val (sql, variables) = preExecute(JdbcSqlBuilder(sqlClient))
-        val executor = sqlClient.jdbcExecutor
-        return executor(JdbcExecutorContext(con, sqlClient, data.selections, sql, variables)) as List<R>
+        return JdbcSelector(sqlClient, data.selections).select(con, sql, variables) as List<R>
     }
 
     @Suppress("UNCHECKED_CAST")
     override suspend fun execute(con: io.r2dbc.spi.Connection): List<R> {
         val sqlClient = baseQuery.sqlClient
         val (sql, variables) = preExecute(R2dbcSqlBuilder(sqlClient))
-        val executor = sqlClient.r2dbcExecutor
-        return executor(R2dbcExecutorContext(con, sqlClient, data.selections, sql, variables)) as List<R>
+        return R2dbcSelector(sqlClient, data.selections).select(con, sql, variables) as List<R>
     }
 
     private fun preExecute(builder: AbstractSqlBuilder): Pair<String, List<Any>> {

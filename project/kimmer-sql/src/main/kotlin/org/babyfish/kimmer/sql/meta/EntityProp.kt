@@ -1,6 +1,7 @@
 package org.babyfish.kimmer.sql.meta
 
 import org.babyfish.kimmer.meta.ImmutableProp
+import org.babyfish.kimmer.sql.meta.config.IdGenerator
 import org.babyfish.kimmer.sql.meta.config.Storage
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -40,4 +41,8 @@ interface EntityProp {
     val scalarProvider: ScalarProvider<*, *>?
 
     val storage: Storage?
+
+    val isVersion: Boolean
+
+    val idGenerator: IdGenerator?
 }

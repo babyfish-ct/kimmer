@@ -1,5 +1,6 @@
 package org.babyfish.kimmer.sql.impl
 
+import org.babyfish.kimmer.sql.Entities
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.ast.Executable
@@ -19,8 +20,8 @@ internal class SqlClientImpl(
     override val entityTypeMap: Map<KClass<out Entity<*>>, EntityType>,
     override val scalarProviderMap: Map<KClass<*>, ScalarProvider<*, *>>,
     override val dialect: Dialect,
-    internal val jdbcExecutor: JdbcExecutor,
-    internal val r2dbcExecutor: R2dbcExecutor
+    override val jdbcExecutor: JdbcExecutor,
+    override val r2dbcExecutor: R2dbcExecutor
 ) : SqlClient {
 
     override fun <E: Entity<ID>, ID: Comparable<ID>, R> createQuery(
@@ -49,6 +50,9 @@ internal class SqlClientImpl(
             freeze()
         }
 
-    override val entities: SqlClient.Entities
-        get() = TODO("Not yet implemented")
+    override val entities: Entities =
+        EntitiesImpl(this)
+
+//    override val trigger: Trigger
+//        get() = TODO("Not yet implemented")
 }

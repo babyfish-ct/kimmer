@@ -79,22 +79,22 @@ fun Expression<String>.ilike(
     LikeExpression(this, value, true, likeMode)
 
 
-infix fun <T: Comparable<T>> Expression<T>.eq(
+infix fun <T: Any> Expression<T>.eq(
     value: T
 ): NonNullExpression<Boolean> = eq(value(value))
 
-infix fun <T: Comparable<T>> Expression<T>.eq(
+infix fun <T: Any> Expression<T>.eq(
     other: Expression<T>
 ): NonNullExpression<Boolean> =
     ComparisonExpression("=", this, other)
 
 
-infix fun <T: Comparable<T>> Expression<T>.ne(
+infix fun <T: Any> Expression<T>.ne(
     value: T
 ): NonNullExpression<Boolean> =
     ne(value(value))
 
-infix fun <T: Comparable<T>> Expression<T>.ne(
+infix fun <T: Any> Expression<T>.ne(
     other: Expression<T>
 ): NonNullExpression<Boolean> =
     ComparisonExpression("<>", this, other)

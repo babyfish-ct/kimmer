@@ -8,8 +8,8 @@ import org.babyfish.kimmer.sql.ast.SqlBuilder
 import org.babyfish.kimmer.sql.ast.query.TypedRootQuery
 import org.babyfish.kimmer.sql.ast.AstVisitor
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
-import org.babyfish.kimmer.sql.runtime.JdbcExecutorContext
-import org.babyfish.kimmer.sql.runtime.R2dbcExecutorContext
+import org.babyfish.kimmer.sql.runtime.JdbcSelector
+import org.babyfish.kimmer.sql.runtime.R2dbcSelector
 
 internal class MergedTypedRootQueryImpl<R>(
     private val sqlClient: SqlClientImpl,
@@ -38,15 +38,13 @@ internal class MergedTypedRootQueryImpl<R>(
     @Suppress("UNCHECKED_CAST")
     override fun execute(con: java.sql.Connection): List<R> {
         val (sql, variables) = preExecute(JdbcSqlBuilder(sqlClient))
-        val executor = sqlClient.jdbcExecutor
-        return executor(JdbcExecutorContext(con, sqlClient, selections, sql, variables)) as List<R>
+        return JdbcSelector(sqlClient, selections).select(con, sql, variables) as List<R>
     }
 
     @Suppress("UNCHECKED_CAST")
     override suspend fun execute(con: io.r2dbc.spi.Connection): List<R> {
         val (sql, variables) = preExecute(R2dbcSqlBuilder(sqlClient))
-        val executor = sqlClient.r2dbcExecutor
-        return executor(R2dbcExecutorContext(con, sqlClient, selections, sql, variables)) as List<R>
+        return R2dbcSelector(sqlClient, selections).select(con, sql, variables) as List<R>
     }
 
     override fun renderTo(builder: SqlBuilder) {

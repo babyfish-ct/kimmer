@@ -87,11 +87,15 @@ internal fun ClassVisitor.writeCopyConstructor(type: ImmutableType) {
                     Type.getMethodDescriptor(getter),
                     true
                 )
+                if (getter.returnType !== prop.returnType.java) {
+
+                    visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(prop.returnType.java))
+                }
                 visitFieldInsn(
                     Opcodes.PUTFIELD,
                     implInternalName,
                     prop.name,
-                    Type.getDescriptor(getter.returnType)
+                    Type.getDescriptor(prop.returnType.java)
                 )
             }
         }

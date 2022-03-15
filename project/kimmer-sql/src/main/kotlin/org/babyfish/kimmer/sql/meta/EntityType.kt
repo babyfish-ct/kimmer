@@ -22,6 +22,8 @@ interface EntityType {
 
     val idProp: EntityProp
 
+    val versionProp: EntityProp?
+
     val declaredProps: Map<String, EntityProp>
 
     val props: Map<String, EntityProp>

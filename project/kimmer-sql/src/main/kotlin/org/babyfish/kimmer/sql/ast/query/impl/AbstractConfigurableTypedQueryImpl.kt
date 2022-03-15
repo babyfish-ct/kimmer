@@ -59,6 +59,9 @@ internal abstract class AbstractConfigurableTypedQueryImpl<E, ID, R>(
                 ctx.build()
             }
         }
+        if (data.forUpdate) {
+            builder.sql(" for update")
+        }
     }
 
     override fun accept(visitor: AstVisitor) {

@@ -6,10 +6,7 @@ import org.babyfish.kimmer.sql.MappingException
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
 import org.babyfish.kimmer.sql.meta.ScalarProvider
-import org.babyfish.kimmer.sql.meta.config.Column
-import org.babyfish.kimmer.sql.meta.config.Formula
-import org.babyfish.kimmer.sql.meta.config.MiddleTable
-import org.babyfish.kimmer.sql.meta.config.Storage
+import org.babyfish.kimmer.sql.meta.config.*
 import org.babyfish.kimmer.sql.meta.impl.EntityMappingBuilderImpl
 import org.babyfish.kimmer.sql.meta.impl.ResolvingPhase
 import org.babyfish.kimmer.sql.spi.databaseIdentifier
@@ -29,6 +26,10 @@ open class EntityPropImpl(
 
     private var _storage: Storage? = null
 
+    private var _version: Boolean = false
+
+    private var _idGenerator: IdGenerator? = null
+
     private var _targetType: EntityType? = null
 
     override val immutableProp: ImmutableProp =
@@ -45,6 +46,12 @@ open class EntityPropImpl(
 
     override val storage: Storage?
         get() = _storage
+
+    override val isVersion: Boolean
+        get() = _version
+
+    override val idGenerator: IdGenerator?
+        get() = _idGenerator
 
     override val returnType: KClass<*>
         get() = immutableProp.returnType
@@ -90,7 +97,38 @@ open class EntityPropImpl(
         if (isReference && storage is Formula<*, *, *>) {
             throw MappingException("reference association '$kotlinProp' does not accept formula")
         }
+        if (storage is Column && storage.onDelete != OnDeleteAction.NONE) {
+            if (!isReference) {
+                throw MappingException("Cannot set 'onDelete' from '$kotlinProp' because it is not reference")
+            }
+            if (storage.onDelete == OnDeleteAction.SET_NULL && !isNullable) {
+                throw MappingException("Cannot set 'onDelete' to 'SET_NULL' from '$kotlinProp' because it is not nullable")
+            }
+        }
         _storage = storage
+    }
+
+    internal fun setVersion() {
+        if (isId) {
+            throw MappingException("Cannot configure id property '$this' as version property")
+        }
+        if (targetType !== null) {
+            throw MappingException("Cannot configure association property '$this' as version property")
+        }
+        if (returnType != Int::class) {
+            throw MappingException("Cannot configure '$this' as version property because its type is not integer")
+        }
+        if (isNullable) {
+            throw MappingException("Cannot configure '$this' as version property because its is nullable")
+        }
+        _version = true
+    }
+
+    internal fun setIdGenerator(idGenerator: IdGenerator?) {
+        if (!isId) {
+            throw MappingException("Cannot set id generator for non-id property")
+        }
+        _idGenerator = idGenerator
     }
 
     internal fun resolve(builder: EntityMappingBuilderImpl, phase: ResolvingPhase) {

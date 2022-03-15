@@ -1,6 +1,5 @@
 package org.babyfish.kimmer.sql.runtime.dialect
 
-import org.babyfish.kimmer.sql.runtime.Dialect
 import org.babyfish.kimmer.sql.runtime.PaginationContext
 
 class OracleDialect : DefaultDialect() {
@@ -25,4 +24,7 @@ class OracleDialect : DefaultDialect() {
         sql(") core__ where rownum <= ")
         variable(offset + limit)
     }
+
+    override fun idFromSequenceSql(sequenceName: String): String =
+        "select $sequenceName.nextval from dual"
 }

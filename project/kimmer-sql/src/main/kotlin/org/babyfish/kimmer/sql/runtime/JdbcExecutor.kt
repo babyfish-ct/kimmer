@@ -1,49 +1,44 @@
 package org.babyfish.kimmer.sql.runtime
 
-import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.ast.DbNull
-import org.babyfish.kimmer.sql.ast.Selection
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.sql.Connection
-import java.sql.Types
+import java.sql.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.reflect.KClass
 
-typealias JdbcExecutor = JdbcExecutorContext.() -> List<Any?>
+interface JdbcExecutor {
 
-data class JdbcExecutorContext internal constructor(
-    val connection: Connection,
-    internal val sqlClient: SqlClient,
-    internal val selections: List<Selection<*>>,
-    val sql: String,
-    val variables: List<Any>
-)
-
-val defaultJdbcExecutor: JdbcExecutor = {
-    defaultImpl()
+    fun <R> execute(
+        con: Connection,
+        sql: String,
+        variables: List<Any>,
+        block: PreparedStatement.() -> R
+    ): R
 }
 
-private fun JdbcExecutorContext.defaultImpl(): List<Any?> =
-    connection.prepareStatement(sql).use { stmt ->
-        for (index in variables.indices) {
-            val variable = variables[index]
-            if (variable is DbNull) {
-                stmt.setNull(index + 1, toJdbcType(variable.type))
-            } else {
-                stmt.setObject(index + 1, variable)
+object DefaultJdbcExecutor: JdbcExecutor {
+
+    override fun <R> execute(
+        con: Connection,
+        sql: String,
+        variables: List<Any>,
+        block: PreparedStatement.() -> R
+    ): R =
+        con.prepareStatement(sql).use { stmt ->
+            for (index in variables.indices) {
+                val variable = variables[index]
+                if (variable is DbNull) {
+                    stmt.setNull(index + 1, toJdbcType(variable.type))
+                } else {
+                    stmt.setObject(index + 1, variable)
+                }
             }
+            stmt.block()
         }
-        stmt.executeQuery().use { rs ->
-            val rows = mutableListOf<Any?>()
-            while (rs.next()) {
-                rows += JdbcResultMapper(sqlClient, rs).map(selections)
-            }
-            rows
-        }
-    }
+}
 
 private fun toJdbcType(type: KClass<*>): Int =
     when (type) {

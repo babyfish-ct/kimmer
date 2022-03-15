@@ -239,7 +239,7 @@ internal class LikeExpression(
     }
 }
 
-internal class ComparisonExpression<T: Comparable<T>>(
+internal class ComparisonExpression<T: Any>(
     private val operator: String,
     private val left: Expression<T>,
     private val right: Expression<T>

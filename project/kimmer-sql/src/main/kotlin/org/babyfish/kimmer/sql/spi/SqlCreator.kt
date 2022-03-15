@@ -11,8 +11,8 @@ import org.babyfish.kimmer.sql.runtime.dialect.DefaultDialect
 
 fun createSqlClient(
     dialect: Dialect? = null,
-    jdbcExecutor: JdbcExecutor = defaultJdbcExecutor,
-    r2dbcExecutor: R2dbcExecutor = defaultR2dbcExecutor,
+    jdbcExecutor: JdbcExecutor = DefaultJdbcExecutor,
+    r2dbcExecutor: R2dbcExecutor = DefaultR2dbcExecutor,
     metaFactory: MetaFactory? = null,
     block: EntityMappingBuilder.() -> Unit
 ): SqlClient {

@@ -35,6 +35,8 @@ open class EntityTypeImpl(
 
     private var _idProp: EntityProp? = null
 
+    private var _versionProp: EntityProp? = null
+
     private var _tableName: String? = null
 
     private var _expectedPhase = ResolvingPhase.SUPER_TYPE.ordinal
@@ -64,6 +66,9 @@ open class EntityTypeImpl(
     override val idProp: EntityProp
         get() = _idProp ?: error("Id property has not been resolved")
 
+    override val versionProp: EntityProp?
+        get() = _versionProp
+
     override val declaredProps: Map<String, EntityProp>
         get() = mutableDeclaredProps
 
@@ -90,6 +95,7 @@ open class EntityTypeImpl(
                 ResolvingPhase.DECLARED_PROPS -> resolveDeclaredProps(builder)
                 ResolvingPhase.PROPS -> resolveProps(builder)
                 ResolvingPhase.ID_PROP -> resolveIdProp()
+                ResolvingPhase.VERSION_PROP -> resolveVersionProp()
                 ResolvingPhase.ON_INITIALIZE_SPI -> onInitialize()
                 else -> resolvePropDetail(builder, phase)
             }
@@ -176,6 +182,30 @@ open class EntityTypeImpl(
                 .first { it.isId }
         _idProp = idProp
         return idProp
+    }
+
+    private fun resolveVersionProp(): EntityProp? {
+        var superVersionProp = _superType?.resolveVersionProp()
+        val declaredVersionProp = declaredProps
+            .values
+            .filter { it.isVersion }
+            .also {
+                if (it.size > 1) {
+                    throw MappingException("Conflict version properties: ${it.joinToString()}")
+                }
+            }
+            .firstOrNull()
+        val versionProp =
+            if (superVersionProp !== null) {
+                if (declaredVersionProp !== null) {
+                    throw MappingException("Conflict version properties: $superVersionProp, $declaredVersionProp")
+                }
+                superVersionProp
+            } else {
+                declaredVersionProp
+            }
+        _versionProp = versionProp
+        return versionProp
     }
 
     protected open fun onInitialize() {}

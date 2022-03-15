@@ -4,9 +4,6 @@ import org.babyfish.kimmer.sql.runtime.PaginationContext
 
 class MysqlDialect: DefaultDialect() {
 
-    override val updateJoin: UpdateJoin?
-        get() = UpdateJoin(true, UpdateJoin.From.UNNECESSARY)
-
     override fun pagination(ctx: PaginationContext) {
         ctx.apply {
             origin()
@@ -16,4 +13,10 @@ class MysqlDialect: DefaultDialect() {
             variable(limit)
         }
     }
+
+    override val updateJoin: UpdateJoin?
+        get() = UpdateJoin(true, UpdateJoin.From.UNNECESSARY)
+
+    override val lastIdentitySql: String
+        get() = "select last_insert_id()"
 }

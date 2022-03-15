@@ -261,4 +261,4 @@ internal class R2dbcSqlBuilder(
         R2dbcSqlBuilder(sqlClient, this)
 }
 
-internal data class DbNull(val type: KClass<*>)
+data class DbNull(val type: KClass<*>)

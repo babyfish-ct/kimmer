@@ -24,8 +24,8 @@ internal inline fun asyncDraftImplInternalName(immutableType: ImmutableType): St
 private inline fun internalName(immutableType: ImmutableType, suffix: String): String =
     "org/babyfish/kimmer/runtime/asm/${immutableType.simpleName}{$suffix}${immutableType.qualifiedName.hashCode()}"
 
-internal inline fun loadedName(type: ImmutableProp): String =
-    "${type.name}{Loaded}"
+internal inline fun loadedName(prop: ImmutableProp): String =
+    "${prop.name}{Loaded}"
 
 internal inline fun draftContextName(): String =
     "{draftContext}"

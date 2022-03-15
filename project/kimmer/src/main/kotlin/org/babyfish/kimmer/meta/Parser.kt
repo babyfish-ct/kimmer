@@ -175,6 +175,9 @@ internal class TypeImpl(
             )
         }
     }
+
+    override fun toString(): String =
+        kotlinType.qualifiedName!!
 }
 
 private class PropImpl(

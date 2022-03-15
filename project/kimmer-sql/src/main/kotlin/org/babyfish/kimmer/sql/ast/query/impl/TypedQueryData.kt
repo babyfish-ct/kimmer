@@ -8,5 +8,6 @@ internal data class TypedQueryData(
     val distinct: Boolean = false,
     val limit: Int = Int.MAX_VALUE,
     val offset: Int = 0,
-    val withoutSortingAndPaging: Boolean = false
+    val withoutSortingAndPaging: Boolean = false,
+    val forUpdate: Boolean = false
 )
