@@ -32,7 +32,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                 keyProps(BookStore::name)
                 createAttachingObject()
             }
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql("select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE from BOOK_STORE as tb_1_ where tb_1_.NAME = $1")
                 variables("TURING")
@@ -107,7 +107,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                     website = "http://www.oreilly.com"
                 }
             }
-        ).executeAndExpect {
+        ).executeAndExpectResult {
             statement {
                 sql("update BOOK_STORE set WEBSITE = $1 where ID = $2")
                 variables("http://www.oreilly.com", oreillyId)
@@ -189,7 +189,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                 keyProps(Book::name, Book::edition)
                 createAttachingObject()
             }
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql("select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE from BOOK_STORE as tb_1_ where tb_1_.NAME = $1")
                 variables("TURING")
@@ -313,7 +313,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                 keyProps(Book::name, Book::edition)
                 createAttachingObject()
             }
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql("select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE from BOOK_STORE as tb_1_ where tb_1_.NAME = $1")
                 variables("O'REILLY")
@@ -515,7 +515,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                 keyProps(Author::firstName, Author::lastName)
                 createAttachingObject()
             }
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql {
                     """select tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
@@ -656,7 +656,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                 keyProps(Author::firstName, Author::lastName)
                 createAttachingObject()
             }
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql {
                     """select tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
@@ -831,7 +831,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                 keyProps(Book::name, Book::edition)
                 createAttachingObject()
             }
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql {
                     """select 
@@ -968,7 +968,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                 keyProps(Book::name, Book::edition)
                 createAttachingObject()
             }
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql {
                     """select 

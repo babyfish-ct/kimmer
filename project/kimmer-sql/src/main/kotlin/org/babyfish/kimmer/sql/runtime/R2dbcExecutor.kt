@@ -1,13 +1,11 @@
 package org.babyfish.kimmer.sql.runtime
 
 import io.r2dbc.spi.Connection
+import io.r2dbc.spi.R2dbcException
 import io.r2dbc.spi.Result
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
-import org.babyfish.kimmer.sql.SqlClient
+import org.babyfish.kimmer.sql.ExecutionException
 import org.babyfish.kimmer.sql.ast.DbNull
-import org.babyfish.kimmer.sql.ast.Selection
 
 interface R2dbcExecutor {
 
@@ -36,10 +34,14 @@ object DefaultR2dbcExecutor: R2dbcExecutor {
                 statement.bind(index, variable)
             }
         }
-        return statement
-            .execute()
-            .awaitSingle()
-            .block()
+        return try {
+            statement
+                .execute()
+                .awaitSingle()
+                .block()
+        } catch (ex: R2dbcException) {
+            throw ExecutionException("Cannot execute SQL [sql: $sql, variables: $variables]", ex)
+        }
     }
 }
 

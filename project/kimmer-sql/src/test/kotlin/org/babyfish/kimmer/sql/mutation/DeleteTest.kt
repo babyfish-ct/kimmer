@@ -15,7 +15,7 @@ class DeleteTest : AbstractMutationTest() {
     fun testDeleteBookStore() {
         sqlClient.entities
             .deleteCommand(BookStore::class, manningId)
-            .executeAndExpect {
+            .executeAndExpectResult {
                 statement {
                     sql {
                         """select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE 
@@ -67,7 +67,7 @@ class DeleteTest : AbstractMutationTest() {
     fun testDeleteBookStoreOnDeleteSetNull() {
         sqlClient(OnDeleteAction.SET_NULL).entities
             .deleteCommand(BookStore::class, manningId)
-            .executeAndExpect {
+            .executeAndExpectResult {
                 statement {
                     sql {
                         """select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE 
@@ -161,7 +161,7 @@ class DeleteTest : AbstractMutationTest() {
     fun testDeleteBookStoreOnDeleteCascade() {
         sqlClient(OnDeleteAction.CASCADE).entities
             .deleteCommand(BookStore::class, manningId)
-            .executeAndExpect {
+            .executeAndExpectResult {
                 statement {
                     sql {
                         """select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE 
@@ -325,7 +325,7 @@ class DeleteTest : AbstractMutationTest() {
                 Book::class,
                 listOf(learningGraphQLId1, learningGraphQLId2, nonExistingId)
             )
-            .multipleExecuteAndExpect {
+            .executeAndExpectResults {
                 statement {
                     sql {
                         """select tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID 
@@ -446,7 +446,7 @@ class DeleteTest : AbstractMutationTest() {
     fun deleteAuthor() {
         sqlClient.entities
             .deleteCommand(Author::class, alexId)
-            .executeAndExpect {
+            .executeAndExpectResult {
                 statement {
                     sql {
                         """select 

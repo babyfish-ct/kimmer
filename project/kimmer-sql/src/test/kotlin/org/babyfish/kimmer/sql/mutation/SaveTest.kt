@@ -22,7 +22,7 @@ class SaveTest : AbstractMutationTest() {
                 id = newId
                 name = "TURING"
             }
-        ).executeAndExpect {
+        ).executeAndExpectResult {
             statement {
                 sql("select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE from BOOK_STORE as tb_1_ where tb_1_.ID = $1")
                 variables(newId)
@@ -53,7 +53,7 @@ class SaveTest : AbstractMutationTest() {
                 id = oreillyId
                 name = "TURING"
             }
-        ).executeAndExpect {
+        ).executeAndExpectResult {
             statement {
                 sql("select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE from BOOK_STORE as tb_1_ where tb_1_.ID = $1")
                 variables(oreillyId)
@@ -86,7 +86,7 @@ class SaveTest : AbstractMutationTest() {
             }
         ) {
             insertOnly()
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql("insert into BOOK_STORE(ID, NAME) values($1, $2)")
                 variables(newId, "TURING")
@@ -115,7 +115,7 @@ class SaveTest : AbstractMutationTest() {
             }
         ) {
             updateOnly()
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql("update BOOK_STORE set NAME = $1 where ID = $2")
                 variables("TURING", oreillyId)
@@ -145,7 +145,7 @@ class SaveTest : AbstractMutationTest() {
             }
         ) {
             keyProps(BookStore::name)
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql("select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE from BOOK_STORE as tb_1_ where tb_1_.NAME = $1")
                 variables("TURING")
@@ -178,7 +178,7 @@ class SaveTest : AbstractMutationTest() {
             }
         ) {
             keyProps(BookStore::name)
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql("select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE from BOOK_STORE as tb_1_ where tb_1_.NAME = $1")
                 variables("O'REILLY")
@@ -217,7 +217,7 @@ class SaveTest : AbstractMutationTest() {
             }
         ) {
             keyProps(Book::name)
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql("select tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID from BOOK as tb_1_ where tb_1_.NAME = $1")
                 variables("Kotlin in Action")
@@ -277,7 +277,7 @@ class SaveTest : AbstractMutationTest() {
             }
         ) {
             keyProps(Book::name, Book::edition)
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql(
                     "select tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID " +
@@ -346,7 +346,7 @@ class SaveTest : AbstractMutationTest() {
             }
         ) {
             keyProps(BookStore::name)
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql("select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE from BOOK_STORE as tb_1_ where tb_1_.NAME = $1")
                 variables("TURING")
@@ -451,7 +451,7 @@ class SaveTest : AbstractMutationTest() {
             }
         ) {
             keyProps(BookStore::name)
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql("select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE from BOOK_STORE as tb_1_ where tb_1_.NAME = $1")
                 variables("O'REILLY")
@@ -622,7 +622,7 @@ class SaveTest : AbstractMutationTest() {
             }
         ) {
             keyProps(Book::name)
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql("select tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID from BOOK as tb_1_ where tb_1_.NAME = $1")
                 variables("Kotlin in Action")
@@ -698,7 +698,7 @@ class SaveTest : AbstractMutationTest() {
             }
         ) {
             keyProps(Book::name, Book::edition)
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql(
                     "select tb_1_.ID, tb_1_.EDITION, tb_1_.NAME, tb_1_.PRICE, tb_1_.STORE_ID " +
@@ -805,7 +805,7 @@ class SaveTest : AbstractMutationTest() {
             }
         ) {
             keyProps(Author::firstName, Author::lastName)
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql {
                     """select 
@@ -891,7 +891,7 @@ class SaveTest : AbstractMutationTest() {
             }
         ) {
             keyProps(Author::firstName, Author::lastName)
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql {
                     """select 

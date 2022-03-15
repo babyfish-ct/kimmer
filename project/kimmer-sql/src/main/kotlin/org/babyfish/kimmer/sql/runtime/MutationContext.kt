@@ -84,6 +84,46 @@ internal open class MutationContext private constructor(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
+    suspend fun saveAssociationAsync(
+        entityProp: EntityProp,
+        block: suspend AssociationContext.() -> Unit
+    ) {
+        if (Immutable.isLoaded(entity, entityProp.immutableProp)) {
+            _associationMap.computeIfAbsent(entityProp) {
+                if (entityProp.targetType === null) {
+                    error("Internal bug: '$entityProp' is not association")
+                }
+                val targets = Immutable.get(entity, entityProp.immutableProp).let {
+                    when {
+                        it is List<*> -> it as List<Entity<*>>
+                        it === null -> emptyList()
+                        else -> listOf(it as Entity<*>)
+                    }
+                }
+                AssociationContext(entityProp, targets)
+            }.apply {
+                block()
+                close()
+            }
+        }
+    }
+
+    suspend fun deleteAssociationAsync(
+        entityProp: EntityProp,
+        block: suspend AssociationContext.() -> Unit
+    ) {
+        _associationMap.computeIfAbsent(entityProp) {
+            if (entityProp.targetType === null) {
+                error("Internal bug: '$entityProp' is not association")
+            }
+            AssociationContext(entityProp, emptyList())
+        }.apply {
+            block()
+            close()
+        }
+    }
+
     override val totalAffectedRowCount: Int
         get() = affectedRowCount + associationMap.values.sumOf { it.totalAffectedRowCount }
 
@@ -205,7 +245,7 @@ internal open class MutationContext private constructor(
         override val totalAffectedRowCount: Int
             get() =
                 targets.sumOf { it.totalAffectedRowCount } +
-                detachedTargets.sumOf { it.totalAffectedRowCount }
+                    detachedTargets.sumOf { it.totalAffectedRowCount }
 
         override fun toString(): String =
             "{totalAffectedRowCount:$totalAffectedRowCount," +

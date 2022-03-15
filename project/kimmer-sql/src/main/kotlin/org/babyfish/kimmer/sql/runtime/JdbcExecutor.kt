@@ -1,5 +1,6 @@
 package org.babyfish.kimmer.sql.runtime
 
+import org.babyfish.kimmer.sql.ExecutionException
 import org.babyfish.kimmer.sql.ast.DbNull
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -27,16 +28,20 @@ object DefaultJdbcExecutor: JdbcExecutor {
         variables: List<Any>,
         block: PreparedStatement.() -> R
     ): R =
-        con.prepareStatement(sql).use { stmt ->
-            for (index in variables.indices) {
-                val variable = variables[index]
-                if (variable is DbNull) {
-                    stmt.setNull(index + 1, toJdbcType(variable.type))
-                } else {
-                    stmt.setObject(index + 1, variable)
+        try {
+            con.prepareStatement(sql).use { stmt ->
+                for (index in variables.indices) {
+                    val variable = variables[index]
+                    if (variable is DbNull) {
+                        stmt.setNull(index + 1, toJdbcType(variable.type))
+                    } else {
+                        stmt.setObject(index + 1, variable)
+                    }
                 }
+                stmt.block()
             }
-            stmt.block()
+        } catch (ex: SQLException) {
+            throw ExecutionException("Cannot execute SQL [sql: $sql, variables: $variables]", ex)
         }
 }
 

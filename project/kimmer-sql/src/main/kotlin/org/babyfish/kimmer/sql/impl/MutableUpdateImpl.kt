@@ -1,5 +1,6 @@
 package org.babyfish.kimmer.sql.impl
 
+import kotlinx.coroutines.reactive.awaitSingle
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ExecutionException
 import org.babyfish.kimmer.sql.ast.*
@@ -76,18 +77,18 @@ internal class MutableUpdateImpl<E: Entity<ID>, ID: Comparable<ID>>(
         val builder = JdbcSqlBuilder(sqlClient)
         renderTo(builder)
         val (sql, variables) = builder.build()
-        println(sql)
-        println(variables)
-        return 0
+        return sqlClient.jdbcExecutor.execute(con, sql, variables) {
+            executeUpdate()
+        }
     }
 
     override suspend fun execute(con: io.r2dbc.spi.Connection): Int {
         val builder = R2dbcSqlBuilder(sqlClient)
         renderTo(builder)
         val (sql, variables) = builder.build()
-        println(sql)
-        println(variables)
-        return 0
+        return sqlClient.r2dbcExecutor.execute(con, sql, variables) {
+            rowsUpdated.awaitSingle()
+        }
     }
 
     override fun accept(visitor: AstVisitor) {
@@ -171,7 +172,7 @@ internal class MutableUpdateImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 UpdateJoin.From.AS_JOIN -> {
                     sql(" from ")
                     table.childTableMap.values.forEachIndexed { index, child ->
-                        if (index !== 0) {
+                        if (index != 0) {
                             sql(", ")
                         }
                         child.renderJoinAsFrom(this, TableImpl.RenderMode.FROM_ONLY)
@@ -192,7 +193,7 @@ internal class MutableUpdateImpl<E: Entity<ID>, ID: Comparable<ID>>(
     }
 
     private fun AbstractSqlBuilder.renderPredicates() {
-        var sp: String = " where "
+        var sp = " where "
         if (sqlClient.dialect.updateJoin?.from == UpdateJoin.From.AS_JOIN &&
             table.childTableMap.values.any { isTableUsed(it) }
         ) {
@@ -257,7 +258,7 @@ internal class MutableUpdateImpl<E: Entity<ID>, ID: Comparable<ID>>(
                     table.isOuterJoin &&
                     dialect.updateJoin?.from == UpdateJoin.From.AS_JOIN) {
                     throw ExecutionException(
-                        "Internal bug: The first level table joins cannot be outer join " +
+                        "The first level table joins cannot be outer join " +
                             "because current dialect '${dialect::class.qualifiedName}' " +
                             "indicates that the first level table joins in update statement " +
                             "must be rendered as 'from' clause, " +

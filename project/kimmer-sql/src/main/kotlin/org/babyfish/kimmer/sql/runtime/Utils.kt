@@ -1,8 +1,15 @@
 package org.babyfish.kimmer.sql.runtime
 
+import io.r2dbc.spi.Result
+import io.r2dbc.spi.Row
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.asFlow
 import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.ExecutionException
 import org.babyfish.kimmer.sql.meta.EntityProp
+import java.sql.PreparedStatement
+import java.sql.ResultSet
 
 internal const val JDBC_BASE_INDEX = 1
 
@@ -43,3 +50,26 @@ internal fun <E> List<E>.toLimitString(
         transform = transform
     )
 }
+
+internal fun <R> PreparedStatement.mapRows(block: ResultSet.() -> R): List<R> =
+    executeQuery().use {
+        mutableListOf<R>().apply {
+            while (it.next()) {
+                this += it.block()
+            }
+        }
+    }
+
+@Suppress("UNCHECKED_CAST")
+internal suspend fun <R> Result.mapRows(block: Row.() -> R): List<R> =
+    map { row, _ ->
+        row.block() ?: Null // Why "asFlow" requires "T: Any"?
+    }
+    .asFlow()
+    .toList()
+    .map { if (it === Null) null else it } as List<R>
+
+private object Null
+
+internal fun Row.getObject(index: Int): Any =
+    get(index) ?: ExecutionException("The value of column $index should not be null")

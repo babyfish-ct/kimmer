@@ -1,5 +1,6 @@
 package org.babyfish.kimmer.sql.impl
 
+import kotlinx.coroutines.reactive.awaitSingle
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.JdbcSqlBuilder
@@ -47,18 +48,18 @@ internal class MutableDeleteImpl<E: Entity<ID>, ID: Comparable<ID>>(
         val builder = JdbcSqlBuilder(sqlClient)
         renderTo(builder)
         val (sql, variables) = builder.build()
-        println(sql)
-        println(variables)
-        return 0
+        return sqlClient.jdbcExecutor.execute(con, sql, variables) {
+            executeUpdate()
+        }
     }
 
     override suspend fun execute(con: io.r2dbc.spi.Connection): Int {
         val builder = R2dbcSqlBuilder(sqlClient)
         renderTo(builder)
         val (sql, variables) = builder.build()
-        println(sql)
-        println(variables)
-        return 0
+        return sqlClient.r2dbcExecutor.execute(con, sql, variables) {
+            rowsUpdated.awaitSingle()
+        }
     }
 
     override fun accept(visitor: AstVisitor) {
@@ -70,7 +71,7 @@ internal class MutableDeleteImpl<E: Entity<ID>, ID: Comparable<ID>>(
     private fun renderTo(builder: SqlBuilder) {
         accept(UseTableVisitor(builder as AbstractSqlBuilder))
         builder.apply {
-            sql("delete ")
+            sql("delete")
             table.renderTo(builder)
             var sp = " where "
             predicates.forEach {

@@ -72,7 +72,7 @@ class SaveListTest: AbstractMutationTest() {
                 keyProps(Author::firstName, Author::lastName)
                 createAttachingObject()
             }
-        }.multipleExecuteAndExpect {
+        }.executeAndExpectResults {
             statement {
                 sql("select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE from BOOK_STORE as tb_1_ where tb_1_.NAME = $1")
                 variables("TURING")

@@ -10,12 +10,8 @@ internal class JdbcSelector(
 ) {
     fun select(con: Connection, sql: String, variables: List<Any>): List<Any?> =
         sqlClient.jdbcExecutor.execute(con, sql, variables) {
-            executeQuery().use { rs ->
-                val rows = mutableListOf<Any?>()
-                while (rs.next()) {
-                    rows += JdbcResultMapper(sqlClient, rs).map(selections)
-                }
-                rows
+            mapRows {
+                JdbcResultMapper(sqlClient, this).map(selections)
             }
         }
 }

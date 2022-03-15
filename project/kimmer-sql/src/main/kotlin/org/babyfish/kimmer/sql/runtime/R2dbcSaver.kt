@@ -1,22 +1,23 @@
 package org.babyfish.kimmer.sql.runtime
 
+import kotlinx.coroutines.reactive.awaitSingle
 import org.babyfish.kimmer.Draft
 import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.produce
 import org.babyfish.kimmer.sql.*
-import org.babyfish.kimmer.sql.ast.JdbcSqlBuilder
+import org.babyfish.kimmer.sql.ast.R2dbcSqlBuilder
 import org.babyfish.kimmer.sql.ast.eq
 import org.babyfish.kimmer.sql.meta.config.*
-import java.sql.Connection
+import io.r2dbc.spi.Connection
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
-internal class JdbcSaver(
+internal class R2dbcSaver(
     private val sqlClient: SqlClient,
     private val con: Connection
 ) {
-    fun save(entity: Entity<*>, mutationOptions: MutationOptions): MutationContext {
+    suspend fun save(entity: Entity<*>, mutationOptions: MutationOptions): MutationContext {
         val ctx = MutationContext(entity, mutationOptions)
         guaranteeFkParents(ctx)
         merge(ctx)
@@ -25,10 +26,10 @@ internal class JdbcSaver(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun guaranteeFkParents(ctx: MutationContext) {
+    private suspend fun guaranteeFkParents(ctx: MutationContext) {
         for (prop in ctx.mutationOptions.entityType.props.values) {
             if (prop.isReference && prop.storage is Column) {
-                ctx.saveAssociation(prop) {
+                ctx.saveAssociationAsync(prop) {
                     merge(targets[0])
                 }
             }
@@ -36,7 +37,7 @@ internal class JdbcSaver(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun merge(ctx: MutationContext) {
+    private suspend fun merge(ctx: MutationContext) {
 
         val entity = ctx.entity
         val saveOptions = ctx.mutationOptions
@@ -116,7 +117,7 @@ internal class JdbcSaver(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun insert(ctx: MutationContext) {
+    private suspend fun insert(ctx: MutationContext) {
         val entity = ctx.entity
         val saveOptions = ctx.mutationOptions
         val entityType = saveOptions.entityType
@@ -159,7 +160,7 @@ internal class JdbcSaver(
             throw ExecutionException("Cannot insert the entity '${entity}' with zero columns")
         }
 
-        val (sql, variables) = JdbcSqlBuilder(sqlClient)
+        val (sql, variables) = R2dbcSqlBuilder(sqlClient)
             .apply {
                 sql("insert into ")
                 sql(entityType.tableName)
@@ -202,14 +203,14 @@ internal class JdbcSaver(
                 sql(")")
             }.build()
 
-        sqlClient.jdbcExecutor.execute(con, sql, variables) {
-            executeUpdate()
+        sqlClient.r2dbcExecutor.execute(con, sql, variables) {
+            rowsUpdated.awaitSingle()
         }
         if (oldId === null) {
             val newId = insertId
-                ?: sqlClient.jdbcExecutor.execute(con, sqlClient.dialect.lastIdentitySql, emptyList()) {
+                ?: sqlClient.r2dbcExecutor.execute(con, sqlClient.dialect.lastIdentitySql, emptyList()) {
                     mapRows {
-                        val id = getObject(JDBC_BASE_INDEX)
+                        val id = getObject(R2DBC_BASE_INDEX)
                         convert(id, idProp.returnType)
                             ?: throw ExecutionException("Last id '$id' does not match the type of $idProp")
                     }
@@ -221,7 +222,7 @@ internal class JdbcSaver(
         ctx.type = MutationType.INSERT
     }
 
-    private fun update(
+    private suspend fun update(
         ctx: MutationContext,
         excludeKeyProps: Boolean,
         oldEntity: Entity<*>?
@@ -245,7 +246,7 @@ internal class JdbcSaver(
             .versionProp
             ?.takeIf { Immutable.isLoaded(entity, it.immutableProp) }
             ?.let { Immutable.get(entity, it.immutableProp) } as Int?
-        val (sql, variables) = JdbcSqlBuilder(sqlClient)
+        val (sql, variables) = R2dbcSqlBuilder(sqlClient)
             .apply {
                 sql("update ")
                 sql(entityType.tableName)
@@ -290,8 +291,8 @@ internal class JdbcSaver(
                 }
             }
             .build()
-        val affectedRowCount = sqlClient.jdbcExecutor.execute(con, sql, variables) {
-            executeUpdate()
+        val affectedRowCount = sqlClient.r2dbcExecutor.execute(con, sql, variables) {
+            rowsUpdated.awaitSingle()
         }
         if (affectedRowCount == 0) {
             if (version !== null) {
@@ -308,7 +309,7 @@ internal class JdbcSaver(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun mergeAssociations(
+    private suspend fun mergeAssociations(
         ctx: MutationContext
     ) {
         val entity = ctx.entity
@@ -326,7 +327,7 @@ internal class JdbcSaver(
             }
             val mappedBy = prop.mappedBy
             if (mappedBy !== null && mappedBy.storage is Column) {
-                ctx.saveAssociation(prop) {
+                ctx.saveAssociationAsync(prop) {
                     mergeChildTable(this)
                 }
             } else {
@@ -339,7 +340,7 @@ internal class JdbcSaver(
                         Triple(it.tableName, it.joinColumnName, it.targetJoinColumnName)
                     }
                 }
-                ctx.saveAssociation(prop) {
+                ctx.saveAssociationAsync(prop) {
                     mergeMiddleTable(
                         this,
                         middleTableName,
@@ -352,7 +353,7 @@ internal class JdbcSaver(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun mergeChildTable(
+    private suspend fun mergeChildTable(
         ctx: MutationContext.AssociationContext
     ) {
         val ownerType = ctx.entityProp.declaringType
@@ -377,7 +378,7 @@ internal class JdbcSaver(
             }
             merge(it)
         }
-        val (existingSql, existingVariables) = JdbcSqlBuilder(sqlClient)
+        val (existingSql, existingVariables) = R2dbcSqlBuilder(sqlClient)
             .apply {
                 sql("select ")
                 sql((targetType.idProp.storage as Column).name)
@@ -388,9 +389,9 @@ internal class JdbcSaver(
                 sql(" = ")
                 variable(ctx.owner.entity.id)
             }.build()
-        val existingTargetIds = sqlClient.jdbcExecutor.execute(con, existingSql, existingVariables) {
+        val existingTargetIds = sqlClient.r2dbcExecutor.execute(con, existingSql, existingVariables) {
             mapRows {
-                convert(getObject(JDBC_BASE_INDEX), targetType.idProp.returnType)
+                convert(getObject(R2DBC_BASE_INDEX), targetType.idProp.returnType)
                     ?: ExecutionException(
                         "The expected type of '${targetType.idProp}' is ${targetType.idProp.returnType}, " +
                             "but the value read from database does not match that type"
@@ -402,7 +403,7 @@ internal class JdbcSaver(
 
         if (detachedTargetIds.isNotEmpty()) {
             if (ctx.targetMutationOptions.deletable) {
-                JdbcDeleter(sqlClient, con).delete(ctx.detachedTargets)
+                R2dbcDeleter(sqlClient, con).delete(ctx.detachedTargets)
             } else {
                 if (!fkProp.isNullable) {
                     throw ExecutionException(
@@ -412,7 +413,7 @@ internal class JdbcSaver(
                             ctx.detachedTargets.toLimitString { it.entity.toString() }
                     )
                 }
-                val (sql, variables) = JdbcSqlBuilder(sqlClient)
+                val (sql, variables) = R2dbcSqlBuilder(sqlClient)
                     .apply {
                         sql("update ")
                         sql(targetType.tableName)
@@ -430,8 +431,8 @@ internal class JdbcSaver(
                         sql(")")
                     }
                     .build()
-                sqlClient.jdbcExecutor.execute(con, sql, variables) {
-                    if (executeUpdate() != ctx.detachedTargets.size) {
+                sqlClient.r2dbcExecutor.execute(con, sql, variables) {
+                    if (rowsUpdated.awaitSingle() != ctx.detachedTargets.size) {
                         throw ExecutionException("Concurrent modification error")
                     }
                 }
@@ -464,7 +465,7 @@ internal class JdbcSaver(
         }
     }
 
-    private fun mergeMiddleTable(
+    private suspend fun mergeMiddleTable(
         ctx: MutationContext.AssociationContext,
         middleTableName: String,
         joinColumnName: String,
@@ -474,7 +475,7 @@ internal class JdbcSaver(
             merge(it)
         }
         val targetType = ctx.entityProp.targetType!!
-        val (existingSql, existingVariables) = JdbcSqlBuilder(sqlClient)
+        val (existingSql, existingVariables) = R2dbcSqlBuilder(sqlClient)
             .apply {
                 sql("select ")
                 sql(targetJoinColumnName)
@@ -486,9 +487,9 @@ internal class JdbcSaver(
                 variable(ctx.owner.entity.id)
             }
             .build()
-        val existingTargetIds = sqlClient.jdbcExecutor.execute(con, existingSql, existingVariables) {
+        val existingTargetIds = sqlClient.r2dbcExecutor.execute(con, existingSql, existingVariables) {
             mapRows {
-                convert(getObject(JDBC_BASE_INDEX), targetType.idProp.returnType)
+                convert(getObject(R2DBC_BASE_INDEX), targetType.idProp.returnType)
                     ?: ExecutionException(
                         "The expected type of '${targetType.idProp}' is ${targetType.idProp.returnType}, " +
                             "but the value read from database does not match that type"
@@ -499,7 +500,7 @@ internal class JdbcSaver(
         ctx.detachByTargetIds(detachedTargetIds)
 
         if (detachedTargetIds.isNotEmpty()) {
-            val (sql, variables) = JdbcSqlBuilder(sqlClient)
+            val (sql, variables) = R2dbcSqlBuilder(sqlClient)
                 .apply {
                     sql("delete from ")
                     sql(middleTableName)
@@ -519,8 +520,8 @@ internal class JdbcSaver(
                     sql(")")
                 }
                 .build()
-            sqlClient.jdbcExecutor.execute(con, sql, variables) {
-                if (executeUpdate() != ctx.detachedTargets.size) {
+            sqlClient.r2dbcExecutor.execute(con, sql, variables) {
+                if (rowsUpdated.awaitSingle() != ctx.detachedTargets.size) {
                     throw ExecutionException("Concurrent modification error")
                 }
             }
@@ -529,7 +530,7 @@ internal class JdbcSaver(
 
         val attachedTargetIds = ctx.targets.map { it.entity.id } - existingTargetIds
         if (attachedTargetIds.isNotEmpty()) {
-            val (insertSql, insertVariables) = JdbcSqlBuilder(sqlClient)
+            val (insertSql, insertVariables) = R2dbcSqlBuilder(sqlClient)
                 .apply {
                     sql("insert into ")
                     sql(middleTableName)
@@ -550,8 +551,8 @@ internal class JdbcSaver(
                     }
                 }
                 .build()
-            sqlClient.jdbcExecutor.execute(con, insertSql, insertVariables) {
-                if (executeUpdate() != attachedTargetIds.size) {
+            sqlClient.r2dbcExecutor.execute(con, insertSql, insertVariables) {
+                if (rowsUpdated.awaitSingle() != attachedTargetIds.size) {
                     throw ExecutionException("Concurrent modification error")
                 }
             }

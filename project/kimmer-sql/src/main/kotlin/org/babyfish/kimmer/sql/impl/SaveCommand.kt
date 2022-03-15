@@ -4,6 +4,7 @@ import org.babyfish.kimmer.sql.*
 import org.babyfish.kimmer.sql.ast.Executable
 import org.babyfish.kimmer.sql.runtime.JdbcSaver
 import org.babyfish.kimmer.sql.runtime.MutationOptions
+import org.babyfish.kimmer.sql.runtime.R2dbcSaver
 
 internal class SaveCommand(
     private val sqlClient: SqlClient,
@@ -18,7 +19,6 @@ internal class SaveCommand(
 
     override suspend fun execute(
         con: io.r2dbc.spi.Connection
-    ): RootMutationResult {
-        TODO("Not yet implemented")
-    }
+    ): RootMutationResult =
+        R2dbcSaver(sqlClient, con).save(entity, mutationOptions)
 }

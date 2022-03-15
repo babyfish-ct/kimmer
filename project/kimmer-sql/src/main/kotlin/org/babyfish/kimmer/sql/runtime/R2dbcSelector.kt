@@ -17,14 +17,8 @@ internal class R2dbcSelector(
         variables: List<Any>
     ): List<Any?> =
         sqlClient.r2dbcExecutor.execute(con, sql, variables) {
-            map { row, _ ->
-                R2dbcResultMapper(sqlClient, row).map(selections)
-                    ?: Null // Why "asFlow" requires "T: Any"?
+            mapRows {
+                R2dbcResultMapper(sqlClient, this).map(selections)
             }
-            .asFlow()
-            .toList()
-            .map { if (it === Null) null else it }
         }
 }
-
-private object Null

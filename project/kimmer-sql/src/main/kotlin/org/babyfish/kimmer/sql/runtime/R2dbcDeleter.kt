@@ -1,25 +1,26 @@
 package org.babyfish.kimmer.sql.runtime
 
+import kotlinx.coroutines.reactive.awaitSingle
 import org.babyfish.kimmer.Draft
 import org.babyfish.kimmer.produce
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ExecutionException
 import org.babyfish.kimmer.sql.MutationType
 import org.babyfish.kimmer.sql.SqlClient
-import org.babyfish.kimmer.sql.ast.JdbcSqlBuilder
+import org.babyfish.kimmer.sql.ast.R2dbcSqlBuilder
 import org.babyfish.kimmer.sql.ast.valueIn
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import org.babyfish.kimmer.sql.meta.config.OnDeleteAction
-import java.sql.Connection
+import io.r2dbc.spi.Connection
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
-internal class JdbcDeleter(
+internal class R2dbcDeleter(
     private val sqlClient: SqlClient,
     private val con: Connection
 ) {
-    fun delete(
+    suspend fun delete(
         ids: Collection<Any>,
         mutationOptions: MutationOptions
     ): List<MutationContext> {
@@ -34,7 +35,7 @@ internal class JdbcDeleter(
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun delete(
+    suspend fun delete(
         contexts: Collection<MutationContext>
     ) {
         if (contexts.isEmpty()) {
@@ -68,8 +69,8 @@ internal class JdbcDeleter(
             .filter { it.isEntityInitialized }
             .takeIf { it.isNotEmpty() }
             ?.let { entityContexts ->
-                deleteAssociations(entityContexts, mutationOptions)
-                val (sql, variables) = JdbcSqlBuilder(sqlClient)
+                deleteAssociationAsyncs(entityContexts, mutationOptions)
+                val (sql, variables) = R2dbcSqlBuilder(sqlClient)
                     .apply {
                         sql("delete from ")
                         sql(entityType.tableName)
@@ -85,8 +86,8 @@ internal class JdbcDeleter(
                         sql(")")
                     }
                     .build()
-                sqlClient.jdbcExecutor.execute(con, sql, variables) {
-                    executeUpdate()
+                sqlClient.r2dbcExecutor.execute(con, sql, variables) {
+                    rowsUpdated.awaitSingle()
                 }
                 entityContexts.forEach {
                     it.type = MutationType.DELETE
@@ -102,7 +103,7 @@ internal class JdbcDeleter(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun deleteAssociations(
+    private suspend fun deleteAssociationAsyncs(
         contexts: List<MutationContext>,
         mutationOptions: MutationOptions
     ) {
@@ -129,7 +130,7 @@ internal class JdbcDeleter(
                 if (childGroupMap.isNotEmpty()) {
                     for (ctx in contexts) {
                         val targets = childGroupMap[ctx.entityId] ?: continue
-                        ctx.deleteAssociation(prop) {
+                        ctx.deleteAssociationAsync(prop) {
                             detachByTargets(targets)
                             handleChildTable(this)
                         }
@@ -145,7 +146,7 @@ internal class JdbcDeleter(
                         } else {
                             Triple(middleTable.tableName, middleTable.targetJoinColumnName, middleTable.joinColumnName)
                         }
-                    val (sql, variables) = JdbcSqlBuilder(sqlClient)
+                    val (sql, variables) = R2dbcSqlBuilder(sqlClient)
                         .apply {
                             sql("select ")
                             sql(joinColumnName)
@@ -165,10 +166,10 @@ internal class JdbcDeleter(
                             sql(")")
                         }
                         .build()
-                    val childGroupMap = sqlClient.jdbcExecutor.execute(con, sql, variables) {
+                    val childGroupMap = sqlClient.r2dbcExecutor.execute(con, sql, variables) {
                         mapRows {
-                            getObject(JDBC_BASE_INDEX) to
-                                getObject(JDBC_BASE_INDEX + 1)
+                            getObject(R2DBC_BASE_INDEX) to
+                                getObject(R2DBC_BASE_INDEX + 1)
                         }
                     }.groupBy({it.first}) {
                         it.second
@@ -176,7 +177,7 @@ internal class JdbcDeleter(
                     if (childGroupMap.isNotEmpty()) {
                         for (ctx in contexts) {
                             val targetIds = childGroupMap[ctx.entityId] ?: continue
-                            ctx.deleteAssociation(prop) {
+                            ctx.deleteAssociationAsync(prop) {
                                 detachByTargetIds(targetIds)
                                 handleMiddleTable(this, tableName, joinColumnName)
                             }
@@ -187,7 +188,7 @@ internal class JdbcDeleter(
         }
     }
 
-    private fun handleChildTable(
+    private suspend fun handleChildTable(
         ctx: MutationContext.AssociationContext
     ) {
         val childType = ctx.entityProp.targetType!!
@@ -202,7 +203,7 @@ internal class JdbcDeleter(
             )
         }
         if (fkColumn.onDelete == OnDeleteAction.SET_NULL) {
-            val (sql, variables) = JdbcSqlBuilder(sqlClient)
+            val (sql, variables) = R2dbcSqlBuilder(sqlClient)
                 .apply {
                     sql("update ")
                     sql(childType.tableName)
@@ -213,8 +214,8 @@ internal class JdbcDeleter(
                     sql(" = ")
                     variable(ctx.owner.entityId)
                 }.build()
-            sqlClient.jdbcExecutor.execute(con, sql, variables) {
-                if (executeUpdate() != ctx.detachedTargets.size) {
+            sqlClient.r2dbcExecutor.execute(con, sql, variables) {
+                if (rowsUpdated.awaitSingle() != ctx.detachedTargets.size) {
                     throw ExecutionException("Concurrent modification error")
                 }
             }
@@ -226,12 +227,12 @@ internal class JdbcDeleter(
         delete(ctx.detachedTargets)
     }
 
-    private fun handleMiddleTable(
+    private suspend fun handleMiddleTable(
         ctx: MutationContext.AssociationContext,
         tableName: String,
         joinColumnName: String
     ) {
-        val (sql, variables) = JdbcSqlBuilder(sqlClient)
+        val (sql, variables) = R2dbcSqlBuilder(sqlClient)
             .apply {
                 sql("delete from ")
                 sql(tableName)
@@ -241,8 +242,8 @@ internal class JdbcDeleter(
                 variable(ctx.owner.entityId)
             }
             .build()
-        sqlClient.jdbcExecutor.execute(con, sql, variables) {
-            if (executeUpdate() != ctx.detachedTargets.size) {
+        sqlClient.r2dbcExecutor.execute(con, sql, variables) {
+            if (rowsUpdated.awaitSingle() != ctx.detachedTargets.size) {
                 throw ExecutionException("Concurrent modification error")
             }
         }

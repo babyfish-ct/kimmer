@@ -1,64 +1,120 @@
 package org.babyfish.kimmer.sql.common
 
+import kotlinx.coroutines.runBlocking
 import org.babyfish.kimmer.sql.RootMutationResult
 import org.babyfish.kimmer.sql.ast.Executable
 import kotlin.reflect.KClass
-import kotlin.test.BeforeTest
 import kotlin.test.expect
 
 abstract class AbstractMutationTest : AbstractTest() {
 
-    @BeforeTest
-    fun restoreDatabase() {
-        initDatabase()
-    }
-
-    protected fun Executable<RootMutationResult>.executeAndExpect(
+    protected fun Executable<Int>.executeAndExpectRowCount(
+        rowCount: Int,
         block: ExpectDSL.() -> Unit
     ) {
         jdbc {
+            initJdbcDatabase(this)
+            clearExecutions()
+            val (affectedRowCount, throwable) = try {
+                execute(this) to null
+            } catch (ex: Throwable) {
+                0 to ex
+            }
+            if (throwable === null) {
+                expect(rowCount) { affectedRowCount }
+            }
+            assert(throwable, emptyList(), block)
+        }
+        runBlocking {
+            resetAutoIds()
+            r2dbc {
+                initR2dbcDatabase(this)
+                clearExecutions()
+                val (affectedRowCount, throwable) = try {
+                    execute(this) to null
+                } catch (ex: Throwable) {
+                    0 to ex
+                }
+                if (throwable === null) {
+                    expect(rowCount) { affectedRowCount }
+                }
+                assert(throwable, emptyList(), block)
+            }
+        }
+    }
+
+    protected fun Executable<RootMutationResult>.executeAndExpectResult(
+        block: ExpectDSLWithResult.() -> Unit
+    ) {
+        jdbc {
+            initJdbcDatabase(this)
             clearExecutions()
             val (results, throwable) = try {
                 listOf(execute(this)) to null
             } catch (ex: Throwable) {
                 emptyList<RootMutationResult>() to ex
             }
-            assert(results, throwable, block)
+            assert(throwable, results, block)
+        }
+        runBlocking {
+            resetAutoIds()
+            r2dbc {
+                initR2dbcDatabase(this)
+                clearExecutions()
+                val (results, throwable) = try {
+                    listOf(execute(this)) to null
+                } catch (ex: Throwable) {
+                    emptyList<RootMutationResult>() to ex
+                }
+                assert(throwable, results, block)
+            }
         }
     }
 
-    protected fun Executable<List<RootMutationResult>>.multipleExecuteAndExpect(
-        block: ExpectDSL.() -> Unit
+    protected fun Executable<List<RootMutationResult>>.executeAndExpectResults(
+        block: ExpectDSLWithResult.() -> Unit
     ) {
         jdbc {
+            initJdbcDatabase(this)
+            clearExecutions()
             clearExecutions()
             val (results, throwable) = try {
                 execute(this) to null
             } catch (ex: Throwable) {
                 emptyList<RootMutationResult>() to ex
             }
-            assert(results, throwable, block)
+            assert(throwable, results, block)
+        }
+        runBlocking {
+            resetAutoIds()
+            r2dbc {
+                initR2dbcDatabase(this)
+                clearExecutions()
+                val (results, throwable) = try {
+                    execute(this) to null
+                } catch (ex: Throwable) {
+                    emptyList<RootMutationResult>() to ex
+                }
+                assert(throwable, results, block)
+            }
         }
     }
 
     private fun assert(
-        results: List<RootMutationResult>,
         throwable: Throwable?,
-        block: ExpectDSL.() -> Unit
+        results: List<RootMutationResult>,
+        block: ExpectDSLWithResult.() -> Unit
     ) {
-        val dsl = ExpectDSL(executions, results, throwable)
+        val dsl = ExpectDSLWithResult(executions, throwable, results)
         dsl.block()
         dsl.close()
     }
 
-    protected class ExpectDSL(
+    protected open class ExpectDSL(
         private val executions: List<Execution>,
-        private val results: List<RootMutationResult>,
         private val throwable: Throwable?
     ) {
         private var statementCount = 0
-
-        private var resultCount = 0
 
         private var throwableChecked = false
 
@@ -67,6 +123,35 @@ abstract class AbstractMutationTest : AbstractTest() {
         ) {
             StatementDSL(statementCount, executions[statementCount++]).block()
         }
+
+        fun throwable(type: KClass<out Throwable>, block: () -> String) {
+            expect(true) { throwable !== null }
+            expect(type) { throwable!!::class }
+            expect(block().replace("\r", "").replace("\n", "")) {
+                throwable!!.message
+            }
+            throwableChecked = true
+        }
+
+        open fun close() {
+            expect(statementCount, "Error statement count") {
+                executions.size
+            }
+            if (throwable !== null) {
+                expect(true, "Error throwable count") {
+                    throwableChecked
+                }
+            }
+        }
+    }
+
+    protected class ExpectDSLWithResult(
+        executions: List<Execution>,
+        throwable: Throwable?,
+        private val results: List<RootMutationResult>
+    ): ExpectDSL(executions, throwable) {
+
+        private var resultCount = 0
 
         fun result(block: () -> String) {
             val index = resultCount++
@@ -79,26 +164,10 @@ abstract class AbstractMutationTest : AbstractTest() {
             }
         }
 
-        fun throwable(type: KClass<out Throwable>, block: () -> String) {
-            expect(true) { throwable !== null }
-            expect(type) { throwable!!::class }
-            expect(block().replace("\r", "").replace("\n", "")) {
-                throwable!!.message
-            }
-            throwableChecked = true
-        }
-
-        fun close() {
-            expect(statementCount, "Error statement count") {
-                executions.size
-            }
+        override fun close() {
+            super.close()
             expect(resultCount, "Error mutation result count") {
                 results.size
-            }
-            if (throwable !== null) {
-                expect(true, "Error throwable count") {
-                    throwableChecked
-                }
             }
         }
     }

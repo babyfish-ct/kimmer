@@ -24,7 +24,7 @@ class DeleteDetachedObjectTest : AbstractMutationTest() {
             list(BookStore::books) {
                 deleteDetachedObject()
             }
-        }.executeAndExpect {
+        }.executeAndExpectResult {
             statement {
                 sql("select tb_1_.ID, tb_1_.NAME, tb_1_.WEBSITE from BOOK_STORE as tb_1_ where tb_1_.ID = $1")
                 variables(manningId)

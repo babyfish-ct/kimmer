@@ -20,12 +20,12 @@ import org.babyfish.kimmer.sql.model.Gender
 import org.babyfish.kimmer.sql.runtime.*
 import org.babyfish.kimmer.sql.spi.createSqlClient
 import java.io.InputStreamReader
-import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.PreparedStatement
 import java.util.*
 import kotlin.reflect.KClass
-import kotlin.test.BeforeTest
+import kotlin.test.expect
+import kotlin.test.fail
 
 abstract class AbstractTest {
 
@@ -96,8 +96,7 @@ abstract class AbstractTest {
     protected val executions: List<Execution>
         get() = _executions
 
-    @BeforeTest
-    fun clearExecutions() {
+    protected fun clearExecutions() {
         _executions.clear()
     }
 
@@ -110,10 +109,16 @@ abstract class AbstractTest {
         return autoIds.get()
     }
 
+    protected fun resetAutoIds() {
+        autoIdMap.values.forEach {
+            it.reset()
+        }
+    }
+
     private inner class JdbcExecutorImpl: JdbcExecutor {
 
         override fun <R> execute(
-            con: Connection,
+            con: java.sql.Connection,
             sql: String,
             variables: List<Any>,
             block: PreparedStatement.() -> R
@@ -146,6 +151,10 @@ abstract class AbstractTest {
         var index = 0
 
         fun get(): Any = ids[index++]
+
+        fun reset() {
+            index = 0
+        }
     }
 
     protected class Execution(
@@ -188,28 +197,54 @@ abstract class AbstractTest {
         @JvmStatic
         protected fun initDatabase() {
             jdbc {
-                AbstractTest::class.java.classLoader.getResourceAsStream("TestDatabase.sql").use { stream ->
-                    val text = InputStreamReader(stream).readText()
-                    text
-                        .split(";")
-                        .filter { it.isNotBlank() }
-                        .forEach {
-                            createStatement().executeUpdate(it)
-                        }
-                }
+                initJdbcDatabase(this)
             }
-
             runBlocking {
                 r2dbc {
-                    AbstractTest::class.java.classLoader.getResourceAsStream("TestDatabase.sql").use { stream ->
-                        val text = InputStreamReader(stream ?: error("Cannot load embedded SQL")).readText()
-                        text
-                            .split(";")
-                            .filter { it.isNotBlank() }
-                            .forEach {
-                                createStatement(it).execute().awaitFirst()
-                            }
+                    initR2dbcDatabase(this)
+                }
+            }
+        }
+
+        @JvmStatic
+        protected fun initJdbcDatabase(con: java.sql.Connection) {
+            AbstractTest::class.java.classLoader.getResourceAsStream("TestDatabase.sql").use { stream ->
+                val text = InputStreamReader(stream).readText()
+                text
+                    .split(";")
+                    .filter { it.isNotBlank() }
+                    .forEach {
+                        con.createStatement().executeUpdate(it)
                     }
+            }
+        }
+
+        @JvmStatic
+        protected suspend fun initR2dbcDatabase(con: io.r2dbc.spi.Connection) {
+            AbstractTest::class.java.classLoader.getResourceAsStream("TestDatabase.sql").use { stream ->
+                val text = InputStreamReader(stream ?: error("Cannot load embedded SQL")).readText()
+                text
+                    .split(";")
+                    .filter { it.isNotBlank() }
+                    .forEach {
+                        con.createStatement(it).execute().awaitFirst()
+                    }
+            }
+        }
+
+        @JvmStatic
+        protected fun throwable(
+            type: KClass<out Throwable>,
+            throwableMessage: String,
+            block: () -> Unit
+        ) {
+            try {
+                block()
+                fail("Exception expected")
+            } catch (ex: Throwable) {
+                expect(type) { ex::class }
+                expect(throwableMessage.replace("\r", "").replace("\n", "")) {
+                    ex.message
                 }
             }
         }
