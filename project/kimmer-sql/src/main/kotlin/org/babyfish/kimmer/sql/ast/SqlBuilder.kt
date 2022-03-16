@@ -253,8 +253,7 @@ internal class R2dbcSqlBuilder(
 
     override fun onAppendVariable(value: Any) {
         variables += value
-        sql("$")
-        sql(variables.size.toString())
+        sql(sqlClient.dialect.r2dbcParameter(variables.size))
     }
 
     override fun createChildBuilder(): AbstractSqlBuilder =

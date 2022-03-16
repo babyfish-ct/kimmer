@@ -10,21 +10,30 @@ import org.babyfish.kimmer.sql.example.model.BookStore
 import org.babyfish.kimmer.sql.meta.config.Formula
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import org.babyfish.kimmer.sql.meta.enumProviderByString
-import org.babyfish.kimmer.sql.runtime.defaultJdbcExecutor
+import org.babyfish.kimmer.sql.runtime.DefaultJdbcExecutor
+import org.babyfish.kimmer.sql.runtime.JdbcExecutor
 import org.babyfish.kimmer.sql.spi.createSqlClient
 import java.io.InputStreamReader
 import java.sql.Connection
 import java.sql.DriverManager
+import java.sql.PreparedStatement
 import java.util.*
 
 object AppContext {
 
     val sqlClient = createSqlClient(
-        jdbcExecutor = {
-            // System.err prints red text in intellij, not white
-            System.err.println("jdbc sql: $sql")
-            System.err.println("jdbc parameters: ${variables.joinToString { "\"$it\"" }}")
-            defaultJdbcExecutor()
+        jdbcExecutor = object: JdbcExecutor {
+            override fun <R> execute(
+                con: Connection,
+                sql: String,
+                variables: List<Any>,
+                block: PreparedStatement.() -> R
+            ): R {
+                // System.err prints red text in intellij, not white
+                System.err.println("jdbc sql: $sql")
+                System.err.println("jdbc parameters: ${variables.joinToString { "\"$it\"" }}")
+                return DefaultJdbcExecutor.execute(con, sql, variables, block)
+            }
         }
     ) {
 

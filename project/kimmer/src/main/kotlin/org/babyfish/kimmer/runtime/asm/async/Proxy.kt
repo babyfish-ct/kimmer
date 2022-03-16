@@ -37,7 +37,7 @@ private fun ClassVisitor.writeProxyProp(
 ) {
     val getter = prop.kotlinProp.getter.javaMethod!!
     val getterDesc = Type.getMethodDescriptor(getter)
-    val setterDesc = "(${Type.getDescriptor(prop.returnType.java)})V"
+    val setterDesc = "(${Type.getDescriptor(prop.javaReturnType)})V"
     val signature = prop.targetType?.takeIf { prop.isList }?.let {
         "Ljava/util/List<${Type.getDescriptor(it.kotlinType.java)}>;"
     }
@@ -69,10 +69,10 @@ private fun ClassVisitor.writeProxyProp(
                 getterDesc,
                 false
             )
-            visitStore(prop.returnType.java, resultSlot)
+            visitStore(prop.javaReturnType, resultSlot)
         }
-        visitLoad(prop.returnType.java, resultSlot)
-        visitReturn(prop.returnType.java)
+        visitLoad(prop.javaReturnType, resultSlot)
+        visitReturn(prop.javaReturnType)
     }
 
     writeMethod(
@@ -84,7 +84,7 @@ private fun ClassVisitor.writeProxyProp(
         val lockSlot = 1 + Type.getArgumentsAndReturnSizes(setterDesc) shr 2
         visitLock(lockSlot, args) {
             visitGetRawDraft(args)
-            visitLoad(prop.returnType.java, 1)
+            visitLoad(prop.javaReturnType, 1)
             visitMethodInsn(
                 Opcodes.INVOKEVIRTUAL,
                 args.rawDraftImplInternalName,
@@ -126,10 +126,10 @@ private fun ClassVisitor.writeProxyProp(
                     funDesc,
                     false
                 )
-                visitStore(prop.returnType.java, resultSlot)
+                visitStore(prop.javaReturnType, resultSlot)
             }
-            visitLoad(prop.returnType.java, resultSlot)
-            visitReturn(prop.returnType.java)
+            visitLoad(prop.javaReturnType, resultSlot)
+            visitReturn(prop.javaReturnType)
         }
     }
 }

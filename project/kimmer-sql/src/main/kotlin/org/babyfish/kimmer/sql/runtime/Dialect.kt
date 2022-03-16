@@ -1,9 +1,10 @@
 package org.babyfish.kimmer.sql.runtime
 
-import org.babyfish.kimmer.sql.ExecutionException
 import org.babyfish.kimmer.sql.runtime.dialect.UpdateJoin
 
 interface Dialect {
+
+    fun r2dbcParameter(position: Int): String
 
     fun pagination(ctx: PaginationContext)
 

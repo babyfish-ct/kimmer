@@ -11,6 +11,9 @@ interface ImmutableProp {
 
     val returnType: KClass<*>
 
+    /** Be different with [returnType].java */
+    val javaReturnType: Class<*>
+
     val isNullable: Boolean
 
     val isAssociation: Boolean

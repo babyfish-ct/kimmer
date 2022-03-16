@@ -15,6 +15,10 @@ dependencies {
     testImplementation(kotlin("test"))
     testRuntimeOnly("io.r2dbc:r2dbc-h2:0.9.1.RELEASE")
     testRuntimeOnly("com.h2database:h2:2.1.210")
+    testImplementation("org.springframework:spring-jdbc:5.3.16")
+    testImplementation("mysql:mysql-connector-java:8.0.28")
+    testImplementation("dev.miku:r2dbc-mysql:0.8.2.RELEASE")
+    testImplementation("com.fasterxml.uuid:java-uuid-generator:4.0.1")
 }
 
 ksp {

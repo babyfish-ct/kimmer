@@ -2,7 +2,7 @@ package org.babyfish.kimmer.runtime.asm.draft
 
 import org.babyfish.kimmer.runtime.asm.baseName
 import org.babyfish.kimmer.runtime.asm.modifiedName
-import org.babyfish.kimmer.runtime.asm.visitCond
+import org.babyfish.kimmer.runtime.asm.visitCondNotMatched
 import org.springframework.asm.MethodVisitor
 import org.springframework.asm.Opcodes
 
@@ -14,7 +14,7 @@ internal fun MethodVisitor.visitModelGetter(args: GeneratorArgs) {
         modifiedName(),
         args.modelImplDescriptor
     )
-    visitCond(
+    visitCondNotMatched(
         Opcodes.IFNULL,
         {
             visitVarInsn(Opcodes.ALOAD, 0)
@@ -47,7 +47,7 @@ internal fun MethodVisitor.visitMutableModelStorage(local: Int, args: GeneratorA
     )
     visitVarInsn(Opcodes.ASTORE, local)
     visitVarInsn(Opcodes.ALOAD, local)
-    visitCond(Opcodes.IFNONNULL) {
+    visitCondNotMatched(Opcodes.IFNONNULL) {
         visitTypeInsn(Opcodes.NEW, args.modelImplInternalName)
         visitInsn(Opcodes.DUP)
         visitVarInsn(Opcodes.ALOAD, 0)

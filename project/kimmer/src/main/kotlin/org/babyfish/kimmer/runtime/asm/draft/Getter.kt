@@ -13,7 +13,7 @@ import kotlin.reflect.jvm.javaMethod
 
 internal fun ClassVisitor.writeGetter(prop: ImmutableProp, args: GeneratorArgs) {
     val getter = prop.kotlinProp.getter.javaMethod!!
-    val returnType = prop.returnType.java
+    val returnType = prop.javaReturnType
     val isId = prop.name == "id" && Entity::class.java.isAssignableFrom(prop.declaringType.kotlinType.java)
     writeMethod(
         Opcodes.ACC_PUBLIC,
@@ -60,6 +60,6 @@ private fun MethodVisitor.visitGetter(prop: ImmutableProp, args: GeneratorArgs, 
     } else {
         loadValue()
     }
-    visitReturn(prop.returnType.java, cast)
+    visitReturn(prop.javaReturnType, cast)
 }
 

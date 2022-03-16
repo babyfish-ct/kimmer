@@ -10,7 +10,7 @@ import org.springframework.asm.Type
 import kotlin.reflect.jvm.javaMethod
 
 internal fun ClassVisitor.writeSetter(prop: ImmutableProp, args: GeneratorArgs) {
-    val parameterType = prop.returnType.java
+    val parameterType = prop.javaReturnType
     val getter = prop.kotlinProp.getter.javaMethod!!
     val setterName = getter.name.let {
         if (it.startsWith("is")) {
@@ -50,14 +50,14 @@ internal fun ClassVisitor.writeSetter(prop: ImmutableProp, args: GeneratorArgs) 
 }
 
 internal fun MethodVisitor.visitSetter(prop: ImmutableProp, args: GeneratorArgs) {
-    val local = when (prop.returnType.java) {
+    val local = when (prop.javaReturnType) {
         Long::class.javaPrimitiveType -> 3
         Double::class.javaPrimitiveType -> 3
         else -> 2
     }
     visitMutableModelStorage(local, args)
     visitSetter(local, prop, args) {
-        visitLoad(prop.returnType.java, 1)
+        visitLoad(prop.javaReturnType, 1)
     }
     visitInsn(Opcodes.RETURN)
 }
@@ -82,6 +82,6 @@ internal fun MethodVisitor.visitSetter(
         Opcodes.PUTFIELD,
         args.modelImplInternalName,
         prop.name,
-        Type.getDescriptor(prop.returnType.java)
+        Type.getDescriptor(prop.javaReturnType)
     )
 }

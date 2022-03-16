@@ -4,6 +4,7 @@ import io.r2dbc.spi.ConnectionFactories
 import io.r2dbc.spi.ConnectionFactory
 import io.r2dbc.spi.Result
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.babyfish.kimmer.sql.Entity
@@ -11,6 +12,7 @@ import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.ast.concat
 import org.babyfish.kimmer.sql.model.*
 import org.babyfish.kimmer.sql.ast.value
+import org.babyfish.kimmer.sql.meta.ScalarProvider
 import org.babyfish.kimmer.sql.meta.config.*
 import org.babyfish.kimmer.sql.meta.enumProviderByString
 import org.babyfish.kimmer.sql.model.Author
@@ -19,10 +21,12 @@ import org.babyfish.kimmer.sql.model.BookStore
 import org.babyfish.kimmer.sql.model.Gender
 import org.babyfish.kimmer.sql.runtime.*
 import org.babyfish.kimmer.sql.spi.createSqlClient
+import org.junit.BeforeClass
 import java.io.InputStreamReader
 import java.sql.DriverManager
 import java.sql.PreparedStatement
 import java.util.*
+import javax.sql.DataSource
 import kotlin.reflect.KClass
 import kotlin.test.expect
 import kotlin.test.fail
@@ -38,7 +42,10 @@ abstract class AbstractTest {
     protected val sqlClient: SqlClient =
         sqlClient(OnDeleteAction.NONE)
 
-    protected fun sqlClient(bookStoreOnDelete: OnDeleteAction): SqlClient =
+    protected fun sqlClient(
+        bookStoreOnDelete: OnDeleteAction,
+        vararg scalarProviders: ScalarProvider<*, *>
+    ): SqlClient =
         createSqlClient(
             dynamicDialect,
             jdbcExecutor = JdbcExecutorImpl(),
@@ -59,7 +66,7 @@ abstract class AbstractTest {
                     autoId(Book::class) as UUID
                 }
             )
-            prop(Book::store, Column("STORE_ID", onDelete = bookStoreOnDelete))
+            prop(Book::store, Column(onDelete = bookStoreOnDelete))
 
             prop(
                 Book::authors,
@@ -69,6 +76,7 @@ abstract class AbstractTest {
                     targetJoinColumnName = "AUTHOR_ID"
                 )
             )
+            inverseProp(Book::chapters, Chapter::book)
 
             prop(
                 Author::id,
@@ -81,12 +89,27 @@ abstract class AbstractTest {
                 concat(firstName, value(" "), lastName)
             })
 
-            scalar(
+            prop(
+                Chapter::id,
+                idGenerator = SequenceIdGenerator("chapter_id_seq")
+            )
+            prop(Chapter::book)
+
+            prop(
+                Announcement::id,
+                idGenerator = IdentityIdGenerator
+            )
+            prop(Announcement::store)
+
+            scalarProvider(
                 enumProviderByString(Gender::class) {
                     map(Gender.MALE, "M")
                     map(Gender.FEMALE, "F")
                 }
             )
+            scalarProviders.forEach {
+                scalarProvider(it)
+            }
         }
 
     protected fun using(dialect: Dialect, block: () -> Unit) {
@@ -124,10 +147,10 @@ abstract class AbstractTest {
             block: PreparedStatement.() -> R
         ): R {
             var index = 0
-            val sql = sql.replace(JDBC_PARAMETER_REGEX) {
+            val formattedSql = sql.replace(JDBC_PARAMETER_REGEX) {
                 "$${++index}" // replace jdbc '?' to '$1', '$2', ..., '$N'
             }
-            _executions += Execution(sql, variables)
+            _executions += Execution(formattedSql, variables)
             return DefaultJdbcExecutor.execute(con, sql, variables, block)
         }
     }
@@ -140,7 +163,11 @@ abstract class AbstractTest {
             variables: List<Any>,
             block: suspend Result.() -> R
         ): R {
-            _executions += Execution(sql, variables)
+            var index = 0
+            val formattedSql = sql.replace(JDBC_PARAMETER_REGEX) {
+                "$${++index}" // replace jdbc '?' to '$1', '$2', ..., '$N'
+            }
+            _executions += Execution(formattedSql, variables)
             return DefaultR2dbcExecutor.execute(con, sql, variables, block)
         }
     }
@@ -162,6 +189,20 @@ abstract class AbstractTest {
         val variables: List<Any>
     )
 
+    enum class TransactionMode {
+        NONE,
+        ROLLBACK
+    }
+
+    protected enum class TestWay(
+        val forJdbc: Boolean,
+        val forR2dbc: Boolean
+    ) {
+        JDBC(true, false),
+        R2DBC(false, true),
+        BOTH(true, true)
+    }
+
     companion object {
 
         private const val JDBC_URL = "jdbc:h2:~/test_db"
@@ -175,27 +216,52 @@ abstract class AbstractTest {
 
         @JvmStatic
         protected fun jdbc(
+            transactionMode: TransactionMode = TransactionMode.NONE,
+            dataSource: DataSource? = null,
             block: java.sql.Connection.() -> Unit
         ) {
-            DriverManager.getConnection(JDBC_URL).use {
-                it.block()
+            (dataSource?.connection ?: DriverManager.getConnection(JDBC_URL)).use {
+                when (transactionMode) {
+                    TransactionMode.NONE -> it.block()
+                    TransactionMode.ROLLBACK -> {
+                        it.autoCommit = false
+                        try {
+                            it.block()
+                        } finally {
+                            it.rollback()
+                        }
+                    }
+                }
             }
         }
 
         @JvmStatic
         protected suspend fun r2dbc(
+            transactionMode: TransactionMode = TransactionMode.NONE,
+            factory: ConnectionFactory? = null,
             block: suspend io.r2dbc.spi.Connection.() -> Unit
         ) {
-            val con = connectionFactory.create().awaitSingle()
+            val con = (factory ?: connectionFactory).create().awaitSingle()
             try {
-                block(con)
+                when (transactionMode) {
+                    TransactionMode.NONE -> block(con)
+                    TransactionMode.ROLLBACK -> {
+                        con.beginTransaction().awaitFirstOrNull()
+                        try {
+                            block(con)
+                        } finally {
+                            con.rollbackTransaction().awaitFirstOrNull()
+                        }
+                    }
+                }
             } finally {
                 con.close()
             }
         }
 
         @JvmStatic
-        protected fun initDatabase() {
+        @BeforeClass
+        fun initDatabase() {
             jdbc {
                 initJdbcDatabase(this)
             }
@@ -207,7 +273,7 @@ abstract class AbstractTest {
         }
 
         @JvmStatic
-        protected fun initJdbcDatabase(con: java.sql.Connection) {
+        private fun initJdbcDatabase(con: java.sql.Connection) {
             AbstractTest::class.java.classLoader.getResourceAsStream("TestDatabase.sql").use { stream ->
                 val text = InputStreamReader(stream).readText()
                 text
@@ -220,7 +286,7 @@ abstract class AbstractTest {
         }
 
         @JvmStatic
-        protected suspend fun initR2dbcDatabase(con: io.r2dbc.spi.Connection) {
+        private suspend fun initR2dbcDatabase(con: io.r2dbc.spi.Connection) {
             AbstractTest::class.java.classLoader.getResourceAsStream("TestDatabase.sql").use { stream ->
                 val text = InputStreamReader(stream ?: error("Cannot load embedded SQL")).readText()
                 text

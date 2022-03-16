@@ -82,14 +82,14 @@ internal fun ClassVisitor.writeMethod(
     }
 }
 
-internal fun MethodVisitor.visitCond(
+internal fun MethodVisitor.visitCondNotMatched(
     opcode: Int,
     block: MethodVisitor.() -> Unit
 ) {
-    visitCond(opcode, block, null)
+    visitCondNotMatched(opcode, block, null)
 }
 
-internal fun MethodVisitor.visitCond(
+internal fun MethodVisitor.visitCondNotMatched(
     opcode: Int,
     block: MethodVisitor.() -> Unit,
     elseBlock: (MethodVisitor.() -> Unit)?
@@ -341,7 +341,7 @@ internal fun MethodVisitor.visitChanged(
     shadow: Shallow,
     block: MethodVisitor.() -> Unit
 ) {
-    val type = prop.returnType.java
+    val type = prop.javaReturnType
     if (type.isPrimitive) {
         val cmp = when (type) {
             Double::class.javaPrimitiveType -> Opcodes.DCMPL
@@ -351,11 +351,11 @@ internal fun MethodVisitor.visitChanged(
         }
         if (cmp !== null) {
             visitInsn(cmp)
-            visitCond(Opcodes.IFEQ) {
+            visitCondNotMatched(Opcodes.IFEQ) {
                 block()
             }
         } else {
-            visitCond(Opcodes.IF_ICMPEQ) {
+            visitCondNotMatched(Opcodes.IF_ICMPEQ) {
                 block()
             }
         }
@@ -368,25 +368,25 @@ internal fun MethodVisitor.visitChanged(
                 "(Ljava/lang/Object;Ljava/lang/Object;)Z",
                 false
             )
-            visitCond(Opcodes.IFNE) {
+            visitCondNotMatched(Opcodes.IFNE) {
                 block()
             }
         }
         if (prop.targetType !== null) {
             if (shadow is Shallow.Dynamic) {
                 shadow.block(this)
-                visitCond(
+                visitCondNotMatched(
                     Opcodes.IFNE,
                     { deepEqualBock() },
                     {
-                        visitCond(Opcodes.IF_ACMPEQ) {
+                        visitCondNotMatched(Opcodes.IF_ACMPEQ) {
                             block()
                         }
                     }
                 )
             } else if (shadow is Shallow.Static){
                 if (shadow.value) {
-                    visitCond(Opcodes.IF_ACMPEQ) {
+                    visitCondNotMatched(Opcodes.IF_ACMPEQ) {
                         block()
                     }
                 } else {

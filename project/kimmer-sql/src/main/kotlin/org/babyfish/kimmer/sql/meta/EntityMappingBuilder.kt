@@ -42,5 +42,5 @@ interface EntityMappingBuilder {
 
     fun storage(prop: KProperty1<out Entity<*>, *>, storage: Storage)
 
-    fun scalar(scalarProvider: ScalarProvider<*, *>)
+    fun scalarProvider(scalarProvider: ScalarProvider<*, *>)
 }

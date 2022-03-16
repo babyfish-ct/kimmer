@@ -4,7 +4,6 @@ import org.babyfish.kimmer.meta.ImmutableType
 import org.babyfish.kimmer.runtime.ImmutableSpi
 import org.babyfish.kimmer.runtime.asm.*
 import org.springframework.asm.ClassVisitor
-import org.springframework.asm.Label
 import org.springframework.asm.Opcodes
 import org.springframework.asm.Type
 import kotlin.reflect.jvm.javaMethod
@@ -77,7 +76,7 @@ internal fun ClassVisitor.writeCopyConstructor(type: ImmutableType) {
             )
 
             visitVarInsn(Opcodes.ILOAD, loadedSlot)
-            visitCond(Opcodes.IFEQ) {
+            visitCondNotMatched(Opcodes.IFEQ) {
                 visitVarInsn(Opcodes.ALOAD, 0)
                 visitVarInsn(Opcodes.ALOAD, 1)
                 visitMethodInsn(
@@ -87,15 +86,14 @@ internal fun ClassVisitor.writeCopyConstructor(type: ImmutableType) {
                     Type.getMethodDescriptor(getter),
                     true
                 )
-                if (getter.returnType !== prop.returnType.java) {
-
-                    visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(prop.returnType.java))
+                if (getter.returnType !== prop.javaReturnType) {
+                    visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(prop.javaReturnType))
                 }
                 visitFieldInsn(
                     Opcodes.PUTFIELD,
                     implInternalName,
                     prop.name,
-                    Type.getDescriptor(prop.returnType.java)
+                    Type.getDescriptor(prop.javaReturnType)
                 )
             }
         }

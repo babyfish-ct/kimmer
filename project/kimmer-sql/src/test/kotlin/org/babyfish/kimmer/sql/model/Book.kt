@@ -10,4 +10,5 @@ interface Book: Entity<UUID> {
     val edition: Int
     val store: BookStore?
     val authors: List<Author>
+    val chapters: List<Chapter>
 }

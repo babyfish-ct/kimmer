@@ -30,15 +30,6 @@ abstract class AbstractQueryTest : AbstractTest() {
         }
     }
 
-    protected enum class TestWay(
-        val forJdbc: Boolean,
-        val forR2dbc: Boolean
-    ) {
-        JDBC(true, false),
-        R2DBC(false, true),
-        BOTH(true, true)
-    }
-
     protected inner class QueryTestContext<R> {
 
         fun sql(block: () -> String) {
@@ -60,15 +51,6 @@ abstract class AbstractQueryTest : AbstractTest() {
         @Suppress("UNCHECKED_CAST")
         fun rows(block: List<R>.() -> Unit) {
             (_rows as List<R>).block()
-        }
-    }
-
-    companion object {
-
-        @JvmStatic
-        @BeforeClass
-        fun beforeTestAll() {
-            initDatabase()
         }
     }
 }

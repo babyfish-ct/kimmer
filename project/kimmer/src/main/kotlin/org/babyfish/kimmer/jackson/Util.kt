@@ -15,5 +15,5 @@ internal val ImmutableProp.jacksonType: JavaType
             SimpleType.constructUnsafe(targetType!!.kotlinType.java)
         )
     } else {
-        SimpleType.constructUnsafe(returnType.java)
+        SimpleType.constructUnsafe(javaReturnType)
     }

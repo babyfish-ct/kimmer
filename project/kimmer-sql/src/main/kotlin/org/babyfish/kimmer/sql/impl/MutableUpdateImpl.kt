@@ -10,6 +10,7 @@ import org.babyfish.kimmer.sql.ast.table.impl.TableAliasAllocator
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.config.Column
+import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import org.babyfish.kimmer.sql.runtime.Dialect
 import org.babyfish.kimmer.sql.runtime.dialect.UpdateJoin
 import java.lang.IllegalStateException
@@ -127,6 +128,11 @@ internal class MutableUpdateImpl<E: Entity<ID>, ID: Comparable<ID>>(
             sql(table.entityType.tableName)
             sql(" ")
             sql(table.alias)
+            if (sqlClient.dialect.updateJoin?.from == UpdateJoin.From.UNNECESSARY) {
+                table.childTableMap.values.forEach {
+                    it.renderTo(this)
+                }
+            }
             sql(" set ")
             renderAssignments()
             renderTables()
@@ -163,10 +169,6 @@ internal class MutableUpdateImpl<E: Entity<ID>, ID: Comparable<ID>>(
     private fun AbstractSqlBuilder.renderTables() {
         if (table.childTableMap.values.any { isTableUsed(it) }) {
             when (sqlClient.dialect.updateJoin!!.from) {
-                UpdateJoin.From.UNNECESSARY ->
-                    table.childTableMap.values.forEach {
-                        it.renderTo(this)
-                    }
                 UpdateJoin.From.AS_ROOT ->
                     table.renderTo(this)
                 UpdateJoin.From.AS_JOIN -> {

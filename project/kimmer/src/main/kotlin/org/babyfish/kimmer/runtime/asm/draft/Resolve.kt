@@ -2,7 +2,6 @@ package org.babyfish.kimmer.runtime.asm.draft
 
 import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.meta.ImmutableProp
-import org.babyfish.kimmer.runtime.*
 import org.babyfish.kimmer.runtime.asm.*
 import org.springframework.asm.ClassVisitor
 import org.springframework.asm.MethodVisitor
@@ -26,7 +25,7 @@ internal fun ClassVisitor.writeResolve(args: GeneratorArgs) {
             resolvingName(),
             "Z"
         )
-        visitCond(Opcodes.IFEQ) {
+        visitCondNotMatched(Opcodes.IFEQ) {
             visitTypeInsn(Opcodes.NEW, CRE_INTERNAL_NAME)
             visitInsn(Opcodes.DUP)
             visitMethodInsn(
@@ -113,7 +112,7 @@ private fun ClassVisitor.writeResolveImpl(args: GeneratorArgs) {
         visitVarInsn(Opcodes.ASTORE, modifiedSlot)
 
         visitVarInsn(Opcodes.ALOAD, modifiedSlot)
-        visitCond(
+        visitCondNotMatched(
             Opcodes.IFNONNULL,
             {
                 for (prop in args.immutableType.props.values) {
@@ -142,7 +141,7 @@ private fun ClassVisitor.writeResolveImpl(args: GeneratorArgs) {
         visitVarInsn(Opcodes.ASTORE, modifiedSlot)
 
         visitVarInsn(Opcodes.ALOAD, modifiedSlot)
-        visitCond(Opcodes.IFNONNULL) {
+        visitCondNotMatched(Opcodes.IFNONNULL) {
             visitVarInsn(Opcodes.ALOAD, baseSlot)
             visitInsn(Opcodes.ARETURN)
         }
@@ -158,7 +157,7 @@ private fun ClassVisitor.writeResolveImpl(args: GeneratorArgs) {
             "(Ljava/lang/Object;Z)Z",
             true
         )
-        visitCond(Opcodes.IFEQ) {
+        visitCondNotMatched(Opcodes.IFEQ) {
             visitVarInsn(Opcodes.ALOAD, baseSlot)
             visitInsn(Opcodes.ARETURN)
         }
@@ -180,7 +179,7 @@ private fun MethodVisitor.visitResolveBaseProp(prop: ImmutableProp, args: Genera
         true
     )
 
-    visitCond(Opcodes.IFEQ) {
+    visitCondNotMatched(Opcodes.IFEQ) {
 
         val getter = prop.kotlinProp.getter.javaMethod!!
         visitVarInsn(Opcodes.ALOAD, baseSlot)
@@ -191,18 +190,18 @@ private fun MethodVisitor.visitResolveBaseProp(prop: ImmutableProp, args: Genera
             Type.getMethodDescriptor(getter),
             true
         )
-        visitStore(prop.returnType.java, oldValueSlot)
+        visitStore(prop.javaReturnType, oldValueSlot)
 
         visitResolveValue(prop, args) {
-            visitLoad(prop.returnType.java, oldValueSlot)
+            visitLoad(prop.javaReturnType, oldValueSlot)
         }
-        visitStore(prop.returnType.java, newValueSlot(prop))
+        visitStore(prop.javaReturnType, newValueSlot(prop))
 
-        visitLoad(prop.returnType.java, oldValueSlot)
-        visitLoad(prop.returnType.java, newValueSlot(prop))
+        visitLoad(prop.javaReturnType, oldValueSlot)
+        visitLoad(prop.javaReturnType, newValueSlot(prop))
         visitChanged(prop, Shallow.static(true)) {
             visitVarInsn(Opcodes.ALOAD, 0)
-            visitLoad(prop.returnType.java, newValueSlot(prop))
+            visitLoad(prop.javaReturnType, newValueSlot(prop))
             visitMethodInsn(
                 Opcodes.INVOKEVIRTUAL,
                 args.draftImplInternalName,
@@ -213,7 +212,7 @@ private fun MethodVisitor.visitResolveBaseProp(prop: ImmutableProp, args: Genera
                         "set${it.substring(3)}"
                     }
                 },
-                "(${Type.getDescriptor(prop.returnType.java)})V",
+                "(${Type.getDescriptor(prop.javaReturnType)})V",
                 false
             )
         }
@@ -222,7 +221,7 @@ private fun MethodVisitor.visitResolveBaseProp(prop: ImmutableProp, args: Genera
 
 private fun MethodVisitor.visitResolveModifiedProp(prop: ImmutableProp, args: GeneratorArgs) {
 
-    val propDesc = Type.getDescriptor(prop.returnType.java)
+    val propDesc = Type.getDescriptor(prop.javaReturnType)
 
     visitVarInsn(Opcodes.ALOAD, modifiedSlot)
     visitResolveValue(prop, args) {
@@ -271,7 +270,7 @@ private fun MethodVisitor.visitResolveValue(
             "($IMMUTABLE_DESCRIPTOR)$IMMUTABLE_DESCRIPTOR",
             true
         )
-        visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(prop.returnType.java))
+        visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(prop.javaReturnType))
     }
 }
 
@@ -279,7 +278,7 @@ private const val baseSlot = 1
 private const val modifiedSlot = 2
 private const val oldValueSlot = 3
 private fun newValueSlot(prop: ImmutableProp) =
-    when (prop.returnType.java) {
+    when (prop.javaReturnType) {
         Long::class.javaPrimitiveType -> 2
         Double::class.javaPrimitiveType -> 2
         else -> 1

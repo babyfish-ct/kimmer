@@ -22,6 +22,9 @@ interface EntityProp {
 
     val returnType: KClass<*>
 
+    /** Be different with [returnType].java */
+    val javaReturnType: Class<*>
+
     val isReference: Boolean
 
     val isList: Boolean

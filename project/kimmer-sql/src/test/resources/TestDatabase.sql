@@ -1,3 +1,6 @@
+drop table announcement if exists;
+drop sequence chapter_id_seq if exists;
+drop table chapter if exists;
 drop table book_author_mapping if exists;
 drop table book if exists;
 drop table author if exists;
@@ -76,6 +79,40 @@ alter table book_author_mapping
             references author(id)
                 on delete cascade
 ;
+
+create sequence chapter_id_seq;
+
+create table chapter(
+    id bigint not null,
+    name varchar(100) not null,
+    book_id uuid not null
+);
+
+alter table chapter
+    add constraint pk_chapter
+        primary key(id);
+
+alter table chapter
+    add constraint fk_chapter__book
+        foreign key(book_id)
+            references book(id)
+                on delete cascade;
+
+create table announcement(
+    id int auto_increment not null,
+    message varchar(200) not null,
+    store_id uuid not null
+);
+
+alter table announcement
+    add constraint pk_announcement
+        primary key(id);
+
+alter table announcement
+    add constraint fk_announcement__book_store
+        foreign key(store_id)
+            references book_store(id)
+                on delete cascade;
 
 insert into book_store(id, name) values
     ('d38c10da-6be8-4924-b9b9-5e81899612a0', 'O''REILLY'),

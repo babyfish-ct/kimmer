@@ -21,6 +21,9 @@ class DynamicDialect: Dialect {
         }
     }
 
+    override fun r2dbcParameter(position: Int): String =
+        (overrideDialect ?: defaultDialect).r2dbcParameter(position)
+
     override fun pagination(ctx: PaginationContext) {
         (overrideDialect ?: defaultDialect).pagination(ctx)
     }

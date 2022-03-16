@@ -6,6 +6,9 @@ import org.babyfish.kimmer.sql.runtime.PaginationContext
 
 open class DefaultDialect : Dialect {
 
+    override fun r2dbcParameter(position: Int): String =
+        "$$position"
+
     override fun pagination(ctx: PaginationContext) {
         ctx.apply {
             origin()

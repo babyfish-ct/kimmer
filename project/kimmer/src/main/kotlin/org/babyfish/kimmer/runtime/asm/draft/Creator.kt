@@ -9,7 +9,7 @@ import org.springframework.asm.Type
 
 internal fun ClassVisitor.writeCreator(prop: ImmutableProp, args: GeneratorArgs) {
 
-    val desc = Type.getDescriptor(prop.returnType.java)
+    val desc = Type.getDescriptor(prop.javaReturnType)
 
     val draftDesc = if (prop.isList) {
         "Ljava/util/List;"
@@ -45,10 +45,10 @@ internal fun ClassVisitor.writeCreator(prop: ImmutableProp, args: GeneratorArgs)
             loadedName(prop),
             "Z"
         )
-        visitCond(Opcodes.IFEQ) {
+        visitCondNotMatched(Opcodes.IFEQ) {
 
             loadMutableValue()
-            visitCond(Opcodes.IFNULL) {
+            visitCondNotMatched(Opcodes.IFNULL) {
                 visitToDraft(prop, args, loadMutableValue)
                 visitInsn(Opcodes.ARETURN)
             }

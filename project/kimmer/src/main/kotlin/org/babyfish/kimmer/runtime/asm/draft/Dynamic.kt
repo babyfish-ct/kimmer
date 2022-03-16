@@ -27,7 +27,7 @@ internal fun ClassVisitor.writeDynamicGetter(args: GeneratorArgs) {
                 Type.getMethodDescriptor(prop.kotlinProp.javaGetter),
                 false
             )
-            visitBox(prop.returnType.java)
+            visitBox(prop.javaReturnType)
             visitInsn(Opcodes.ARETURN)
         }
     }
@@ -49,7 +49,7 @@ internal fun ClassVisitor.writeDynamicCreator(args: GeneratorArgs) {
                     Type.getMethodDescriptor(prop.kotlinProp.javaGetter),
                     false
                 )
-                visitBox(prop.returnType.java)
+                visitBox(prop.javaReturnType)
             } else {
                 val draftDesc = if (prop.isList) {
                     "Ljava/util/List;"
@@ -86,7 +86,7 @@ internal fun ClassVisitor.writeDynamicSetter(args: GeneratorArgs) {
         visitPropNameSwitch(args.immutableType, { visitVarInsn(Opcodes.ALOAD, 1)}) { prop, _ ->
             if (!prop.isNullable) {
                 visitVarInsn(Opcodes.ALOAD, 2)
-                visitCond(Opcodes.IFNONNULL) {
+                visitCondNotMatched(Opcodes.IFNONNULL) {
                     visitThrow(
                         IllegalArgumentException::class,
                         "Cannot set null to the prop '${prop.kotlinProp}' whose type is non-nullable"
@@ -103,12 +103,12 @@ internal fun ClassVisitor.writeDynamicSetter(args: GeneratorArgs) {
             )
             visitVarInsn(Opcodes.ALOAD, mutableLocal)
             visitVarInsn(Opcodes.ALOAD, 2)
-            visitUnbox(prop.returnType.java)
+            visitUnbox(prop.javaReturnType)
             visitFieldInsn(
                 Opcodes.PUTFIELD,
                 args.modelImplInternalName,
                 prop.name,
-                Type.getDescriptor(prop.returnType.java)
+                Type.getDescriptor(prop.javaReturnType)
             )
             visitInsn(Opcodes.RETURN)
         }

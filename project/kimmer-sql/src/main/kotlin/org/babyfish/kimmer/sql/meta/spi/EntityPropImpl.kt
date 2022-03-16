@@ -56,6 +56,9 @@ open class EntityPropImpl(
     override val returnType: KClass<*>
         get() = immutableProp.returnType
 
+    override val javaReturnType: Class<*>
+        get() = immutableProp.javaReturnType
+
     override val isReference: Boolean
         get() = immutableProp.isReference
 
@@ -105,7 +108,17 @@ open class EntityPropImpl(
                 throw MappingException("Cannot set 'onDelete' to 'SET_NULL' from '$kotlinProp' because it is not nullable")
             }
         }
-        _storage = storage
+        _storage = if (storage is Column && storage.name == "") {
+            storage.copy(
+                name = if (isReference) {
+                    databaseIdentifier("${name}_id")
+                } else {
+                    databaseIdentifier(name)
+                }
+            )
+        } else {
+            storage
+        }
     }
 
     internal fun setVersion() {
@@ -191,13 +204,7 @@ open class EntityPropImpl(
             !isList &&
             !isConnection
         ) {
-            setStorage(
-                if (isReference) {
-                    Column(databaseIdentifier("${name}_id"))
-                } else {
-                    Column(databaseIdentifier(name))
-                }
-            )
+            setStorage(Column())
         }
     }
 

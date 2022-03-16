@@ -52,20 +52,20 @@ internal fun ClassVisitor.writeHashCode(type: ImmutableType) {
             visitVarInsn(Opcodes.ISTORE, loadedSlot)
 
             visitVarInsn(Opcodes.ILOAD, loadedSlot)
-            visitCond(Opcodes.IFEQ) {
+            visitCondNotMatched(Opcodes.IFEQ) {
                 visitVarInsn(Opcodes.ALOAD, 0)
                 visitFieldInsn(
                     Opcodes.GETFIELD,
                     internalName,
                     prop.name,
-                    Type.getDescriptor(prop.returnType.java)
+                    Type.getDescriptor(prop.javaReturnType)
                 )
-                visitStore(prop.returnType.java, valueSlot)
+                visitStore(prop.javaReturnType, valueSlot)
 
-                val (primitiveType, boxInternalName) = primitiveTuples(prop.returnType.java)
+                val (primitiveType, boxInternalName) = primitiveTuples(prop.javaReturnType)
                 if (primitiveType === "") {
                     visitVarInsn(Opcodes.ALOAD, valueSlot)
-                    visitCond(Opcodes.IFNULL) {
+                    visitCondNotMatched(Opcodes.IFNULL) {
                         visitVarInsn(Opcodes.ILOAD, hashSlot)
                         visitLdcInsn(31)
                         visitInsn(Opcodes.IMUL)
@@ -81,7 +81,7 @@ internal fun ClassVisitor.writeHashCode(type: ImmutableType) {
                         }
                         if (prop.targetType != null) {
                             visitVarInsn(Opcodes.ILOAD, 1)
-                            visitCond(
+                            visitCondNotMatched(
                                 Opcodes.IFNE,
                                 { deepHashCodeBlock() },
                                 {
@@ -105,7 +105,7 @@ internal fun ClassVisitor.writeHashCode(type: ImmutableType) {
                     visitVarInsn(Opcodes.ILOAD, hashSlot)
                     visitLdcInsn(31)
                     visitInsn(Opcodes.IMUL)
-                    visitLoad(prop.returnType.java, valueSlot)
+                    visitLoad(prop.javaReturnType, valueSlot)
                     visitMethodInsn(
                         Opcodes.INVOKESTATIC,
                         boxInternalName,
@@ -159,13 +159,13 @@ internal fun ClassVisitor.writeEquals(type: ImmutableType) {
 
         visitVarInsn(Opcodes.ALOAD, 0)
         visitVarInsn(Opcodes.ALOAD, 1)
-        visitCond(Opcodes.IF_ACMPNE) {
+        visitCondNotMatched(Opcodes.IF_ACMPNE) {
             visitInsn(Opcodes.ICONST_1)
             visitInsn(Opcodes.IRETURN)
         }
 
         visitVarInsn(Opcodes.ALOAD, 1)
-        visitCond(Opcodes.IFNONNULL) {
+        visitCondNotMatched(Opcodes.IFNONNULL) {
             visitInsn(Opcodes.ICONST_0)
             visitInsn(Opcodes.IRETURN)
         }
@@ -187,7 +187,7 @@ internal fun ClassVisitor.writeEquals(type: ImmutableType) {
             "{immutableType}",
             immutableTypeDescriptor
         )
-        visitCond(Opcodes.IF_ACMPEQ) {
+        visitCondNotMatched(Opcodes.IF_ACMPEQ) {
             visitInsn(Opcodes.ICONST_0)
             visitInsn(Opcodes.IRETURN)
         }
@@ -212,13 +212,13 @@ internal fun ClassVisitor.writeEquals(type: ImmutableType) {
                 true
             )
             visitVarInsn(Opcodes.ILOAD, loadedSlot)
-            visitCond(Opcodes.IF_ICMPEQ) {
+            visitCondNotMatched(Opcodes.IF_ICMPEQ) {
                 visitInsn(Opcodes.ICONST_0)
                 visitInsn(Opcodes.IRETURN)
             }
 
             visitVarInsn(Opcodes.ILOAD, loadedSlot)
-            visitCond(Opcodes.IFEQ) {
+            visitCondNotMatched(Opcodes.IFEQ) {
                 val getter = prop.kotlinProp.getter.javaMethod!!
                 val desc = Type.getDescriptor(getter.returnType)
                 visitVarInsn(Opcodes.ALOAD, 0)

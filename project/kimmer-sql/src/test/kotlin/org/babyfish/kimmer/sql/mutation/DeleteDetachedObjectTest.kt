@@ -42,6 +42,14 @@ class DeleteDetachedObjectTest : AbstractMutationTest() {
                 variables(graphQLInActionId1)
             }
             statement {
+                sql {
+                    """select tb_1_.BOOK_ID, tb_1_.ID, tb_1_.BOOK_ID, tb_1_.NAME 
+                        |from CHAPTER as tb_1_ 
+                        |where tb_1_.BOOK_ID in ($1)""".trimMargin()
+                }
+                variables(graphQLInActionId1)
+            }
+            statement {
                 sql("delete from BOOK where ID in ($1)")
                 variables(graphQLInActionId1)
             }

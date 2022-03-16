@@ -135,7 +135,9 @@ internal class R2dbcSaver(
             is UUIDIdGenerator ->
                 UUID.randomUUID()
             is SequenceIdGenerator ->
-                sqlClient.dialect.idFromSequenceSql(idGenerator.sequenceName)
+                sqlClient.r2dbcExecutor.execute(con, sqlClient.dialect.idFromSequenceSql(idGenerator.sequenceName), emptyList()) {
+                    mapRows { getObject(R2DBC_BASE_INDEX) }.first()
+                }
             is IdentityIdGenerator ->
                 null
             else ->
@@ -213,7 +215,7 @@ internal class R2dbcSaver(
                         val id = getObject(R2DBC_BASE_INDEX)
                         convert(id, idProp.returnType)
                             ?: throw ExecutionException("Last id '$id' does not match the type of $idProp")
-                    }
+                    }.first()
                 }
             ctx.entity = produce(entityType.kotlinType as KClass<Entity<*>>, entity) {
                 Draft.set(this, idProp.immutableProp, newId)

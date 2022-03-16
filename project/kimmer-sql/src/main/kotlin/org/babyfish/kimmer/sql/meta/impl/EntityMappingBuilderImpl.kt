@@ -74,7 +74,7 @@ internal class EntityMappingBuilderImpl(
         getProp(prop).setStorage(storage)
     }
 
-    override fun scalar(scalarProvider: ScalarProvider<*, *>) {
+    override fun scalarProvider(scalarProvider: ScalarProvider<*, *>) {
         val type = scalarProvider.scalarType
         if (type.javaPrimitiveType !== null) {
             throw IllegalArgumentException(

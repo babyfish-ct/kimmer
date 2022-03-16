@@ -10,11 +10,11 @@ import kotlin.reflect.jvm.javaMethod
 
 internal fun ClassVisitor.writeProp(prop: ImmutableProp, ownerInternalName: String) {
 
-    val desc = Type.getDescriptor(prop.returnType.java)
+    val desc = Type.getDescriptor(prop.javaReturnType)
     val loadedName = loadedName(prop)
     val signature = when { // Jackson need it
-        prop.isList -> "Ljava/util/List<${Type.getDescriptor(prop.returnType.java)}>;"
-        prop.isConnection -> "L$CONNECTION_INTERNAL_NAME<${Type.getDescriptor(prop.returnType.java)}>;"
+        prop.isList -> "Ljava/util/List<${Type.getDescriptor(prop.javaReturnType)}>;"
+        prop.isConnection -> "L$CONNECTION_INTERNAL_NAME<${Type.getDescriptor(prop.javaReturnType)}>;"
         else -> null
     }
 
@@ -41,7 +41,7 @@ internal fun ClassVisitor.writeProp(prop: ImmutableProp, ownerInternalName: Stri
 
         visitVarInsn(Opcodes.ALOAD, 0)
         visitFieldInsn(Opcodes.GETFIELD, ownerInternalName, loadedName, "Z")
-        visitCond(
+        visitCondNotMatched(
             Opcodes.IFNE
         ) {
             visitThrow(UnloadedException::class, "The field '${prop.kotlinProp}' is unloaded")
@@ -49,6 +49,6 @@ internal fun ClassVisitor.writeProp(prop: ImmutableProp, ownerInternalName: Stri
 
         visitVarInsn(Opcodes.ALOAD, 0)
         visitFieldInsn(Opcodes.GETFIELD, ownerInternalName, prop.name, desc)
-        visitReturn(prop.returnType.java)
+        visitReturn(prop.javaReturnType)
     }
 }

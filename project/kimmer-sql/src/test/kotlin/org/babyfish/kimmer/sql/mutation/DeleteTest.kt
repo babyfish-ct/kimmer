@@ -32,8 +32,10 @@ class DeleteTest : AbstractMutationTest() {
                     }
                     variables(manningId)
                 }
-                throwable(ExecutionException::class) {
-                    """Cannot delete the entity 
+                throwable {
+                    type(ExecutionException::class)
+                    message {
+                        """Cannot delete the entity 
                         |'{"name":"MANNING","website":null,"id":"2fa3955e-3e83-49b9-902e-0465c109c779"}', 
                         |the 'onDelete' of parent property 
                         |'val org.babyfish.kimmer.sql.model.Book.store: org.babyfish.kimmer.sql.model.BookStore?' 
@@ -59,6 +61,7 @@ class DeleteTest : AbstractMutationTest() {
                                 |"id":"780bdf07-05af-48bf-9be9-f8c65236fecc"
                             |}
                         |]""".trimMargin()
+                    }
                 }
             }
     }
@@ -193,6 +196,14 @@ class DeleteTest : AbstractMutationTest() {
                 statement {
                     sql("delete from BOOK_AUTHOR_MAPPING where BOOK_ID = $1")
                     variables(graphQLInActionId3)
+                }
+                statement {
+                    sql {
+                        """select tb_1_.BOOK_ID, tb_1_.ID, tb_1_.BOOK_ID, tb_1_.NAME 
+                        |from CHAPTER as tb_1_ 
+                        |where tb_1_.BOOK_ID in ($1, $2, $3)""".trimMargin()
+                    }
+                    variables(graphQLInActionId1, graphQLInActionId2, graphQLInActionId3)
                 }
                 statement {
                     sql("delete from BOOK where ID in ($1, $2, $3)")
@@ -345,6 +356,14 @@ class DeleteTest : AbstractMutationTest() {
                 statement {
                     sql("delete from BOOK_AUTHOR_MAPPING where BOOK_ID = $1")
                     variables(learningGraphQLId2)
+                }
+                statement {
+                    sql {
+                        """select tb_1_.BOOK_ID, tb_1_.ID, tb_1_.BOOK_ID, tb_1_.NAME 
+                        |from CHAPTER as tb_1_ 
+                        |where tb_1_.BOOK_ID in ($1, $2)""".trimMargin()
+                    }
+                    variables(learningGraphQLId1, learningGraphQLId2)
                 }
                 statement {
                     sql("delete from BOOK where ID in ($1, $2)")

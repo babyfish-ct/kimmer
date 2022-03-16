@@ -2,9 +2,7 @@ package org.babyfish.kimmer.meta
 
 import org.babyfish.kimmer.*
 import org.babyfish.kimmer.graphql.Connection
-import org.babyfish.kimmer.graphql.Input
 import org.babyfish.kimmer.sql.Entity
-import org.springframework.core.GenericTypeResolver
 import java.util.*
 import kotlin.reflect.*
 
@@ -189,6 +187,19 @@ private class PropImpl(
         kotlinProp.returnType.classifier as? KClass<*>
             ?: error("Internal bug: '${kotlinProp}' does not returns class")
 
+    override val javaReturnType: Class<*> =
+        returnType.let {
+            when {
+                isNullable ->
+                    it.javaObjectType
+                name == "id" &&
+                    Entity::class.java.isAssignableFrom(declaringType.kotlinType.java) ->
+                    it.javaObjectType
+                else ->
+                    it.java
+            }
+        }
+
     override val isConnection: Boolean
 
     override val isList: Boolean
@@ -201,17 +212,17 @@ private class PropImpl(
 
     init {
 
-        if (Map::class.java.isAssignableFrom(returnType.java)) {
+        if (Map::class.java.isAssignableFrom(javaReturnType)) {
             throw MetadataException("Illegal property '${kotlinProp}', map is not allowed")
         }
-        if (returnType.java.isArray) {
+        if (javaReturnType.isArray) {
             throw MetadataException("Illegal property '${kotlinProp}', array is not allowed")
         }
-        isConnection = Connection::class.java.isAssignableFrom(returnType.java)
-        isList = Collection::class.java.isAssignableFrom(returnType.java)
-        isReference = !isConnection && Immutable::class.java.isAssignableFrom(returnType.java)
+        isConnection = Connection::class.java.isAssignableFrom(javaReturnType)
+        isList = Collection::class.java.isAssignableFrom(javaReturnType)
+        isReference = !isConnection && Immutable::class.java.isAssignableFrom(javaReturnType)
         if (isConnection && isList) {
-            throw MetadataException("Illegal property '${kotlinProp}', its return type canot be both connection and list")
+            throw MetadataException("Illegal property '${kotlinProp}', its return type cannot be both connection and list")
         }
         isTargetNullable = if (isConnection || isList) {
             kotlinProp.returnType.arguments[0].type?.isMarkedNullable ?: false
