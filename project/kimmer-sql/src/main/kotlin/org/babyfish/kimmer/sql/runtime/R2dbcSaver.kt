@@ -358,9 +358,9 @@ internal class R2dbcSaver(
     private suspend fun mergeChildTable(
         ctx: MutationContext.AssociationContext
     ) {
-        val ownerType = ctx.entityProp.declaringType
-        val targetType = ctx.entityProp.targetType!!
-        val fkProp = ctx.entityProp.mappedBy!!
+        val ownerType = ctx.ownerType
+        val targetType = ctx.targetType
+        val fkProp = ctx.backProp!!
         val fkColumn = fkProp.storage as Column
 
         val noIdTargets =ctx
@@ -409,7 +409,7 @@ internal class R2dbcSaver(
             } else {
                 if (!fkProp.isNullable) {
                     throw ExecutionException(
-                        "The one-to-many prop '${ctx.entityProp}' is not nullable " +
+                        "The one-to-many prop '${ctx.associationName}' is not nullable " +
                             "and the 'deleteDetachedObject' is not enabled in the save options, " +
                             "but there are some detached child entities: " +
                             ctx.detachedTargets.toLimitString { it.entity.toString() }
@@ -476,7 +476,7 @@ internal class R2dbcSaver(
         ctx.targets.forEach {
             merge(it)
         }
-        val targetType = ctx.entityProp.targetType!!
+        val targetType = ctx.targetType
         val (existingSql, existingVariables) = R2dbcSqlBuilder(sqlClient)
             .apply {
                 sql("select ")

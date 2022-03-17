@@ -92,6 +92,14 @@ class DeleteTest : AbstractMutationTest() {
                     variables(manningId)
                 }
                 statement {
+                    sql {
+                        """select tb_1_.STORE_ID, tb_1_.ID, tb_1_.MESSAGE, tb_1_.STORE_ID 
+                            |from ANNOUNCEMENT as tb_1_ 
+                            |where tb_1_.STORE_ID in ($1)""".trimMargin()
+                    }
+                    variables(manningId)
+                }
+                statement {
                     sql("delete from BOOK_STORE where ID in ($1)")
                     variables(manningId)
                 }
@@ -208,6 +216,14 @@ class DeleteTest : AbstractMutationTest() {
                 statement {
                     sql("delete from BOOK where ID in ($1, $2, $3)")
                     variables(graphQLInActionId1, graphQLInActionId2, graphQLInActionId3)
+                }
+                statement {
+                    sql {
+                        """select tb_1_.STORE_ID, tb_1_.ID, tb_1_.MESSAGE, tb_1_.STORE_ID 
+                            |from ANNOUNCEMENT as tb_1_ 
+                            |where tb_1_.STORE_ID in ($1)""".trimMargin()
+                    }
+                    variables(manningId)
                 }
                 statement {
                     sql("delete from BOOK_STORE where ID in ($1)")

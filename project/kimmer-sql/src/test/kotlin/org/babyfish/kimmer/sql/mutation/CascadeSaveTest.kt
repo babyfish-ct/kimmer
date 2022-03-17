@@ -30,7 +30,7 @@ class CascadeSaveTest : AbstractMutationTest() {
             keyProps(Book::name)
             reference(Book::store) {
                 keyProps(BookStore::name)
-                createAttachingObject()
+                createAttachedObjects()
             }
         }.executeAndExpectResult {
             statement {
@@ -187,7 +187,7 @@ class CascadeSaveTest : AbstractMutationTest() {
             keyProps(BookStore::name)
             list(BookStore::books) {
                 keyProps(Book::name, Book::edition)
-                createAttachingObject()
+                createAttachedObjects()
             }
         }.executeAndExpectResult {
             statement {
@@ -311,7 +311,7 @@ class CascadeSaveTest : AbstractMutationTest() {
             keyProps(BookStore::name)
             list(BookStore::books) {
                 keyProps(Book::name, Book::edition)
-                createAttachingObject()
+                createAttachedObjects()
             }
         }.executeAndExpectResult {
             statement {
@@ -513,7 +513,7 @@ class CascadeSaveTest : AbstractMutationTest() {
             keyProps(Book::name, Book::edition)
             list(Book::authors) {
                 keyProps(Author::firstName, Author::lastName)
-                createAttachingObject()
+                createAttachedObjects()
             }
         }.executeAndExpectResult {
             statement {
@@ -654,7 +654,7 @@ class CascadeSaveTest : AbstractMutationTest() {
             keyProps(Book::name, Book::edition)
             list(Book::authors) {
                 keyProps(Author::firstName, Author::lastName)
-                createAttachingObject()
+                createAttachedObjects()
             }
         }.executeAndExpectResult {
             statement {
@@ -829,7 +829,7 @@ class CascadeSaveTest : AbstractMutationTest() {
             keyProps(Author::firstName, Author::lastName)
             list(Author::books) {
                 keyProps(Book::name, Book::edition)
-                createAttachingObject()
+                createAttachedObjects()
             }
         }.executeAndExpectResult {
             statement {
@@ -966,7 +966,7 @@ class CascadeSaveTest : AbstractMutationTest() {
             keyProps(Author::firstName, Author::lastName)
             list(Author::books) {
                 keyProps(Book::name, Book::edition)
-                createAttachingObject()
+                createAttachedObjects()
             }
         }.executeAndExpectResult {
             statement {

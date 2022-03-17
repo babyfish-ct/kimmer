@@ -35,7 +35,7 @@ interface RootMutationResult : MutationResult {
     val entity: Entity<*>
     val type: MutationType
     val affectedRowCount: Int
-    val associationMap: Map<EntityProp, AssociationMutationResult>
+    val associationMap: Map<String, AssociationMutationResult>
 }
 
 interface AssociationMutationResult : MutationResult {

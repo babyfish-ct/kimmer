@@ -11,7 +11,7 @@ import kotlin.reflect.KProperty1
 @ScopedDSL
 interface AbstractSaveOptionsDSL<E: Entity<*>> {
 
-    fun keyProps(prop: KProperty1<E, *>, vararg moreProps: KProperty1<E, *>)
+    fun keyProps(firstProp: KProperty1<E, *>, vararg moreProps: KProperty1<E, *>)
 
     fun <X: Entity<*>> reference(
         prop: KProperty1<E, X?>,
@@ -38,9 +38,9 @@ interface SaveOptionsDSL<E: Entity<*>>: AbstractSaveOptionsDSL<E> {
 
 interface AssociatedObjSaveOptionsDSL<E: Entity<*>>: AbstractSaveOptionsDSL<E> {
 
-    fun createAttachingObject()
+    fun createAttachedObjects()
 
-    fun deleteDetachedObject()
+    fun deleteDetachedObjects()
 }
 
 internal class SaveOptionsDSLImpl<E: Entity<*>>(
@@ -52,11 +52,11 @@ internal class SaveOptionsDSLImpl<E: Entity<*>>(
 
     private var _keyProps: Set<EntityProp> = emptySet()
 
-    private val childOptions = mutableMapOf<EntityProp, MutationOptions>()
+    private val childOptions = mutableMapOf<String, MutationOptions>()
 
-    override fun keyProps(prop: KProperty1<E, *>, vararg moreProps: KProperty1<E, *>) {
+    override fun keyProps(firstProp: KProperty1<E, *>, vararg moreProps: KProperty1<E, *>) {
         val props = mutableSetOf<KProperty1<E, *>>().apply {
-            add(prop)
+            add(firstProp)
             for (moreProp in moreProps) {
                 add(moreProp)
             }
@@ -129,11 +129,11 @@ internal class SaveOptionsDSLImpl<E: Entity<*>>(
         insertable = false
     }
 
-    override fun createAttachingObject() {
+    override fun createAttachedObjects() {
         insertable = true
     }
 
-    override fun deleteDetachedObject() {
+    override fun deleteDetachedObjects() {
         deletable = true
     }
 
@@ -141,7 +141,7 @@ internal class SaveOptionsDSLImpl<E: Entity<*>>(
         entityProp: EntityProp,
         block: AssociatedObjSaveOptionsDSL<X>.() -> Unit
     ) {
-        if (childOptions.containsKey(entityProp)) {
+        if (childOptions.containsKey(entityProp.name)) {
             throw IllegalArgumentException("Child save options of association '${entityProp}' has been configured")
         }
         val childOption = SaveOptionsDSLImpl<X>(
@@ -153,7 +153,7 @@ internal class SaveOptionsDSLImpl<E: Entity<*>>(
             block()
             build()
         }
-        childOptions[entityProp] = childOption
+        childOptions[entityProp.name] = childOption
     }
 
     internal fun build(): MutationOptions =

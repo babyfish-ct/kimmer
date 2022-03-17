@@ -9,5 +9,5 @@ internal data class MutationOptions(
     val updatable: Boolean,
     val deletable: Boolean,
     val keyProps: Set<EntityProp>?,
-    val targetMutationOptions: MutableMap<EntityProp, MutationOptions>
+    val targetMutationOptions: MutableMap<String, MutationOptions>
 )

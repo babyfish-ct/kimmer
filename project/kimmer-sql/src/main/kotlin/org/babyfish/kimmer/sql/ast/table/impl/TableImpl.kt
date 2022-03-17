@@ -32,7 +32,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
 
     internal val alias: String
 
-    private val middleTableAlias: String?
+    internal val middleTableAlias: String?
 
     internal val childTableMap = mutableMapOf<String, TableImpl<*, *>>()
 

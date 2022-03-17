@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = "org.babyfish.kimmer"
-    version = "0.2.4"
+    version = "0.2.5"
 }
 
 subprojects {

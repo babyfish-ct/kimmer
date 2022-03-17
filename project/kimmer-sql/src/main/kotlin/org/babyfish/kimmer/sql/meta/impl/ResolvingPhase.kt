@@ -8,6 +8,7 @@ internal enum class ResolvingPhase {
     PROP_TARGET,
     PROP_MAPPED_BY,
     PROP_DEFAULT_COLUMN,
+    PROP_TARGET_TYPE_BACK_PROPS,
     ID_PROP,
     VERSION_PROP,
     ON_INITIALIZE_SPI,

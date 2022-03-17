@@ -22,7 +22,7 @@ class DeleteDetachedObjectTest : AbstractMutationTest() {
             }
         ) {
             list(BookStore::books) {
-                deleteDetachedObject()
+                deleteDetachedObjects()
             }
         }.executeAndExpectResult {
             statement {

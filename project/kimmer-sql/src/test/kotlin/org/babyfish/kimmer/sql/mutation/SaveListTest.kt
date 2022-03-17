@@ -66,11 +66,11 @@ class SaveListTest: AbstractMutationTest() {
             keyProps(Book::name, Book::edition)
             reference(Book::store) {
                 keyProps(BookStore::name)
-                createAttachingObject()
+                createAttachedObjects()
             }
             list(Book::authors) {
                 keyProps(Author::firstName, Author::lastName)
-                createAttachingObject()
+                createAttachedObjects()
             }
         }.executeAndExpectResults {
             statement {

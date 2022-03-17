@@ -5,6 +5,7 @@ import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.produce
 import org.babyfish.kimmer.sql.*
 import org.babyfish.kimmer.sql.meta.EntityProp
+import org.babyfish.kimmer.sql.meta.EntityType
 import kotlin.reflect.KClass
 
 internal open class MutationContext private constructor(
@@ -35,33 +36,33 @@ internal open class MutationContext private constructor(
 
     override var type: MutationType = MutationType.NONE
 
-    private val _associationMap: MutableMap<EntityProp, AssociationContext> =
+    private val _associationMap: MutableMap<String, AssociationContext> =
         mutableMapOf()
 
     override val affectedRowCount: Int
         get() = if (type == MutationType.NONE) 0 else 1
 
-    override val associationMap: Map<EntityProp, AssociationContext>
+    override val associationMap: Map<String, AssociationContext>
         get() = _associationMap
 
     @Suppress("UNCHECKED_CAST")
     fun saveAssociation(
-        entityProp: EntityProp,
+        prop: EntityProp,
         block: AssociationContext.() -> Unit
     ) {
-        if (Immutable.isLoaded(entity, entityProp.immutableProp)) {
-            _associationMap.computeIfAbsent(entityProp) {
-                if (entityProp.targetType === null) {
-                    error("Internal bug: '$entityProp' is not association")
+        if (Immutable.isLoaded(entity, prop.immutableProp)) {
+            _associationMap.computeIfAbsent(prop.name) {
+                if (prop.targetType === null) {
+                    error("Internal bug: '$prop' is not association")
                 }
-                val targets = Immutable.get(entity, entityProp.immutableProp).let {
+                val targets = Immutable.get(entity, prop.immutableProp).let {
                     when {
                         it is List<*> -> it as List<Entity<*>>
                         it === null -> emptyList()
                         else -> listOf(it as Entity<*>)
                     }
                 }
-                AssociationContext(entityProp, targets)
+                AssociationContext(prop, prop.opposite, targets)
             }.apply {
                 block()
                 close()
@@ -70,14 +71,11 @@ internal open class MutationContext private constructor(
     }
 
     fun deleteAssociation(
-        entityProp: EntityProp,
+        backProp: EntityProp,
         block: AssociationContext.() -> Unit
     ) {
-        _associationMap.computeIfAbsent(entityProp) {
-            if (entityProp.targetType === null) {
-                error("Internal bug: '$entityProp' is not association")
-            }
-            AssociationContext(entityProp, emptyList())
+        _associationMap.computeIfAbsent(associationName(null, backProp)) {
+            AssociationContext(backProp.opposite, backProp, emptyList())
         }.apply {
             block()
             close()
@@ -86,22 +84,22 @@ internal open class MutationContext private constructor(
 
     @Suppress("UNCHECKED_CAST")
     suspend fun saveAssociationAsync(
-        entityProp: EntityProp,
+        prop: EntityProp,
         block: suspend AssociationContext.() -> Unit
     ) {
-        if (Immutable.isLoaded(entity, entityProp.immutableProp)) {
-            _associationMap.computeIfAbsent(entityProp) {
-                if (entityProp.targetType === null) {
-                    error("Internal bug: '$entityProp' is not association")
+        if (Immutable.isLoaded(entity, prop.immutableProp)) {
+            _associationMap.computeIfAbsent(prop.name) {
+                if (prop.targetType === null) {
+                    error("Internal bug: '$prop' is not association")
                 }
-                val targets = Immutable.get(entity, entityProp.immutableProp).let {
+                val targets = Immutable.get(entity, prop.immutableProp).let {
                     when {
                         it is List<*> -> it as List<Entity<*>>
                         it === null -> emptyList()
                         else -> listOf(it as Entity<*>)
                     }
                 }
-                AssociationContext(entityProp, targets)
+                AssociationContext(prop, prop.opposite, targets)
             }.apply {
                 block()
                 close()
@@ -110,14 +108,11 @@ internal open class MutationContext private constructor(
     }
 
     suspend fun deleteAssociationAsync(
-        entityProp: EntityProp,
+        backProp: EntityProp,
         block: suspend AssociationContext.() -> Unit
     ) {
-        _associationMap.computeIfAbsent(entityProp) {
-            if (entityProp.targetType === null) {
-                error("Internal bug: '$entityProp' is not association")
-            }
-            AssociationContext(entityProp, emptyList())
+        _associationMap.computeIfAbsent(associationName(null, backProp)) {
+            AssociationContext(backProp.opposite, backProp, emptyList())
         }.apply {
             block()
             close()
@@ -133,14 +128,30 @@ internal open class MutationContext private constructor(
     protected val contentString: String
         get() = "totalAffectedRowCount:$totalAffectedRowCount,type:$type,affectedRowCount:$affectedRowCount,entity:$entity,associationMap:{" +
             associationMap.entries.joinToString(",") {
-                "${it.key.name}:${it.value}"
+                "${it.key}:${it.value}"
             } +
             "}"
 
     inner class AssociationContext(
-        val entityProp: EntityProp,
+        val prop: EntityProp?,
+        val backProp: EntityProp?,
         targets: List<Entity<*>>
     ): AssociationMutationResult {
+
+        init {
+            if (prop === null && backProp === null) {
+                error("Internal bug: Neither prop nor back prop is specified")
+            }
+        }
+
+        val associationName: String
+            get() = prop?.name ?: "←${backProp!!.name}"
+
+        val ownerType: EntityType
+            get() = prop?.declaringType ?: backProp!!.targetType!!
+
+        val targetType: EntityType
+            get() = prop?.targetType ?: backProp!!.declaringType
 
         val targetMutationOptions: MutationOptions
 
@@ -171,10 +182,9 @@ internal open class MutationContext private constructor(
 
         init {
             targetMutationOptions = mutationOptions
-                .targetMutationOptions.computeIfAbsent(entityProp) {
+                .targetMutationOptions.computeIfAbsent(associationName) {
                     MutationOptions(
-                        entityProp.targetType
-                            ?: throw IllegalArgumentException("$entityProp is not association"),
+                        targetType,
                         insertable = false,
                         updatable = true,
                         deletable = false,
@@ -184,9 +194,9 @@ internal open class MutationContext private constructor(
                 }
 
             if (targetMutationOptions.deletable) {
-                if (entityProp.mappedBy?.isReference != true) {
+                if (backProp?.isReference != true) {
                     throw ExecutionException(
-                        "Cannot enabled the 'deleteDetachedObject' of saveOptions of the association '$entityProp', " +
+                        "Cannot enabled the 'deleteDetachedObject' of saveOptions of the association '$associationName', " +
                             "that's not one-to-many association"
                     )
                 }
@@ -201,8 +211,8 @@ internal open class MutationContext private constructor(
             if (_detachedTargets !== null) {
                 error("The detachTargets of current AssociationContext has been set")
             }
-            val targetKotlinType = entityProp.targetType!!.kotlinType as KClass<Entity<*>>
-            val targetIdProp = entityProp.targetType!!.idProp
+            val targetKotlinType = targetType.kotlinType as KClass<Entity<*>>
+            val targetIdProp = targetType.idProp
             _detachedTargets = targetIds
                 .map {
                     produce(targetKotlinType) {
@@ -229,15 +239,17 @@ internal open class MutationContext private constructor(
             if (!entityChanged) {
                 return
             }
-            entity = if (entityProp.isReference) {
-                val targetEntity = targets.firstOrNull()?.let { it.entity }
-                produce(mutationOptions.entityType.kotlinType as KClass<Entity<*>>, entity) {
-                    Draft.set(this, entityProp.immutableProp, targetEntity)
-                }
-            } else {
-                val targetEntities = targets.map { it.entity }
-                produce(mutationOptions.entityType.kotlinType as KClass<Entity<*>>, entity) {
-                    Draft.set(this, entityProp.immutableProp, targetEntities)
+            if (prop !== null) {
+                entity = if (prop.isReference) {
+                    val targetEntity = targets.firstOrNull()?.let { it.entity }
+                    produce(mutationOptions.entityType.kotlinType as KClass<Entity<*>>, entity) {
+                        Draft.set(this, prop.immutableProp, targetEntity)
+                    }
+                } else {
+                    val targetEntities = targets.map { it.entity }
+                    produce(mutationOptions.entityType.kotlinType as KClass<Entity<*>>, entity) {
+                        Draft.set(this, prop.immutableProp, targetEntities)
+                    }
                 }
             }
         }

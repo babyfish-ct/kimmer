@@ -73,3 +73,8 @@ private object Null
 
 internal fun Row.getObject(index: Int): Any =
     get(index) ?: ExecutionException("The value of column $index should not be null")
+
+internal fun associationName(prop: EntityProp?, backProp: EntityProp?): String =
+    prop?.name
+        ?: backProp?.opposite?.name
+        ?: "←${backProp?.name ?: error("Internal bug neither prop nor backProp is specified")}"

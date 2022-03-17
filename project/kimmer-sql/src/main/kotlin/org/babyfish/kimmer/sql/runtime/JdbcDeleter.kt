@@ -107,14 +107,13 @@ internal class JdbcDeleter(
         mutationOptions: MutationOptions
     ) {
         val entityType = mutationOptions.entityType
-        for (prop in entityType.props.values) {
-            val targetType = prop.targetType ?: continue
-            val mappedBy = prop.mappedBy
-            if (mappedBy?.isReference == true) {
+        for (backProp in entityType.backProps) {
+            val targetType = backProp.declaringType
+            if (backProp.isReference) {
                 val childGroupMap = sqlClient.createQuery(targetType.kotlinType as KClass<Entity<FakeId>>) {
                     val parentId = table
                         .joinReference(
-                            mappedBy.kotlinProp as KProperty1<Entity<FakeId>, Entity<FakeId>>
+                            backProp.kotlinProp as KProperty1<Entity<FakeId>, Entity<FakeId>>
                         )
                         .get(
                             entityType.idProp.kotlinProp as KProperty1<Entity<FakeId>, Any>
@@ -129,21 +128,22 @@ internal class JdbcDeleter(
                 if (childGroupMap.isNotEmpty()) {
                     for (ctx in contexts) {
                         val targets = childGroupMap[ctx.entityId] ?: continue
-                        ctx.deleteAssociation(prop) {
+                        ctx.deleteAssociation(backProp) {
                             detachByTargets(targets)
                             handleChildTable(this)
                         }
                     }
                 }
             } else {
-                val middleTable = (prop.storage as? MiddleTable)
-                    ?: prop.mappedBy?.storage as? MiddleTable
+                val middleTable = (
+                    backProp.storage ?: backProp.opposite?.storage
+                ) as? MiddleTable
                 if (middleTable !== null) {
                     val (tableName, joinColumnName, targetJoinColumnName) =
-                        if (prop.storage is MiddleTable) {
-                            Triple(middleTable.tableName, middleTable.joinColumnName, middleTable.targetJoinColumnName)
-                        } else {
+                        if (backProp.storage is MiddleTable) {
                             Triple(middleTable.tableName, middleTable.targetJoinColumnName, middleTable.joinColumnName)
+                        } else {
+                            Triple(middleTable.tableName, middleTable.joinColumnName, middleTable.targetJoinColumnName)
                         }
                     val (sql, variables) = JdbcSqlBuilder(sqlClient)
                         .apply {
@@ -176,7 +176,7 @@ internal class JdbcDeleter(
                     if (childGroupMap.isNotEmpty()) {
                         for (ctx in contexts) {
                             val targetIds = childGroupMap[ctx.entityId] ?: continue
-                            ctx.deleteAssociation(prop) {
+                            ctx.deleteAssociation(backProp) {
                                 detachByTargetIds(targetIds)
                                 handleMiddleTable(this, tableName, joinColumnName)
                             }
@@ -190,13 +190,13 @@ internal class JdbcDeleter(
     private fun handleChildTable(
         ctx: MutationContext.AssociationContext
     ) {
-        val childType = ctx.entityProp.targetType!!
-        val parentProp = ctx.entityProp.mappedBy!!
-        val fkColumn = parentProp.storage as Column
+        val childType = ctx.targetType
+        val backProp = ctx.backProp!!
+        val fkColumn = backProp.storage as Column
         if (fkColumn.onDelete == OnDeleteAction.NONE) {
             throw ExecutionException(
                 "Cannot delete the entity '${ctx.owner.entity}', " +
-                    "the 'onDelete' of parent property '${parentProp}' is 'NONE' " +
+                    "the 'onDelete' of parent property '${backProp}' is 'NONE' " +
                     "but there are some child objects whose type is '${childType.kotlinType.qualifiedName}': " +
                     ctx.detachedTargets.toLimitString { it.entity.toString() }
             )

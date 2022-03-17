@@ -108,14 +108,13 @@ internal class R2dbcDeleter(
         mutationOptions: MutationOptions
     ) {
         val entityType = mutationOptions.entityType
-        for (prop in entityType.props.values) {
-            val targetType = prop.targetType ?: continue
-            val mappedBy = prop.mappedBy
-            if (mappedBy?.isReference == true) {
+        for (referenceProp in entityType.backProps) {
+            val targetType = referenceProp.declaringType
+            if (referenceProp.isReference) {
                 val childGroupMap = sqlClient.createQuery(targetType.kotlinType as KClass<Entity<FakeId>>) {
                     val parentId = table
                         .joinReference(
-                            mappedBy.kotlinProp as KProperty1<Entity<FakeId>, Entity<FakeId>>
+                            referenceProp.kotlinProp as KProperty1<Entity<FakeId>, Entity<FakeId>>
                         )
                         .get(
                             entityType.idProp.kotlinProp as KProperty1<Entity<FakeId>, Any>
@@ -130,21 +129,22 @@ internal class R2dbcDeleter(
                 if (childGroupMap.isNotEmpty()) {
                     for (ctx in contexts) {
                         val targets = childGroupMap[ctx.entityId] ?: continue
-                        ctx.deleteAssociationAsync(prop) {
+                        ctx.deleteAssociationAsync(referenceProp) {
                             detachByTargets(targets)
                             handleChildTable(this)
                         }
                     }
                 }
             } else {
-                val middleTable = (prop.storage as? MiddleTable)
-                    ?: prop.mappedBy?.storage as? MiddleTable
+                val middleTable = (
+                    referenceProp.storage ?: referenceProp.opposite?.storage
+                ) as? MiddleTable
                 if (middleTable !== null) {
                     val (tableName, joinColumnName, targetJoinColumnName) =
-                        if (prop.storage is MiddleTable) {
-                            Triple(middleTable.tableName, middleTable.joinColumnName, middleTable.targetJoinColumnName)
-                        } else {
+                        if (referenceProp.storage is MiddleTable) {
                             Triple(middleTable.tableName, middleTable.targetJoinColumnName, middleTable.joinColumnName)
+                        } else {
+                            Triple(middleTable.tableName, middleTable.joinColumnName, middleTable.targetJoinColumnName)
                         }
                     val (sql, variables) = R2dbcSqlBuilder(sqlClient)
                         .apply {
@@ -177,7 +177,7 @@ internal class R2dbcDeleter(
                     if (childGroupMap.isNotEmpty()) {
                         for (ctx in contexts) {
                             val targetIds = childGroupMap[ctx.entityId] ?: continue
-                            ctx.deleteAssociationAsync(prop) {
+                            ctx.deleteAssociationAsync(referenceProp) {
                                 detachByTargetIds(targetIds)
                                 handleMiddleTable(this, tableName, joinColumnName)
                             }
@@ -191,8 +191,8 @@ internal class R2dbcDeleter(
     private suspend fun handleChildTable(
         ctx: MutationContext.AssociationContext
     ) {
-        val childType = ctx.entityProp.targetType!!
-        val parentProp = ctx.entityProp.mappedBy!!
+        val childType = ctx.targetType
+        val parentProp = ctx.backProp!!
         val fkColumn = parentProp.storage as Column
         if (fkColumn.onDelete == OnDeleteAction.NONE) {
             throw ExecutionException(

@@ -150,6 +150,7 @@ open class EntityPropImpl(
             ResolvingPhase.PROP_TARGET -> resolveTarget(builder)
             ResolvingPhase.PROP_MAPPED_BY -> resolvedMappedBy(builder)
             ResolvingPhase.PROP_DEFAULT_COLUMN -> resolveDefaultColumn()
+            ResolvingPhase.PROP_TARGET_TYPE_BACK_PROPS -> resolveTargetTypeBackProps()
             ResolvingPhase.ON_INITIALIZE_SPI -> onInitialize()
         }
     }
@@ -205,6 +206,12 @@ open class EntityPropImpl(
             !isConnection
         ) {
             setStorage(Column())
+        }
+    }
+
+    private fun resolveTargetTypeBackProps() {
+        _targetType?.let {
+            (it as EntityTypeImpl).mutableBackProps += this
         }
     }
 

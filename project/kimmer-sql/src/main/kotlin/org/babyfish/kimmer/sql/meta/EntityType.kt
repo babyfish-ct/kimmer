@@ -29,4 +29,6 @@ interface EntityType {
     val props: Map<String, EntityProp>
 
     val starProps: Map<String, EntityProp>
+
+    val backProps: Set<EntityProp>
 }

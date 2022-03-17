@@ -176,8 +176,8 @@ abstract class AbstractMutationTest : AbstractTest() {
                 executions.size
             }
             if (throwable !== null) {
-                expect(true, "Throwable has not been tested.") {
-                    throwableChecked
+                if (!throwableChecked) {
+                    throw throwable
                 }
             }
         }
@@ -190,7 +190,7 @@ abstract class AbstractMutationTest : AbstractTest() {
     ) : ExpectDSL(executions, throwable) {
         fun rowCount(rowCount: Int) {
             if (throwable === null) {
-                expect(rowCount) { this.rowCount }
+                expect(rowCount, "bad row count") { this.rowCount }
             }
         }
     }

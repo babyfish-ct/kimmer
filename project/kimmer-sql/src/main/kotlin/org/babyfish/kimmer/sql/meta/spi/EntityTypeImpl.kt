@@ -39,6 +39,8 @@ open class EntityTypeImpl(
 
     private var _tableName: String? = null
 
+    internal val mutableBackProps = mutableSetOf<EntityProp>()
+
     private var _expectedPhase = ResolvingPhase.SUPER_TYPE.ordinal
 
     override val name: String
@@ -87,6 +89,9 @@ open class EntityTypeImpl(
                 .associateByTo(map) { it.name }
         }
     }
+
+    override val backProps: Set<EntityProp>
+        get() = mutableBackProps
 
     internal fun resolve(builder: EntityMappingBuilderImpl, phase: ResolvingPhase) {
         if (shouldResolve(phase)) {

@@ -6,5 +6,5 @@ class H2Dialect : DefaultDialect() {
         "select nextval('$sequenceName')"
 
     override val lastIdentitySql: String
-        get() = "call identity()"
+        get() = "call scopeidentity()"
 }
