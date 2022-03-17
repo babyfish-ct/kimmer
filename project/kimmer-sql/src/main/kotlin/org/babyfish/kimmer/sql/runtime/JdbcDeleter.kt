@@ -8,6 +8,7 @@ import org.babyfish.kimmer.sql.MutationType
 import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.ast.JdbcSqlBuilder
 import org.babyfish.kimmer.sql.ast.valueIn
+import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import org.babyfish.kimmer.sql.meta.config.OnDeleteAction
@@ -107,9 +108,21 @@ internal class JdbcDeleter(
         mutationOptions: MutationOptions
     ) {
         val entityType = mutationOptions.entityType
+        for (prop in entityType.props.values) {
+            val storage = prop.storage as? MiddleTable ?: continue
+            handleMiddleTable(
+                contexts,
+                prop,
+                null,
+                storage.tableName,
+                storage.joinColumnName,
+                storage.targetJoinColumnName
+            )
+        }
         for (backProp in entityType.backProps) {
             val targetType = backProp.declaringType
-            if (backProp.isReference) {
+            val backStorage = backProp.storage
+            if (backStorage is Column) {
                 val childGroupMap = sqlClient.createQuery(targetType.kotlinType as KClass<Entity<FakeId>>) {
                     val parentId = table
                         .joinReference(
@@ -128,61 +141,21 @@ internal class JdbcDeleter(
                 if (childGroupMap.isNotEmpty()) {
                     for (ctx in contexts) {
                         val targets = childGroupMap[ctx.entityId] ?: continue
-                        ctx.deleteAssociation(backProp) {
+                        ctx.deleteAssociationByBackProp(backProp) {
                             detachByTargets(targets)
                             handleChildTable(this)
                         }
                     }
                 }
-            } else {
-                val middleTable = (
-                    backProp.storage ?: backProp.opposite?.storage
-                ) as? MiddleTable
-                if (middleTable !== null) {
-                    val (tableName, joinColumnName, targetJoinColumnName) =
-                        if (backProp.storage is MiddleTable) {
-                            Triple(middleTable.tableName, middleTable.targetJoinColumnName, middleTable.joinColumnName)
-                        } else {
-                            Triple(middleTable.tableName, middleTable.joinColumnName, middleTable.targetJoinColumnName)
-                        }
-                    val (sql, variables) = JdbcSqlBuilder(sqlClient)
-                        .apply {
-                            sql("select ")
-                            sql(joinColumnName)
-                            sql(", ")
-                            sql(targetJoinColumnName)
-                            sql(" from ")
-                            sql(tableName)
-                            sql(" where ")
-                            sql(joinColumnName)
-                            sql(" in (")
-                            contexts.forEachIndexed { index, ctx ->
-                                if (index != 0) {
-                                    sql(", ")
-                                }
-                                variable(ctx.entityId)
-                            }
-                            sql(")")
-                        }
-                        .build()
-                    val childGroupMap = sqlClient.jdbcExecutor.execute(con, sql, variables) {
-                        mapRows {
-                            getObject(JDBC_BASE_INDEX) to
-                                getObject(JDBC_BASE_INDEX + 1)
-                        }
-                    }.groupBy({it.first}) {
-                        it.second
-                    }
-                    if (childGroupMap.isNotEmpty()) {
-                        for (ctx in contexts) {
-                            val targetIds = childGroupMap[ctx.entityId] ?: continue
-                            ctx.deleteAssociation(backProp) {
-                                detachByTargetIds(targetIds)
-                                handleMiddleTable(this, tableName, joinColumnName)
-                            }
-                        }
-                    }
-                }
+            } else if (backStorage is MiddleTable) {
+                handleMiddleTable(
+                    contexts,
+                    null,
+                    backProp,
+                    backStorage.tableName,
+                    backStorage.targetJoinColumnName,
+                    backStorage.joinColumnName
+                )
             }
         }
     }
@@ -227,6 +200,62 @@ internal class JdbcDeleter(
     }
 
     private fun handleMiddleTable(
+        contexts: List<MutationContext>,
+        prop: EntityProp?,
+        backProp: EntityProp?,
+        tableName: String,
+        joinColumnName: String,
+        targetJoinColumnName: String
+    ) {
+        val (sql, variables) = JdbcSqlBuilder(sqlClient)
+            .apply {
+                sql("select ")
+                sql(joinColumnName)
+                sql(", ")
+                sql(targetJoinColumnName)
+                sql(" from ")
+                sql(tableName)
+                sql(" where ")
+                sql(joinColumnName)
+                sql(" in (")
+                contexts.forEachIndexed { index, ctx ->
+                    if (index != 0) {
+                        sql(", ")
+                    }
+                    variable(ctx.entityId)
+                }
+                sql(")")
+            }
+            .build()
+        val childGroupMap = sqlClient.jdbcExecutor.execute(con, sql, variables) {
+            mapRows {
+                getObject(JDBC_BASE_INDEX) to
+                    getObject(JDBC_BASE_INDEX + 1)
+            }
+        }.groupBy({it.first}) {
+            it.second
+        }
+        if (childGroupMap.isNotEmpty()) {
+            for (ctx in contexts) {
+                val targetIds = childGroupMap[ctx.entityId] ?: continue
+                when {
+                    prop !== null ->
+                        ctx.deleteAssociation(prop) {
+                            detachByTargetIds(targetIds)
+                            deleteMiddleTableRows(this, tableName, joinColumnName)
+                        }
+                    backProp !== null ->
+                        ctx.deleteAssociationByBackProp(backProp) {
+                            detachByTargetIds(targetIds)
+                            deleteMiddleTableRows(this, tableName, joinColumnName)
+                        }
+                    else -> error("Internal bug: neither prop nor backProp is specified")
+                }
+            }
+        }
+    }
+
+    private fun deleteMiddleTableRows(
         ctx: MutationContext.AssociationContext,
         tableName: String,
         joinColumnName: String

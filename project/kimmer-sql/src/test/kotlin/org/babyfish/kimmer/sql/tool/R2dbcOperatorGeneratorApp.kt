@@ -35,7 +35,8 @@ private fun translateToR2dbc(runtimeDir: File, suffix: String) {
         .replace("java.sql.Connection", "io.r2dbc.spi.Connection")
         .replace("executeUpdate()", "rowsUpdated.awaitSingle()")
         .replace("saveAssociation", "saveAssociationAsync")
-        .replace("deleteAssociation", "deleteAssociationAsync")
+        .replace("deleteAssociation(", "deleteAssociationAsync(")
+        .replace("deleteAssociationByBackProp(", "deleteAssociationByBackPropAsync(")
     println(r2dbcSourceCode)
     r2dbcFile.writeText(r2dbcSourceCode)
 }

@@ -36,6 +36,9 @@ class DMLTest: AbstractMutationTest() {
 
     @Test
     fun testUpdateJoinByMySql() {
+
+        assumeNativeDatabase()
+
         using(MysqlDialect()) {
             sqlClient.createUpdate(Author::class) {
                 set(table.firstName, concat(table.firstName, value("*")))
@@ -76,14 +79,33 @@ class DMLTest: AbstractMutationTest() {
         }
     }
 
-    @Ignore
     @Test
     fun testUpdateJoinByPostgres() {
-        sqlClient.createUpdate(Author::class) {
-            set(table.firstName, concat(table.firstName, value("*")))
-            where(table.books.store.name eq "MANNING")
-        }.executeAndExpectRowCount {
 
+        assumeNativeDatabase()
+
+        using(PostgresDialect()) {
+            sqlClient.createUpdate(Author::class) {
+                set(table.firstName, concat(table.firstName, value("*")))
+                where(table.books.store.name eq "MANNING")
+            }.executeAndExpectRowCount(
+                POSTGRES_DATA_SOURCE,
+                POSTGRES_CONNECTION_FACTORY
+            ) {
+                statement {
+                    sql{
+                        """update AUTHOR tb_1_ 
+                            |set FIRST_NAME = concat(tb_1_.FIRST_NAME, $1) 
+                            |from BOOK_AUTHOR_MAPPING as tb_2_ 
+                            |inner join BOOK as tb_3_ on tb_2_.BOOK_ID = tb_3_.ID 
+                            |inner join BOOK_STORE as tb_4_ on tb_3_.STORE_ID = tb_4_.ID 
+                            |where tb_1_.ID = tb_2_.AUTHOR_ID 
+                            |and tb_4_.NAME = $2""".trimMargin()
+                    }
+                    variables("*", "MANNING")
+                }
+                rowCount(1)
+            }
         }
     }
 
@@ -124,6 +146,19 @@ class DMLTest: AbstractMutationTest() {
 
     @Test
     fun testDelete() {
+        sqlClient.createDelete(Book::class) {
+            where(table.name eq "Learning GraphQL")
+        }.executeAndExpectRowCount {
+            statement {
+                sql("delete from BOOK as tb_1_ where tb_1_.NAME = $1")
+                variables("Learning GraphQL")
+            }
+            rowCount(3)
+        }
+    }
+
+    @Test
+    fun testDeleteWithJoin() {
         sqlClient.createDelete(Book::class) {
             where(table.store.name eq "MANNING")
         }.executeAndExpectRowCount {

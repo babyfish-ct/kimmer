@@ -22,8 +22,8 @@ import org.babyfish.kimmer.sql.model.Gender
 import org.babyfish.kimmer.sql.runtime.*
 import org.babyfish.kimmer.sql.spi.createSqlClient
 import org.junit.BeforeClass
+import org.springframework.jdbc.datasource.SimpleDriverDataSource
 import java.io.InputStreamReader
-import java.sql.DriverManager
 import java.sql.PreparedStatement
 import java.util.*
 import javax.sql.DataSource
@@ -209,7 +209,11 @@ abstract class AbstractTest {
 
         private const val R2DBC_URL = "r2dbc:h2:mem:///r2dbc_db"
 
+        @JvmStatic
         private val JDBC_PARAMETER_REGEX = Regex("\\?")
+
+        @JvmStatic
+        private val dataSource: DataSource
 
         @JvmStatic
         private val connectionFactory: ConnectionFactory
@@ -220,7 +224,7 @@ abstract class AbstractTest {
             dataSource: DataSource? = null,
             block: java.sql.Connection.() -> Unit
         ) {
-            (dataSource?.connection ?: DriverManager.getConnection(JDBC_URL)).use {
+            (dataSource ?: this.dataSource).connection.use {
                 when (transactionMode) {
                     TransactionMode.NONE -> it.block()
                     TransactionMode.ROLLBACK -> {
@@ -238,10 +242,10 @@ abstract class AbstractTest {
         @JvmStatic
         protected suspend fun r2dbc(
             transactionMode: TransactionMode = TransactionMode.NONE,
-            factory: ConnectionFactory? = null,
+            connectionFactory: ConnectionFactory? = null,
             block: suspend io.r2dbc.spi.Connection.() -> Unit
         ) {
-            val con = (factory ?: connectionFactory).create().awaitSingle()
+            val con = (connectionFactory ?: this.connectionFactory).create().awaitSingle()
             try {
                 when (transactionMode) {
                     TransactionMode.NONE -> block(con)
@@ -316,10 +320,7 @@ abstract class AbstractTest {
         }
 
         init {
-            // Init JDBC
-            Class.forName("org.h2.Driver")
-
-            // Init R2DBC
+            dataSource = SimpleDriverDataSource(org.h2.Driver(), JDBC_URL)
             connectionFactory = ConnectionFactories.get(R2DBC_URL)
         }
     }

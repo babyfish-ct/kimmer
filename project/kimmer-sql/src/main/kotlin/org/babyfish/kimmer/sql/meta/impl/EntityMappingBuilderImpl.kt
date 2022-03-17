@@ -7,9 +7,11 @@ import org.babyfish.kimmer.meta.ImmutableType
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.MappingException
 import org.babyfish.kimmer.sql.meta.EntityMappingBuilder
+import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
 import org.babyfish.kimmer.sql.meta.ScalarProvider
 import org.babyfish.kimmer.sql.meta.config.IdGenerator
+import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import org.babyfish.kimmer.sql.meta.config.Storage
 import org.babyfish.kimmer.sql.meta.config.UserIdGenerator
 import org.babyfish.kimmer.sql.meta.spi.EntityPropImpl
@@ -105,6 +107,30 @@ internal class EntityMappingBuilderImpl(
         for (phase in ResolvingPhase.values()) {
             resolve(phase)
         }
+        val middleTablePropMap = mutableMapOf<String, EntityProp>()
+        for (entityType in entityTypeMap.values) {
+            for (entityProp in entityType.declaredProps.values) {
+                val storage = entityProp.storage
+                if (storage is MiddleTable) {
+                    val standardTableName = standardMiddleTableName(storage.tableName)
+                    middleTablePropMap.put(standardTableName, entityProp)?.let {
+                        if (entityProp.declaringType === it.targetType &&
+                            entityProp.targetType === it.declaringType) {
+                            throw MappingException(
+                                "Conflict mapping, the middle table '$standardTableName' " +
+                                    "is configured by '$entityProp' and '$it', " +
+                                    "they look like two side of bidirectional association, " +
+                                    "please make one of them are inverse property"
+                            )
+                        }
+                        throw MappingException(
+                            "Conflict mapping, the middle table '$standardTableName' " +
+                                "is configured by '$entityProp' and '$it'"
+                        )
+                    }
+                }
+            }
+        }
         val map = entityTypeMap.entries.associateBy(
             {it.key.kotlinType as KClass<out Entity<*>>}
         ) {
@@ -182,3 +208,24 @@ internal class EntityMappingBuilderImpl(
         return entityProp
     }
 }
+
+private fun standardMiddleTableName(tableName: String): String {
+    var result = tableName
+    val lastDotIndex = result.lastIndexOf('.')
+    if (lastDotIndex != -1) {
+        result = result.substring(lastDotIndex + 1)
+    }
+    result = result.trim()
+    for (quote in QUOTES) {
+        if (result.startsWith(quote.first) && result.endsWith(quote.second)) {
+            result = result.substring(1, result.length - 1)
+        }
+    }
+    return result.trim().lowercase()
+}
+
+private val QUOTES = listOf(
+    "`" to "`",
+    "\"" to "\"",
+    "[" to "]"
+)

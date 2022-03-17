@@ -31,7 +31,7 @@ internal abstract class AbstractMutableQueryImpl<E, ID>(
           Entity<ID>,
           ID: Comparable<ID> {
 
-    private val predicates = mutableListOf<NonNullExpression<Boolean>>()
+    internal val predicates = mutableListOf<NonNullExpression<Boolean>>()
 
     private val groupByExpressions = mutableListOf<Expression<*>>()
 

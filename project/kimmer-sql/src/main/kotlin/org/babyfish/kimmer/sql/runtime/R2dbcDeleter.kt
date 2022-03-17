@@ -9,6 +9,7 @@ import org.babyfish.kimmer.sql.MutationType
 import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.ast.R2dbcSqlBuilder
 import org.babyfish.kimmer.sql.ast.valueIn
+import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import org.babyfish.kimmer.sql.meta.config.OnDeleteAction
@@ -69,7 +70,7 @@ internal class R2dbcDeleter(
             .filter { it.isEntityInitialized }
             .takeIf { it.isNotEmpty() }
             ?.let { entityContexts ->
-                deleteAssociationAsyncs(entityContexts, mutationOptions)
+                deleteAssociations(entityContexts, mutationOptions)
                 val (sql, variables) = R2dbcSqlBuilder(sqlClient)
                     .apply {
                         sql("delete from ")
@@ -103,18 +104,30 @@ internal class R2dbcDeleter(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private suspend fun deleteAssociationAsyncs(
+    private suspend fun deleteAssociations(
         contexts: List<MutationContext>,
         mutationOptions: MutationOptions
     ) {
         val entityType = mutationOptions.entityType
-        for (referenceProp in entityType.backProps) {
-            val targetType = referenceProp.declaringType
-            if (referenceProp.isReference) {
+        for (prop in entityType.props.values) {
+            val storage = prop.storage as? MiddleTable ?: continue
+            handleMiddleTable(
+                contexts,
+                prop,
+                null,
+                storage.tableName,
+                storage.joinColumnName,
+                storage.targetJoinColumnName
+            )
+        }
+        for (backProp in entityType.backProps) {
+            val targetType = backProp.declaringType
+            val backStorage = backProp.storage
+            if (backStorage is Column) {
                 val childGroupMap = sqlClient.createQuery(targetType.kotlinType as KClass<Entity<FakeId>>) {
                     val parentId = table
                         .joinReference(
-                            referenceProp.kotlinProp as KProperty1<Entity<FakeId>, Entity<FakeId>>
+                            backProp.kotlinProp as KProperty1<Entity<FakeId>, Entity<FakeId>>
                         )
                         .get(
                             entityType.idProp.kotlinProp as KProperty1<Entity<FakeId>, Any>
@@ -129,61 +142,21 @@ internal class R2dbcDeleter(
                 if (childGroupMap.isNotEmpty()) {
                     for (ctx in contexts) {
                         val targets = childGroupMap[ctx.entityId] ?: continue
-                        ctx.deleteAssociationAsync(referenceProp) {
+                        ctx.deleteAssociationByBackPropAsync(backProp) {
                             detachByTargets(targets)
                             handleChildTable(this)
                         }
                     }
                 }
-            } else {
-                val middleTable = (
-                    referenceProp.storage ?: referenceProp.opposite?.storage
-                ) as? MiddleTable
-                if (middleTable !== null) {
-                    val (tableName, joinColumnName, targetJoinColumnName) =
-                        if (referenceProp.storage is MiddleTable) {
-                            Triple(middleTable.tableName, middleTable.targetJoinColumnName, middleTable.joinColumnName)
-                        } else {
-                            Triple(middleTable.tableName, middleTable.joinColumnName, middleTable.targetJoinColumnName)
-                        }
-                    val (sql, variables) = R2dbcSqlBuilder(sqlClient)
-                        .apply {
-                            sql("select ")
-                            sql(joinColumnName)
-                            sql(", ")
-                            sql(targetJoinColumnName)
-                            sql(" from ")
-                            sql(tableName)
-                            sql(" where ")
-                            sql(joinColumnName)
-                            sql(" in (")
-                            contexts.forEachIndexed { index, ctx ->
-                                if (index != 0) {
-                                    sql(", ")
-                                }
-                                variable(ctx.entityId)
-                            }
-                            sql(")")
-                        }
-                        .build()
-                    val childGroupMap = sqlClient.r2dbcExecutor.execute(con, sql, variables) {
-                        mapRows {
-                            getObject(R2DBC_BASE_INDEX) to
-                                getObject(R2DBC_BASE_INDEX + 1)
-                        }
-                    }.groupBy({it.first}) {
-                        it.second
-                    }
-                    if (childGroupMap.isNotEmpty()) {
-                        for (ctx in contexts) {
-                            val targetIds = childGroupMap[ctx.entityId] ?: continue
-                            ctx.deleteAssociationAsync(referenceProp) {
-                                detachByTargetIds(targetIds)
-                                handleMiddleTable(this, tableName, joinColumnName)
-                            }
-                        }
-                    }
-                }
+            } else if (backStorage is MiddleTable) {
+                handleMiddleTable(
+                    contexts,
+                    null,
+                    backProp,
+                    backStorage.tableName,
+                    backStorage.targetJoinColumnName,
+                    backStorage.joinColumnName
+                )
             }
         }
     }
@@ -192,12 +165,12 @@ internal class R2dbcDeleter(
         ctx: MutationContext.AssociationContext
     ) {
         val childType = ctx.targetType
-        val parentProp = ctx.backProp!!
-        val fkColumn = parentProp.storage as Column
+        val backProp = ctx.backProp!!
+        val fkColumn = backProp.storage as Column
         if (fkColumn.onDelete == OnDeleteAction.NONE) {
             throw ExecutionException(
                 "Cannot delete the entity '${ctx.owner.entity}', " +
-                    "the 'onDelete' of parent property '${parentProp}' is 'NONE' " +
+                    "the 'onDelete' of parent property '${backProp}' is 'NONE' " +
                     "but there are some child objects whose type is '${childType.kotlinType.qualifiedName}': " +
                     ctx.detachedTargets.toLimitString { it.entity.toString() }
             )
@@ -228,6 +201,62 @@ internal class R2dbcDeleter(
     }
 
     private suspend fun handleMiddleTable(
+        contexts: List<MutationContext>,
+        prop: EntityProp?,
+        backProp: EntityProp?,
+        tableName: String,
+        joinColumnName: String,
+        targetJoinColumnName: String
+    ) {
+        val (sql, variables) = R2dbcSqlBuilder(sqlClient)
+            .apply {
+                sql("select ")
+                sql(joinColumnName)
+                sql(", ")
+                sql(targetJoinColumnName)
+                sql(" from ")
+                sql(tableName)
+                sql(" where ")
+                sql(joinColumnName)
+                sql(" in (")
+                contexts.forEachIndexed { index, ctx ->
+                    if (index != 0) {
+                        sql(", ")
+                    }
+                    variable(ctx.entityId)
+                }
+                sql(")")
+            }
+            .build()
+        val childGroupMap = sqlClient.r2dbcExecutor.execute(con, sql, variables) {
+            mapRows {
+                getObject(R2DBC_BASE_INDEX) to
+                    getObject(R2DBC_BASE_INDEX + 1)
+            }
+        }.groupBy({it.first}) {
+            it.second
+        }
+        if (childGroupMap.isNotEmpty()) {
+            for (ctx in contexts) {
+                val targetIds = childGroupMap[ctx.entityId] ?: continue
+                when {
+                    prop !== null ->
+                        ctx.deleteAssociationAsync(prop) {
+                            detachByTargetIds(targetIds)
+                            deleteMiddleTableRows(this, tableName, joinColumnName)
+                        }
+                    backProp !== null ->
+                        ctx.deleteAssociationByBackPropAsync(backProp) {
+                            detachByTargetIds(targetIds)
+                            deleteMiddleTableRows(this, tableName, joinColumnName)
+                        }
+                    else -> error("Internal bug: neither prop nor backProp is specified")
+                }
+            }
+        }
+    }
+
+    private suspend fun deleteMiddleTableRows(
         ctx: MutationContext.AssociationContext,
         tableName: String,
         joinColumnName: String

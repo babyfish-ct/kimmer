@@ -71,6 +71,18 @@ internal open class MutationContext private constructor(
     }
 
     fun deleteAssociation(
+        prop: EntityProp,
+        block: AssociationContext.() -> Unit
+    ) {
+        _associationMap.computeIfAbsent(prop.name) {
+            AssociationContext(prop, prop.opposite, emptyList())
+        }.apply {
+            block()
+            close()
+        }
+    }
+
+    fun deleteAssociationByBackProp(
         backProp: EntityProp,
         block: AssociationContext.() -> Unit
     ) {
@@ -108,6 +120,18 @@ internal open class MutationContext private constructor(
     }
 
     suspend fun deleteAssociationAsync(
+        prop: EntityProp,
+        block: suspend AssociationContext.() -> Unit
+    ) {
+        _associationMap.computeIfAbsent(prop.name) {
+            AssociationContext(prop, prop.opposite, emptyList())
+        }.apply {
+            block()
+            close()
+        }
+    }
+
+    suspend fun deleteAssociationByBackPropAsync(
         backProp: EntityProp,
         block: suspend AssociationContext.() -> Unit
     ) {

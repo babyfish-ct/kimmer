@@ -92,11 +92,13 @@ abstract class AbstractMutationTest : AbstractTest() {
     }
 
     protected fun Executable<List<RootMutationResult>>.executeAndExpectResults(
+        dataSource: DataSource? = null,
+        connectionFactory: ConnectionFactory? = null,
         testWay: TestWay = TestWay.BOTH,
         block: ExpectDSLWithResult.() -> Unit
     ) {
         if (testWay.forJdbc) {
-            jdbc(TransactionMode.ROLLBACK) {
+            jdbc(TransactionMode.ROLLBACK, dataSource) {
                 clearExecutions()
                 val (results, throwable) = try {
                     execute(this) to null
@@ -111,7 +113,7 @@ abstract class AbstractMutationTest : AbstractTest() {
 
         if (testWay.forR2dbc) {
             runBlocking {
-                r2dbc(TransactionMode.ROLLBACK) {
+                r2dbc(TransactionMode.ROLLBACK, connectionFactory) {
                     clearExecutions()
                     val (results, throwable) = try {
                         execute(this) to null
