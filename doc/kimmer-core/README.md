@@ -18,7 +18,9 @@ Port [https://github.com/immerjs/immer](https://github.com/immerjs/immer) for ko
 ```kt
 val book = new(Book::class).by {
     name = "book"
-    store().name = "parent"
+    store().apply {
+        name = "parent"
+    }
     authors().add.by {
         name = "child-1"
     }
