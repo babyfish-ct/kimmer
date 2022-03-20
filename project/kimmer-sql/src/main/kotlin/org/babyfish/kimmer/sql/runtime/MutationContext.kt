@@ -1,5 +1,6 @@
 package org.babyfish.kimmer.sql.runtime
 
+import com.fasterxml.jackson.annotation.JsonIncludeProperties
 import org.babyfish.kimmer.Draft
 import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.produce
@@ -8,6 +9,12 @@ import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
 import kotlin.reflect.KClass
 
+@JsonIncludeProperties(value = [
+    "totalAffectedRowCount",
+    "type",
+    "affectedRowCount",
+    "associations"
+])
 internal open class MutationContext private constructor(
     private var _entity: Entity<*>?,
     private val _entityId: Any?,
@@ -42,8 +49,8 @@ internal open class MutationContext private constructor(
     override val affectedRowCount: Int
         get() = if (type == MutationType.NONE) 0 else 1
 
-    override val associationMap: Map<String, AssociationContext>
-        get() = _associationMap
+    override val associations: Collection<AssociationContext>
+        get() = _associationMap.values
 
     @Suppress("UNCHECKED_CAST")
     fun saveAssociation(
@@ -144,18 +151,24 @@ internal open class MutationContext private constructor(
     }
 
     override val totalAffectedRowCount: Int
-        get() = affectedRowCount + associationMap.values.sumOf { it.totalAffectedRowCount }
+        get() = affectedRowCount + associations.sumOf { it.totalAffectedRowCount }
 
     override fun toString(): String =
         "{$contentString}"
 
     protected val contentString: String
-        get() = "totalAffectedRowCount:$totalAffectedRowCount,type:$type,affectedRowCount:$affectedRowCount,entity:$entity,associationMap:{" +
-            associationMap.entries.joinToString(",") {
-                "${it.key}:${it.value}"
-            } +
-            "}"
+        get() = "totalAffectedRowCount:$totalAffectedRowCount,type:$type,affectedRowCount:$affectedRowCount,entity:$entity,associations:[" +
+            associations.joinToString(",") +
+            "]"
 
+    @JsonIncludeProperties(value = [
+        "associationName",
+        "totalAffectedRowCount",
+        "targets",
+        "detachedTargets",
+        "middleTableInsertedRowCount",
+        "middleTableDeletedRowCount"
+    ])
     inner class AssociationContext(
         val prop: EntityProp?,
         val backProp: EntityProp?,
@@ -168,7 +181,7 @@ internal open class MutationContext private constructor(
             }
         }
 
-        val associationName: String
+        override val associationName: String
             get() = prop?.name ?: "←${backProp!!.name}"
 
         val ownerType: EntityType
@@ -284,12 +297,20 @@ internal open class MutationContext private constructor(
                     detachedTargets.sumOf { it.totalAffectedRowCount }
 
         override fun toString(): String =
-            "{totalAffectedRowCount:$totalAffectedRowCount," +
+            "{associationName:\"$associationName\"," +
+                "totalAffectedRowCount:$totalAffectedRowCount," +
                 "targets:[${targets.joinToString(",")}]," +
                 "detachedTargets:[${detachedTargets.joinToString(",")}]," +
                 "middleTableInsertedRowCount:$middleTableInsertedRowCount," +
                 "middleTableDeletedRowCount:$middleTableDeletedRowCount}"
 
+        @JsonIncludeProperties(value = [
+            "totalAffectedRowCount",
+            "type",
+            "affectedRowCount",
+            "associations",
+            "middleTableChanged"
+        ])
         inner class TargetContext(
             target: Entity<*>,
             mutationOptions: MutationOptions

@@ -216,8 +216,9 @@ class SaveListTest: AbstractMutationTest() {
                         |},
                         |"id":"56506a3c-801b-4f7d-a41d-e889cdc3d67d"
                     |},
-                    |associationMap:{
-                        |store:{
+                    |associations:[
+                        |{
+                            |associationName:"store",
                             |totalAffectedRowCount:1,
                             |targets:[
                                 |{
@@ -228,14 +229,15 @@ class SaveListTest: AbstractMutationTest() {
                                         |"name":"TURING",
                                         |"id":"4f351857-6cbc-4aad-ac3a-140a20034a3b"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:false
                                 |}
                             |],
                             |detachedTargets:[],
                             |middleTableInsertedRowCount:0,
                             |middleTableDeletedRowCount:0
-                        |},authors:{
+                        |},{
+                            |associationName:"authors",
                             |totalAffectedRowCount:4,
                             |targets:[
                                 |{
@@ -248,7 +250,7 @@ class SaveListTest: AbstractMutationTest() {
                                         |"lastName":"Beaulieu",
                                         |"id":"6939d7e2-4f84-40b6-b486-f48a9a21af4d"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:true
                                 |},{
                                     |totalAffectedRowCount:2,
@@ -260,15 +262,16 @@ class SaveListTest: AbstractMutationTest() {
                                         |"lastName":"Vasilik",
                                         |"id":"c5b73398-e4c0-41be-b091-d3161ac0a52e"
                                     |},
-                                    |associationMap:{},
-                                    |middleTableChanged:true}
-                                |],
-                                |detachedTargets:[],
-                                |middleTableInsertedRowCount:2,
-                                |middleTableDeletedRowCount:0
-                            |}
+                                    |associations:[],
+                                    |middleTableChanged:true
+                                |}
+                            |],
+                            |detachedTargets:[],
+                            |middleTableInsertedRowCount:2,
+                            |middleTableDeletedRowCount:0
                         |}
-                    |}""".trimMargin()
+                    |]
+                |}""".trimMargin()
             }
             result {
                 """{
@@ -298,8 +301,9 @@ class SaveListTest: AbstractMutationTest() {
                         |},
                         |"id":"4749d255-2745-4f6b-99ae-61aa8fd463e0"
                     |},
-                    |associationMap:{
-                        |store:{
+                    |associations:[
+                        |{
+                            |associationName:"store",
                             |totalAffectedRowCount:0,
                             |targets:[
                                 |{
@@ -310,15 +314,15 @@ class SaveListTest: AbstractMutationTest() {
                                         |"name":"TURING",
                                         |"id":"4f351857-6cbc-4aad-ac3a-140a20034a3b"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:false
                                 |}
                             |],
                             |detachedTargets:[],
                             |middleTableInsertedRowCount:0,
                             |middleTableDeletedRowCount:0
-                        |},
-                        |authors:{
+                        |},{
+                            |associationName:"authors",
                             |totalAffectedRowCount:3,
                             |targets:[
                                 |{
@@ -331,7 +335,7 @@ class SaveListTest: AbstractMutationTest() {
                                         |"lastName":"Molinaro",
                                         |"id":"b4ec96a2-ab48-44ac-a941-b10a9f5bc14c"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:true
                                 |},{
                                     |totalAffectedRowCount:1,
@@ -343,15 +347,16 @@ class SaveListTest: AbstractMutationTest() {
                                         |"lastName":"Vasilik",
                                         |"id":"c5b73398-e4c0-41be-b091-d3161ac0a52e"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:true
                                 |}
                             |],
                             |detachedTargets:[],
                             |middleTableInsertedRowCount:2,
-                            |middleTableDeletedRowCount:0}
+                            |middleTableDeletedRowCount:0
                         |}
-                    |}""".trimMargin()
+                    |]
+                |}""".trimMargin()
             }
         }
     }

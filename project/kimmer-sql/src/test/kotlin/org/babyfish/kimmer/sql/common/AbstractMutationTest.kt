@@ -1,10 +1,11 @@
 package org.babyfish.kimmer.sql.common
 
 import io.r2dbc.spi.ConnectionFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.runBlocking
 import org.babyfish.kimmer.sql.RootMutationResult
 import org.babyfish.kimmer.sql.ast.Executable
-import java.util.*
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 import kotlin.test.expect
@@ -33,7 +34,7 @@ abstract class AbstractMutationTest : AbstractTest() {
         resetAutoIds()
 
         if (testWay.forR2dbc) {
-            runBlocking {
+            runBlocking(newFixedThreadPoolContext(5, "r2dbc-test")) {
                 r2dbc(TransactionMode.ROLLBACK, connectionFactory) {
                     clearExecutions()
                     val (affectedRowCount, throwable) = try {
@@ -77,7 +78,7 @@ abstract class AbstractMutationTest : AbstractTest() {
                     init()
                 }
             }
-            runBlocking {
+            runBlocking(newFixedThreadPoolContext(5, "r2dbc-test")) {
                 r2dbc(TransactionMode.ROLLBACK, connectionFactory) {
                     clearExecutions()
                     val (results, throwable) = try {
@@ -112,7 +113,7 @@ abstract class AbstractMutationTest : AbstractTest() {
         resetAutoIds()
 
         if (testWay.forR2dbc) {
-            runBlocking {
+            runBlocking(newFixedThreadPoolContext(5, "r2dbc-test")) {
                 r2dbc(TransactionMode.ROLLBACK, connectionFactory) {
                     clearExecutions()
                     val (results, throwable) = try {

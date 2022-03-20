@@ -113,8 +113,9 @@ class DeleteTest : AbstractMutationTest() {
                             |"website":null,
                             |"id":"2fa3955e-3e83-49b9-902e-0465c109c779"
                         |},
-                        |associationMap:{
-                            |books:{
+                        |associations:[
+                            |{
+                                |associationName:"books",
                                 |totalAffectedRowCount:3,
                                 |targets:[],
                                 |detachedTargets:[
@@ -129,7 +130,7 @@ class DeleteTest : AbstractMutationTest() {
                                             |"store":{"id":"2fa3955e-3e83-49b9-902e-0465c109c779"},
                                             |"id":"a62f7aa3-9490-4612-98b5-98aae0e77120"
                                         |}
-                                        |,associationMap:{},
+                                        |,associations:[],
                                         |middleTableChanged:false
                                     |},{
                                         |totalAffectedRowCount:1,
@@ -142,7 +143,7 @@ class DeleteTest : AbstractMutationTest() {
                                             |"store":{"id":"2fa3955e-3e83-49b9-902e-0465c109c779"},
                                             |"id":"e37a8344-73bb-4b23-ba76-82eac11f03e6"
                                         |},
-                                        |associationMap:{},
+                                        |associations:[],
                                         |middleTableChanged:false
                                     |},{
                                         |totalAffectedRowCount:1,
@@ -155,14 +156,14 @@ class DeleteTest : AbstractMutationTest() {
                                             |"store":{"id":"2fa3955e-3e83-49b9-902e-0465c109c779"},
                                             |"id":"780bdf07-05af-48bf-9be9-f8c65236fecc"
                                         |},
-                                        |associationMap:{},
+                                        |associations:[],
                                         |middleTableChanged:false
                                     |}
                                 |],
                                 |middleTableInsertedRowCount:0,
                                 |middleTableDeletedRowCount:0
                             |}
-                        |}
+                        |]
                     |}""".trimMargin()
                 }
             }
@@ -239,8 +240,9 @@ class DeleteTest : AbstractMutationTest() {
                             |"website":null,
                             |"id":"2fa3955e-3e83-49b9-902e-0465c109c779"
                         |},
-                        |associationMap:{
-                            |books:{
+                        |associations:[
+                            |{
+                                |associationName:"books",
                                 |totalAffectedRowCount:6,
                                 |targets:[],
                                 |detachedTargets:[
@@ -255,8 +257,9 @@ class DeleteTest : AbstractMutationTest() {
                                             |"store":{"id":"2fa3955e-3e83-49b9-902e-0465c109c779"},
                                             |"id":"a62f7aa3-9490-4612-98b5-98aae0e77120"
                                         |},
-                                        |associationMap:{
-                                            |authors:{
+                                        |associations:[
+                                            |{
+                                                |associationName:"authors",
                                                 |totalAffectedRowCount:1,
                                                 |targets:[],
                                                 |detachedTargets:[
@@ -265,14 +268,14 @@ class DeleteTest : AbstractMutationTest() {
                                                         |type:NONE,
                                                         |affectedRowCount:0,
                                                         |entity:{"id":"eb4963fd-5223-43e8-b06b-81e6172ee7ae"},
-                                                        |associationMap:{},
+                                                        |associations:[],
                                                         |middleTableChanged:true
                                                     |}
                                                 |],
                                                 |middleTableInsertedRowCount:0,
                                                 |middleTableDeletedRowCount:1
                                             |}
-                                        |},
+                                        |],
                                         |middleTableChanged:false
                                     |},{
                                         |totalAffectedRowCount:2,
@@ -285,8 +288,9 @@ class DeleteTest : AbstractMutationTest() {
                                             |"store":{"id":"2fa3955e-3e83-49b9-902e-0465c109c779"},
                                             |"id":"e37a8344-73bb-4b23-ba76-82eac11f03e6"
                                         |},
-                                        |associationMap:{
-                                            |authors:{
+                                        |associations:[
+                                            |{
+                                                |associationName:"authors",
                                                 |totalAffectedRowCount:1,
                                                 |targets:[],
                                                 |detachedTargets:[
@@ -295,14 +299,14 @@ class DeleteTest : AbstractMutationTest() {
                                                         |type:NONE,
                                                         |affectedRowCount:0,
                                                         |entity:{"id":"eb4963fd-5223-43e8-b06b-81e6172ee7ae"},
-                                                        |associationMap:{},
+                                                        |associations:[],
                                                         |middleTableChanged:true
                                                     |}
                                                 |],
                                                 |middleTableInsertedRowCount:0,
                                                 |middleTableDeletedRowCount:1
                                             |}
-                                        |},
+                                        |],
                                         |middleTableChanged:false
                                     |},{
                                         |totalAffectedRowCount:2,
@@ -314,8 +318,9 @@ class DeleteTest : AbstractMutationTest() {
                                             |"price":80.00,
                                             |"store":{"id":"2fa3955e-3e83-49b9-902e-0465c109c779"},
                                             |"id":"780bdf07-05af-48bf-9be9-f8c65236fecc"
-                                        |},associationMap:{
-                                            |authors:{
+                                        |},associations:[
+                                            |{
+                                                |associationName:"authors",
                                                 |totalAffectedRowCount:1,
                                                 |targets:[],
                                                 |detachedTargets:[
@@ -324,21 +329,21 @@ class DeleteTest : AbstractMutationTest() {
                                                         |type:NONE,
                                                         |affectedRowCount:0,
                                                         |entity:{"id":"eb4963fd-5223-43e8-b06b-81e6172ee7ae"},
-                                                        |associationMap:{},
+                                                        |associations:[],
                                                         |middleTableChanged:true
                                                     |}
                                                 |],
                                                 |middleTableInsertedRowCount:0,
                                                 |middleTableDeletedRowCount:1
                                             |}
-                                        |},
+                                        |],
                                         |middleTableChanged:false
                                     |}
                                 |],
                                 |middleTableInsertedRowCount:0,
                                 |middleTableDeletedRowCount:0
                             |}
-                        |}
+                        |]
                     |}""".trimMargin()
                 }
             }
@@ -397,8 +402,9 @@ class DeleteTest : AbstractMutationTest() {
                             |"store":{"id":"d38c10da-6be8-4924-b9b9-5e81899612a0"},
                             |"id":"e110c564-23cc-4811-9e81-d587a13db634"
                         |},
-                        |associationMap:{
-                            |authors:{
+                        |associations:[
+                            |{
+                                |associationName:"authors",
                                 |totalAffectedRowCount:2,
                                 |targets:[],
                                 |detachedTargets:[
@@ -407,21 +413,21 @@ class DeleteTest : AbstractMutationTest() {
                                         |type:NONE,
                                         |affectedRowCount:0,
                                         |entity:{"id":"1e93da94-af84-44f4-82d1-d8a9fd52ea94"},
-                                        |associationMap:{},
+                                        |associations:[],
                                         |middleTableChanged:true
                                     |},{
                                         |totalAffectedRowCount:1,
                                         |type:NONE,
                                         |affectedRowCount:0,
                                         |entity:{"id":"fd6bb6cf-336d-416c-8005-1ae11a6694b5"},
-                                        |associationMap:{},
+                                        |associations:[],
                                         |middleTableChanged:true
                                     |}
                                 |],
                                 |middleTableInsertedRowCount:0,
                                 |middleTableDeletedRowCount:2
                             |}
-                        |}
+                        |]
                     |}""".trimMargin()
                 }
                 result {
@@ -436,8 +442,9 @@ class DeleteTest : AbstractMutationTest() {
                             |"store":{"id":"d38c10da-6be8-4924-b9b9-5e81899612a0"},
                             |"id":"b649b11b-1161-4ad2-b261-af0112fdd7c8"
                         |},
-                        |associationMap:{
-                            |authors:{
+                        |associations:[
+                            |{
+                                |associationName:"authors",
                                 |totalAffectedRowCount:2,
                                 |targets:[],
                                 |detachedTargets:[
@@ -446,21 +453,21 @@ class DeleteTest : AbstractMutationTest() {
                                         |type:NONE,
                                         |affectedRowCount:0,
                                         |entity:{"id":"1e93da94-af84-44f4-82d1-d8a9fd52ea94"},
-                                        |associationMap:{},
+                                        |associations:[],
                                         |middleTableChanged:true
                                     |},{
                                         |totalAffectedRowCount:1,
                                         |type:NONE,
                                         |affectedRowCount:0,
                                         |entity:{"id":"fd6bb6cf-336d-416c-8005-1ae11a6694b5"},
-                                        |associationMap:{},
+                                        |associations:[],
                                         |middleTableChanged:true
                                     |}
                                 |],
                                 |middleTableInsertedRowCount:0,
                                 |middleTableDeletedRowCount:2
                             |}
-                        |}
+                        |]
                     |}""".trimMargin()
                 }
                 result {
@@ -471,7 +478,7 @@ class DeleteTest : AbstractMutationTest() {
                         |entity:{
                             |"id":"56506a3c-801b-4f7d-a41d-e889cdc3d67d"
                         |},
-                        |associationMap:{}
+                        |associations:[]
                     |}""".trimMargin()
                 }
             }
@@ -519,8 +526,9 @@ class DeleteTest : AbstractMutationTest() {
                             |"lastName":"Banks",
                             |"id":"1e93da94-af84-44f4-82d1-d8a9fd52ea94"
                         |},
-                        |associationMap:{
-                            |books:{
+                        |associations:[
+                            |{
+                                |associationName:"books",
                                 |totalAffectedRowCount:3,
                                 |targets:[],
                                 |detachedTargets:[
@@ -529,28 +537,28 @@ class DeleteTest : AbstractMutationTest() {
                                         |type:NONE,
                                         |affectedRowCount:0,
                                         |entity:{"id":"e110c564-23cc-4811-9e81-d587a13db634"},
-                                        |associationMap:{},
+                                        |associations:[],
                                         |middleTableChanged:true
                                     |},{
                                         |totalAffectedRowCount:1,
                                         |type:NONE,
                                         |affectedRowCount:0,
                                         |entity:{"id":"b649b11b-1161-4ad2-b261-af0112fdd7c8"},
-                                        |associationMap:{},
+                                        |associations:[],
                                         |middleTableChanged:true
                                     |},{
                                         |totalAffectedRowCount:1,
                                         |type:NONE,
                                         |affectedRowCount:0,
                                         |entity:{"id":"64873631-5d82-4bae-8eb8-72dd955bfc56"},
-                                        |associationMap:{},
+                                        |associations:[],
                                         |middleTableChanged:true
                                     |}
                                 |],
                                 |middleTableInsertedRowCount:0,
                                 |middleTableDeletedRowCount:3
                             |}
-                        |}
+                        |]
                     |}""".trimMargin()
                 }
             }

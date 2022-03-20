@@ -127,7 +127,7 @@ internal class JdbcSaver(
             } else {
                 null
             }
-        val idGenerator = idProp.idGenerator
+        val idGenerator = entityType.idGenerator
         val insertId = oldId ?: when (idGenerator) {
             is UserIdGenerator<*> ->
                 idGenerator.get()

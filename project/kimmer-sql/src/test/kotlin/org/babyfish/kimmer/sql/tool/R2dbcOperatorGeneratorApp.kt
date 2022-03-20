@@ -37,6 +37,7 @@ private fun translateToR2dbc(runtimeDir: File, suffix: String) {
         .replace("saveAssociation", "saveAssociationAsync")
         .replace("deleteAssociation(", "deleteAssociationAsync(")
         .replace("deleteAssociationByBackProp(", "deleteAssociationByBackPropAsync(")
+        .replace("produce", "produceAsync")
     println(r2dbcSourceCode)
     r2dbcFile.writeText(r2dbcSourceCode)
 }

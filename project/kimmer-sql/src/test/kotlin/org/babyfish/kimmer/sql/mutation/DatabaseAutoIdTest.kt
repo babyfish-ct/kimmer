@@ -51,8 +51,9 @@ class DatabaseAutoIdTest : AbstractMutationTest() {
                                 |"name":"Chapter-1",
                                 |"id":1
                             |},
-                            |associationMap:{
-                                |book:{
+                            |associations:[
+                                |{
+                                    |associationName:"book",
                                     |totalAffectedRowCount:0,
                                     |targets:[
                                         |{
@@ -60,7 +61,7 @@ class DatabaseAutoIdTest : AbstractMutationTest() {
                                             |type:NONE,
                                             |affectedRowCount:0,
                                             |entity:{"id":"780bdf07-05af-48bf-9be9-f8c65236fecc"},
-                                            |associationMap:{},
+                                            |associations:[],
                                             |middleTableChanged:false
                                         |}
                                     |],
@@ -68,7 +69,7 @@ class DatabaseAutoIdTest : AbstractMutationTest() {
                                     |middleTableInsertedRowCount:0,
                                     |middleTableDeletedRowCount:0
                                 |}
-                            |}
+                            |]
                         |}""".trimMargin()
                     }
                 }
@@ -115,8 +116,9 @@ class DatabaseAutoIdTest : AbstractMutationTest() {
                                 |"name":"Chapter-1",
                                 |"id":1
                             |},
-                            |associationMap:{
-                                |book:{
+                            |associations:[
+                                |{
+                                    |associationName:"book",
                                     |totalAffectedRowCount:0,
                                     |targets:[
                                         |{
@@ -124,7 +126,7 @@ class DatabaseAutoIdTest : AbstractMutationTest() {
                                             |type:NONE,
                                             |affectedRowCount:0,
                                             |entity:{"id":"780bdf07-05af-48bf-9be9-f8c65236fecc"},
-                                            |associationMap:{},
+                                            |associations:[],
                                             |middleTableChanged:false
                                         |}
                                     |],
@@ -132,7 +134,7 @@ class DatabaseAutoIdTest : AbstractMutationTest() {
                                     |middleTableInsertedRowCount:0,
                                     |middleTableDeletedRowCount:0
                                 |}
-                            |}
+                            |]
                         |}""".trimMargin()
                     }
                 }
@@ -180,8 +182,9 @@ class DatabaseAutoIdTest : AbstractMutationTest() {
                                 |"store":{"id":"2fa3955e-3e83-49b9-902e-0465c109c779"},
                                 |"id":1
                             |},
-                            |associationMap:{
-                                |store:{
+                            |associations:[
+                                |{
+                                    |associationName:"store",
                                     |totalAffectedRowCount:0,
                                     |targets:[
                                         |{
@@ -191,7 +194,7 @@ class DatabaseAutoIdTest : AbstractMutationTest() {
                                             |entity:{
                                                 |"id":"2fa3955e-3e83-49b9-902e-0465c109c779"
                                             |},
-                                            |associationMap:{},
+                                            |associations:[],
                                             |middleTableChanged:false
                                         |}
                                     |],
@@ -199,7 +202,7 @@ class DatabaseAutoIdTest : AbstractMutationTest() {
                                     |middleTableInsertedRowCount:0,
                                     |middleTableDeletedRowCount:0
                                 |}
-                            |}
+                            |]
                         |}""".trimMargin()
                     }
                 }
@@ -247,8 +250,9 @@ class DatabaseAutoIdTest : AbstractMutationTest() {
                                 |"store":{"id":"2fa3955e-3e83-49b9-902e-0465c109c779"},
                                 |"id":1
                             |},
-                            |associationMap:{
-                                |store:{
+                            |associations:[
+                                |{
+                                    |associationName:"store",
                                     |totalAffectedRowCount:0,
                                     |targets:[
                                         |{
@@ -258,7 +262,7 @@ class DatabaseAutoIdTest : AbstractMutationTest() {
                                             |entity:{
                                                 |"id":"2fa3955e-3e83-49b9-902e-0465c109c779"
                                             |},
-                                            |associationMap:{},
+                                            |associations:[],
                                             |middleTableChanged:false
                                         |}
                                     |],
@@ -266,7 +270,7 @@ class DatabaseAutoIdTest : AbstractMutationTest() {
                                     |middleTableInsertedRowCount:0,
                                     |middleTableDeletedRowCount:0
                                 |}
-                            |}
+                            |]
                         |}""".trimMargin()
                     }
                 }

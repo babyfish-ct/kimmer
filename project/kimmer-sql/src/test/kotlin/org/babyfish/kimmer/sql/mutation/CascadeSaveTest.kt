@@ -69,8 +69,9 @@ class CascadeSaveTest : AbstractMutationTest() {
                         |},
                         |"id":"56506a3c-801b-4f7d-a41d-e889cdc3d67d"
                     |},
-                    |associationMap:{
-                        |store:{
+                    |associations:[
+                        |{
+                            |associationName:"store",
                             |totalAffectedRowCount:1,
                             |targets:[
                                 |{
@@ -82,16 +83,16 @@ class CascadeSaveTest : AbstractMutationTest() {
                                         |"website":"http://www.turing.com",
                                         |"id":"4749d255-2745-4f6b-99ae-61aa8fd463e0"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:false
                                 |}
                             |],
                             |detachedTargets:[],
                             |middleTableInsertedRowCount:0,
                             |middleTableDeletedRowCount:0
-                            |}
                         |}
-                    |}""".trimMargin()
+                    |]
+                |}""".trimMargin()
             }
         }
     }
@@ -137,8 +138,9 @@ class CascadeSaveTest : AbstractMutationTest() {
                         |},
                         |"id":"64873631-5d82-4bae-8eb8-72dd955bfc56"
                     |},
-                    |associationMap:{
-                        |store:{
+                    |associations:[
+                        |{
+                            |associationName:"store",
                             |totalAffectedRowCount:1,
                             |targets:[
                                 |{
@@ -147,17 +149,18 @@ class CascadeSaveTest : AbstractMutationTest() {
                                     |affectedRowCount:1,
                                     |entity:{
                                         |"website":"http://www.oreilly.com",
-                                        |"id":"d38c10da-6be8-4924-b9b9-5e81899612a0"},
-                                        |associationMap:{},
-                                        |middleTableChanged:false
-                                    |}
-                                |],
-                                |detachedTargets:[],
-                                |middleTableInsertedRowCount:0,
-                                |middleTableDeletedRowCount:0
-                            |}
+                                        |"id":"d38c10da-6be8-4924-b9b9-5e81899612a0"
+                                    |},
+                                    |associations:[],
+                                    |middleTableChanged:false
+                                |}
+                            |],
+                            |detachedTargets:[],
+                            |middleTableInsertedRowCount:0,
+                            |middleTableDeletedRowCount:0
                         |}
-                    |}""".trimMargin()
+                    |]
+                |}""".trimMargin()
             }
         }
     }
@@ -250,8 +253,9 @@ class CascadeSaveTest : AbstractMutationTest() {
                         |"name":"TURING",
                         |"id":"56506a3c-801b-4f7d-a41d-e889cdc3d67d"
                     |},
-                    |associationMap:{
-                        |books:{
+                    |associations:[
+                        |{
+                            |associationName:"books",
                             |totalAffectedRowCount:2,
                             |targets:[
                                 |{
@@ -265,7 +269,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                                         |"store":{"id":"56506a3c-801b-4f7d-a41d-e889cdc3d67d"},
                                         |"id":"4749d255-2745-4f6b-99ae-61aa8fd463e0"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:false
                                 |},{
                                     |totalAffectedRowCount:1,
@@ -278,15 +282,16 @@ class CascadeSaveTest : AbstractMutationTest() {
                                         |"store":{"id":"56506a3c-801b-4f7d-a41d-e889cdc3d67d"},
                                         |"id":"4f351857-6cbc-4aad-ac3a-140a20034a3b"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:false
-                                |}],
-                                |detachedTargets:[],
-                                |middleTableInsertedRowCount:0,
-                                |middleTableDeletedRowCount:0
-                            |}
+                                |}
+                            |],
+                            |detachedTargets:[],
+                            |middleTableInsertedRowCount:0,
+                            |middleTableDeletedRowCount:0
                         |}
-                    |}""".trimMargin()
+                    |]
+                |}""".trimMargin()
             }
         }
     }
@@ -384,8 +389,9 @@ class CascadeSaveTest : AbstractMutationTest() {
                         |"name":"O'REILLY",
                         |"id":"d38c10da-6be8-4924-b9b9-5e81899612a0"
                     |},
-                    |associationMap:{
-                        |books:{
+                    |associations:[
+                        |{
+                            |associationName:"books",
                             |totalAffectedRowCount:10,
                             |targets:[
                                 |{
@@ -399,7 +405,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                                         |"store":{"id":"d38c10da-6be8-4924-b9b9-5e81899612a0"},
                                         |"id":"64873631-5d82-4bae-8eb8-72dd955bfc56"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:false
                                 |},{
                                     |totalAffectedRowCount:1,
@@ -412,7 +418,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                                         |"store":{"id":"d38c10da-6be8-4924-b9b9-5e81899612a0"},
                                         |"id":"780bdf07-05af-48bf-9be9-f8c65236fecc"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:false
                                 |}
                             |],
@@ -422,63 +428,63 @@ class CascadeSaveTest : AbstractMutationTest() {
                                     |type:UPDATE,
                                     |affectedRowCount:1,
                                     |entity:{"store":null,"id":"e110c564-23cc-4811-9e81-d587a13db634"},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:false
                                 |},{
                                     |totalAffectedRowCount:1,
                                     |type:UPDATE,
                                     |affectedRowCount:1,
                                     |entity:{"store":null,"id":"b649b11b-1161-4ad2-b261-af0112fdd7c8"},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:false
                                 |},{
                                     |totalAffectedRowCount:1,
                                     |type:UPDATE,
                                     |affectedRowCount:1,
                                     |entity:{"store":null,"id":"8f30bc8a-49f9-481d-beca-5fe2d147c831"},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:false
                                 |},{
                                     |totalAffectedRowCount:1,
                                     |type:UPDATE,
                                     |affectedRowCount:1,
                                     |entity:{"store":null,"id":"8e169cfb-2373-4e44-8cce-1f1277f730d1"},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:false
                                 |},{
                                     |totalAffectedRowCount:1,
                                     |type:UPDATE,
                                     |affectedRowCount:1,
                                     |entity:{"store":null,"id":"9eded40f-6d2e-41de-b4e7-33a28b11c8b6"}
-                                    |,associationMap:{},
+                                    |,associations:[],
                                     |middleTableChanged:false
                                 |},{
                                     |totalAffectedRowCount:1,
                                     |type:UPDATE,
                                     |affectedRowCount:1,
                                     |entity:{"store":null,"id":"914c8595-35cb-4f67-bbc7-8029e9e6245a"},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:false
                                 |},{
                                     |totalAffectedRowCount:1,
                                     |type:UPDATE,
                                     |affectedRowCount:1,
                                     |entity:{"store":null,"id":"058ecfd0-047b-4979-a7dc-46ee24d08f08"},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:false
                                 |},{
                                     |totalAffectedRowCount:1,
                                     |type:UPDATE,
                                     |affectedRowCount:1,
                                     |entity:{"store":null,"id":"782b9a9d-eac8-41c4-9f2d-74a5d047f45a"},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:false
                                 |}
                             |],
                             |middleTableInsertedRowCount:0,
                             |middleTableDeletedRowCount:0
                         |}
-                    |}
+                    |]
                 |}""".trimMargin()
             }
         }
@@ -593,8 +599,10 @@ class CascadeSaveTest : AbstractMutationTest() {
                         |"name":"Kotlin in Action",
                         |"price":49,
                         |"id":"56506a3c-801b-4f7d-a41d-e889cdc3d67d"
-                    |},associationMap:{
-                        |authors:{
+                    |},
+                    |associations:[
+                        |{
+                            |associationName:"authors",
                             |totalAffectedRowCount:4,
                             |targets:[
                                 |{
@@ -607,7 +615,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                                         |"lastName":"Breslav",
                                         |"id":"4749d255-2745-4f6b-99ae-61aa8fd463e0"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:true
                                 |},{
                                     |totalAffectedRowCount:2,
@@ -619,15 +627,16 @@ class CascadeSaveTest : AbstractMutationTest() {
                                         |"lastName":"Saumont",
                                         |"id":"4f351857-6cbc-4aad-ac3a-140a20034a3b"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:true
-                                |}],
-                                |detachedTargets:[],
-                                |middleTableInsertedRowCount:2,
-                                |middleTableDeletedRowCount:0
-                            |}
+                                |}
+                            |],
+                            |detachedTargets:[],
+                            |middleTableInsertedRowCount:2,
+                            |middleTableDeletedRowCount:0
                         |}
-                    |}""".trimMargin()
+                    |]
+                |}""".trimMargin()
             }
         }
     }
@@ -746,8 +755,9 @@ class CascadeSaveTest : AbstractMutationTest() {
                         |"price":49,
                         |"id":"64873631-5d82-4bae-8eb8-72dd955bfc56"
                     |},
-                    |associationMap:{
-                        |authors:{
+                    |associations:[
+                        |{
+                            |associationName:"authors",
                             |totalAffectedRowCount:6,
                             |targets:[
                                 |{
@@ -760,7 +770,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                                         |"lastName":"Vanderkam",
                                         |"id":"c14665c8-c689-4ac7-b8cc-6f065b8d835d"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:true
                                 |},{
                                     |totalAffectedRowCount:2,
@@ -772,7 +782,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                                         |"lastName":"Cherny",
                                         |"id":"718795ad-77c1-4fcf-994a-fec6a5a11f0f"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:true
                                 |}
                             |],detachedTargets:[
@@ -781,21 +791,22 @@ class CascadeSaveTest : AbstractMutationTest() {
                                     |type:NONE,
                                     |affectedRowCount:0,
                                     |entity:{"id":"1e93da94-af84-44f4-82d1-d8a9fd52ea94"},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:true
                                 |},{
                                     |totalAffectedRowCount:1,
                                     |type:NONE,
                                     |affectedRowCount:0,
                                     |entity:{"id":"fd6bb6cf-336d-416c-8005-1ae11a6694b5"},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:true
                                 |}
                             |],
                             |middleTableInsertedRowCount:2,
-                            |middleTableDeletedRowCount:2}
+                            |middleTableDeletedRowCount:2
                         |}
-                    |}""".trimMargin()
+                    |]
+                |}""".trimMargin()
             }
         }
     }
@@ -905,8 +916,9 @@ class CascadeSaveTest : AbstractMutationTest() {
                         |"lastName":"Green",
                         |"id":"56506a3c-801b-4f7d-a41d-e889cdc3d67d"
                     |},
-                    |associationMap:{
-                        |books:{
+                    |associations:[
+                        |{
+                            |associationName:"books",
                             |totalAffectedRowCount:4,
                             |targets:[
                                 |{
@@ -919,7 +931,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                                         |"price":30,
                                         |"id":"4749d255-2745-4f6b-99ae-61aa8fd463e0"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:true
                                 |},{
                                     |totalAffectedRowCount:2,
@@ -931,15 +943,16 @@ class CascadeSaveTest : AbstractMutationTest() {
                                         |"price":40,
                                         |"id":"4f351857-6cbc-4aad-ac3a-140a20034a3b"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:true
                                 |}
                             |],
                             |detachedTargets:[],
                             |middleTableInsertedRowCount:2,
-                            |middleTableDeletedRowCount:0}
+                            |middleTableDeletedRowCount:0
                         |}
-                    |}""".trimMargin()
+                    |]
+                |}""".trimMargin()
             }
         }
     }
@@ -1051,8 +1064,9 @@ class CascadeSaveTest : AbstractMutationTest() {
                         |"lastName":"Procello",
                         |"id":"fd6bb6cf-336d-416c-8005-1ae11a6694b5"
                     |},
-                    |associationMap:{
-                        |books:{
+                    |associations:[
+                        |{
+                            |associationName:"books",
                             |totalAffectedRowCount:5,
                             |targets:[
                                 |{
@@ -1064,7 +1078,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                                         |"name":"Learning GraphQL",
                                         |"price":35,"id":"64873631-5d82-4bae-8eb8-72dd955bfc56"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:false
                                 |},{
                                     |totalAffectedRowCount:2,
@@ -1076,7 +1090,7 @@ class CascadeSaveTest : AbstractMutationTest() {
                                         |"price":28,
                                         |"id":"780bdf07-05af-48bf-9be9-f8c65236fecc"
                                     |},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:true
                                 |}
                             |],
@@ -1086,21 +1100,22 @@ class CascadeSaveTest : AbstractMutationTest() {
                                     |type:NONE,
                                     |affectedRowCount:0,
                                     |entity:{"id":"e110c564-23cc-4811-9e81-d587a13db634"},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:true
                                 |},{
                                     |totalAffectedRowCount:1,
                                     |type:NONE,
                                     |affectedRowCount:0,
                                     |entity:{"id":"b649b11b-1161-4ad2-b261-af0112fdd7c8"},
-                                    |associationMap:{},
+                                    |associations:[],
                                     |middleTableChanged:true
                                 |}
                             |],
                             |middleTableInsertedRowCount:1,
-                            |middleTableDeletedRowCount:2}
+                            |middleTableDeletedRowCount:2
                         |}
-                    |}""".trimMargin()
+                    |]
+                |}""".trimMargin()
             }
         }
     }

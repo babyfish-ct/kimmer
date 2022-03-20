@@ -20,22 +20,16 @@ import kotlin.reflect.KProperty1
  */
 interface EntityMappingBuilder {
 
-    fun entity(type: KClass<out Entity<*>>): EntityTypeImpl
-
-    fun tableName(type: KClass<out Entity<*>>, tableName: String)
+    fun entity(
+        type: KClass<out Entity<*>>,
+        tableName: String? = null,
+        idGenerator: IdGenerator? = null,
+        versionProp: KProperty1<*, Int>? = null
+    ): EntityTypeImpl
 
     fun prop(
         prop: KProperty1<out Entity<*>, *>,
-        storage: Storage? = null,
-        idGenerator: IdGenerator? = null,
-        isVersion: Boolean = false
-    ): EntityPropImpl
-
-    fun <ID: Comparable<ID>> prop(
-        prop: KProperty1<out Entity<ID>, ID>,
-        storage: Storage? = null,
-        idGenerator: UserIdGenerator<ID>,
-        isVersion: Boolean = false
+        storage: Storage? = null
     ): EntityPropImpl
 
     fun inverseProp(prop: KProperty1<out Entity<*>, *>, mappedBy: KProperty1<out Entity<*>, *>): EntityPropImpl

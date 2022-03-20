@@ -52,16 +52,16 @@ abstract class AbstractTest {
             r2dbcExecutor = R2dbcExecutorImpl()
         ) {
 
-            prop(
-                BookStore::id,
+            entity(
+                BookStore::class,
                 idGenerator = UserIdGenerator {
                     autoId(BookStore::class) as UUID
                 }
             )
             inverseProp(BookStore::books, Book::store)
 
-            prop(
-                Book::id,
+            entity(
+                Book::class,
                 idGenerator = UserIdGenerator {
                     autoId(Book::class) as UUID
                 }
@@ -78,8 +78,8 @@ abstract class AbstractTest {
             )
             inverseProp(Book::chapters, Chapter::book)
 
-            prop(
-                Author::id,
+            entity(
+                Author::class,
                 idGenerator = UserIdGenerator {
                     autoId(Author::class) as UUID
                 }
@@ -89,14 +89,14 @@ abstract class AbstractTest {
                 concat(firstName, value(" "), lastName)
             })
 
-            prop(
-                Chapter::id,
+            entity(
+                Chapter::class,
                 idGenerator = SequenceIdGenerator("chapter_id_seq")
             )
             prop(Chapter::book)
 
-            prop(
-                Announcement::id,
+            entity(
+                Announcement::class,
                 idGenerator = IdentityIdGenerator
             )
             prop(Announcement::store)

@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 open class EntityPropImpl(
-    override val declaringType: EntityType,
+    final override val declaringType: EntityType,
     kotlinProp: KProperty1<*, *>
 ): EntityProp {
 
@@ -26,17 +26,17 @@ open class EntityPropImpl(
 
     private var _storage: Storage? = null
 
-    private var _version: Boolean = false
-
-    private var _idGenerator: IdGenerator? = null
-
     private var _targetType: EntityType? = null
 
     override val immutableProp: ImmutableProp =
         declaringType.immutableType.props[kotlinProp.name]
             ?: throw IllegalArgumentException("No prop '${kotlinProp.name}' of type '${declaringType.kotlinType.qualifiedName}'")
 
-    override val isId: Boolean = kotlinProp.name == Entity<*>::id.name
+    override val isId: Boolean
+        get() = kotlinProp.name == Entity<*>::id.name
+
+    override val isVersion: Boolean
+        get() = this === declaringType.versionProp
 
     override val targetType: EntityType?
         get() = _targetType
@@ -46,12 +46,6 @@ open class EntityPropImpl(
 
     override val storage: Storage?
         get() = _storage
-
-    override val isVersion: Boolean
-        get() = _version
-
-    override val idGenerator: IdGenerator?
-        get() = _idGenerator
 
     override val returnType: KClass<*>
         get() = immutableProp.returnType
@@ -119,29 +113,6 @@ open class EntityPropImpl(
         } else {
             storage
         }
-    }
-
-    internal fun setVersion() {
-        if (isId) {
-            throw MappingException("Cannot configure id property '$this' as version property")
-        }
-        if (targetType !== null) {
-            throw MappingException("Cannot configure association property '$this' as version property")
-        }
-        if (returnType != Int::class) {
-            throw MappingException("Cannot configure '$this' as version property because its type is not integer")
-        }
-        if (isNullable) {
-            throw MappingException("Cannot configure '$this' as version property because its is nullable")
-        }
-        _version = true
-    }
-
-    internal fun setIdGenerator(idGenerator: IdGenerator?) {
-        if (!isId) {
-            throw MappingException("Cannot set id generator for non-id property")
-        }
-        _idGenerator = idGenerator
     }
 
     internal fun resolve(builder: EntityMappingBuilderImpl, phase: ResolvingPhase) {

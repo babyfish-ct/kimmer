@@ -1,5 +1,6 @@
 package org.babyfish.kimmer.sql.ast
 
+import org.babyfish.kimmer.sql.ExecutionException
 import org.babyfish.kimmer.sql.MappingException
 import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.ast.table.Table
@@ -170,18 +171,22 @@ internal abstract class AbstractSqlBuilder(
                 singleVariable(value._9 ?: throw IllegalArgumentException("tuple._9 is null"))
                 sql(")")
             }
-            else -> singleVariable(value)
+            else ->
+                singleVariable(value)
         }
     }
     
     override fun nullVariable(type: KClass<*>) {
         validate()
         val scalarProvider = sqlClient.scalarProviderMap[type]
-        variables += DbNull(scalarProvider?.sqlType ?: type)
+        onAppendVariable(DbNull(scalarProvider?.sqlType ?: type))
     }
 
     @Suppress("UNCHECKED_CAST")
     private fun singleVariable(value: Any) {
+        if (value is DbNull) {
+            throw ExecutionException("Cannot add variable whose type is '${DbNull::class.qualifiedName}'")
+        }
         val scalarProvider = sqlClient.scalarProviderMap[value::class] as ScalarProvider<Any, Any>?
         onAppendVariable(scalarProvider?.toSql(value) ?: value)
     }

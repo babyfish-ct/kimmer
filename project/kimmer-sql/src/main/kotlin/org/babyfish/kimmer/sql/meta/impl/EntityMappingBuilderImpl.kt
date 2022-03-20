@@ -28,38 +28,33 @@ internal class EntityMappingBuilderImpl(
 
     private val scalarProviderMap = mutableMapOf<KClass<*>, ScalarProvider<*, *>>()
 
-    override fun entity(type: KClass<out Entity<*>>): EntityTypeImpl =
-        this[ImmutableType.of(type)]
-
-    override fun tableName(type: KClass<out Entity<*>>, tableName: String) {
-        this[ImmutableType.of(type)].setTableName(tableName)
-    }
+    override fun entity(
+        type: KClass<out Entity<*>>,
+        tableName: String?,
+        idGenerator: IdGenerator?,
+        versionProp: KProperty1<*, Int>?
+    ): EntityTypeImpl =
+        this[ImmutableType.of(type)].apply {
+            if (tableName !== null) {
+                setTableName(tableName)
+            }
+            if (idGenerator !== null) {
+                setIdGenerator(idGenerator)
+            }
+            if (versionProp !== null) {
+                setVersionPropName(versionProp.name)
+            }
+        }
 
     override fun prop(
         prop: KProperty1<out Entity<*>, *>,
-        storage: Storage?,
-        idGenerator: IdGenerator?,
-        isVersion: Boolean
+        storage: Storage?
     ): EntityPropImpl =
         createProp(prop).apply {
             storage?.let {
                 setStorage(it)
             }
-            idGenerator?.let {
-                setIdGenerator(it)
-            }
-            if (isVersion) {
-                setVersion()
-            }
         }
-
-    override fun <ID : Comparable<ID>> prop(
-        prop: KProperty1<out Entity<ID>, ID>,
-        storage: Storage?,
-        idGenerator: UserIdGenerator<ID>,
-        isVersion: Boolean
-    ): EntityPropImpl =
-        prop(prop, storage, idGenerator as IdGenerator, isVersion)
 
     override fun inverseProp(
         prop: KProperty1<out Entity<*>, *>,

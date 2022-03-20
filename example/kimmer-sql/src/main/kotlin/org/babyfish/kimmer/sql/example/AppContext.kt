@@ -54,7 +54,7 @@ object AppContext {
             concat(firstName, value(" "), lastName)
         })
 
-        scalar(
+        scalarProvider(
             enumProviderByString(Gender::class) {
                 map(Gender.MALE, "M")
                 map(Gender.FEMALE, "F")

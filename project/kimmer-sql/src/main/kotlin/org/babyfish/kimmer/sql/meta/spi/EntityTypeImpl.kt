@@ -7,9 +7,13 @@ import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.Formula
+import org.babyfish.kimmer.sql.meta.config.IdGenerator
+import org.babyfish.kimmer.sql.meta.config.UserIdGenerator
 import org.babyfish.kimmer.sql.meta.impl.EntityMappingBuilderImpl
 import org.babyfish.kimmer.sql.meta.impl.ResolvingPhase
 import org.babyfish.kimmer.sql.spi.databaseIdentifier
+import kotlin.reflect.KProperty1
+import kotlin.reflect.jvm.javaGetter
 
 open class EntityTypeImpl(
     private val metaFactory: MetaFactory,
@@ -35,7 +39,9 @@ open class EntityTypeImpl(
 
     private var _idProp: EntityProp? = null
 
-    private var _versionProp: EntityProp? = null
+    private var _idGenerator: IdGenerator? = null
+
+    private var _versionProp: Any? = null // String | EntityProp
 
     private var _tableName: String? = null
 
@@ -59,6 +65,14 @@ open class EntityTypeImpl(
         _tableName = tableName
     }
 
+    internal fun setIdGenerator(idGenerator: IdGenerator) {
+        _idGenerator = idGenerator
+    }
+
+    internal fun setVersionPropName(versionPropName: String) {
+        _versionProp = versionPropName
+    }
+
     override val superType: EntityType?
         get() = _superType
 
@@ -68,8 +82,13 @@ open class EntityTypeImpl(
     override val idProp: EntityProp
         get() = _idProp ?: error("Id property has not been resolved")
 
+    override val idGenerator: IdGenerator?
+        get() = _idGenerator
+
     override val versionProp: EntityProp?
-        get() = _versionProp
+        get() = _versionProp?.let {
+            it as? EntityProp ?: error("Version property has not been resolved")
+        }
 
     override val declaredProps: Map<String, EntityProp>
         get() = mutableDeclaredProps
@@ -100,7 +119,7 @@ open class EntityTypeImpl(
                 ResolvingPhase.DECLARED_PROPS -> resolveDeclaredProps(builder)
                 ResolvingPhase.PROPS -> resolveProps(builder)
                 ResolvingPhase.ID_PROP -> resolveIdProp()
-                ResolvingPhase.VERSION_PROP -> resolveVersionProp()
+                ResolvingPhase.VERSION_PROP -> resoleVersionProp()
                 ResolvingPhase.ON_INITIALIZE_SPI -> onInitialize()
                 else -> resolvePropDetail(builder, phase)
             }
@@ -189,28 +208,13 @@ open class EntityTypeImpl(
         return idProp
     }
 
-    private fun resolveVersionProp(): EntityProp? {
-        var superVersionProp = _superType?.resolveVersionProp()
-        val declaredVersionProp = declaredProps
-            .values
-            .filter { it.isVersion }
-            .also {
-                if (it.size > 1) {
-                    throw MappingException("Conflict version properties: ${it.joinToString()}")
-                }
-            }
-            .firstOrNull()
-        val versionProp =
-            if (superVersionProp !== null) {
-                if (declaredVersionProp !== null) {
-                    throw MappingException("Conflict version properties: $superVersionProp, $declaredVersionProp")
-                }
-                superVersionProp
-            } else {
-                declaredVersionProp
-            }
-        _versionProp = versionProp
-        return versionProp
+    private fun resoleVersionProp() {
+        val versionPropName = _versionProp as? String ?: return
+        val prop = declaredProps[versionPropName]
+            ?: MappingException(
+                "Illegal version property '$versionPropName', " +
+                    "There is no such declared property in '${immutableType.qualifiedName}'"
+            )
     }
 
     protected open fun onInitialize() {}

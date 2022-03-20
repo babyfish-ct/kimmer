@@ -20,6 +20,8 @@ interface EntityProp {
 
     val isId: Boolean
 
+    val isVersion: Boolean
+
     val returnType: KClass<*>
 
     /** Be different with [returnType].java */
@@ -44,8 +46,4 @@ interface EntityProp {
     val scalarProvider: ScalarProvider<*, *>?
 
     val storage: Storage?
-
-    val isVersion: Boolean
-
-    val idGenerator: IdGenerator?
 }

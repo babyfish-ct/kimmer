@@ -1,5 +1,6 @@
 package org.babyfish.kimmer.sql
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.babyfish.kimmer.sql.ast.Executable
 import org.babyfish.kimmer.sql.meta.EntityProp
 import kotlin.reflect.KClass
@@ -35,10 +36,11 @@ interface RootMutationResult : MutationResult {
     val entity: Entity<*>
     val type: MutationType
     val affectedRowCount: Int
-    val associationMap: Map<String, AssociationMutationResult>
+    val associations: Collection<AssociationMutationResult>
 }
 
 interface AssociationMutationResult : MutationResult {
+    val associationName: String
     val middleTableAffectedRowCount: Int
     val middleTableInsertedRowCount: Int
     val middleTableDeletedRowCount: Int

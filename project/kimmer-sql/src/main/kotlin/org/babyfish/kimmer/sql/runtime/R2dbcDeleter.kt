@@ -2,7 +2,7 @@ package org.babyfish.kimmer.sql.runtime
 
 import kotlinx.coroutines.reactive.awaitSingle
 import org.babyfish.kimmer.Draft
-import org.babyfish.kimmer.produce
+import org.babyfish.kimmer.produceAsync
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ExecutionException
 import org.babyfish.kimmer.sql.MutationType
@@ -97,7 +97,7 @@ internal class R2dbcDeleter(
         contexts
             .filter { !it.isEntityInitialized }
             .forEach {
-                it.entity = produce(entityType.kotlinType) {
+                it.entity = produceAsync(entityType.kotlinType) {
                     Draft.set(this, entityType.idProp.immutableProp, it.entityId)
                 }
             }

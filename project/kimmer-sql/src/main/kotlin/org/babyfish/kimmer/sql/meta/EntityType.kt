@@ -2,6 +2,7 @@ package org.babyfish.kimmer.sql.meta
 
 import org.babyfish.kimmer.meta.ImmutableType
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.meta.config.IdGenerator
 import kotlin.reflect.KClass
 
 interface EntityType {
@@ -21,6 +22,8 @@ interface EntityType {
     val tableName: String
 
     val idProp: EntityProp
+
+    val idGenerator: IdGenerator?
 
     val versionProp: EntityProp?
 

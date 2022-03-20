@@ -3,7 +3,7 @@ package org.babyfish.kimmer.sql.runtime
 import kotlinx.coroutines.reactive.awaitSingle
 import org.babyfish.kimmer.Draft
 import org.babyfish.kimmer.Immutable
-import org.babyfish.kimmer.produce
+import org.babyfish.kimmer.produceAsync
 import org.babyfish.kimmer.sql.*
 import org.babyfish.kimmer.sql.ast.R2dbcSqlBuilder
 import org.babyfish.kimmer.sql.ast.eq
@@ -101,7 +101,7 @@ internal class R2dbcSaver(
                     }
                 }.firstOrNull()
                 if (existing !== null) {
-                    ctx.entity = produce(type, entity as Entity<FakeId>) {
+                    ctx.entity = produceAsync(type, entity as Entity<FakeId>) {
                         Draft.set(this, idProp, existing.id)
                     }
                     update(ctx, true, existing)
@@ -128,7 +128,7 @@ internal class R2dbcSaver(
             } else {
                 null
             }
-        val idGenerator = idProp.idGenerator
+        val idGenerator = entityType.idGenerator
         val insertId = oldId ?: when (idGenerator) {
             is UserIdGenerator<*> ->
                 idGenerator.get()
@@ -217,7 +217,7 @@ internal class R2dbcSaver(
                             ?: throw ExecutionException("Last id '$id' does not match the type of $idProp")
                     }.first()
                 }
-            ctx.entity = produce(entityType.kotlinType as KClass<Entity<*>>, entity) {
+            ctx.entity = produceAsync(entityType.kotlinType as KClass<Entity<*>>, entity) {
                 Draft.set(this, idProp.immutableProp, newId)
             }
         }
@@ -303,7 +303,7 @@ internal class R2dbcSaver(
             return
         }
         if (version !== null) {
-            ctx.entity = produce(entityType.kotlinType as KClass<Entity<*>>, entity) {
+            ctx.entity = produceAsync(entityType.kotlinType as KClass<Entity<*>>, entity) {
                 Draft.set(this, entityType.versionProp!!.immutableProp, version + 1)
             }
         }
@@ -369,11 +369,11 @@ internal class R2dbcSaver(
                 !Immutable.isLoaded(it.entity, targetType.idProp.immutableProp)
             }
         noIdTargets.forEach {
-            it.entity = produce(targetType.kotlinType as KClass<Entity<*>>, it.entity) {
+            it.entity = produceAsync(targetType.kotlinType as KClass<Entity<*>>, it.entity) {
                 Draft.set(
                     this,
                     fkProp.immutableProp,
-                    produce(ownerType.kotlinType as KClass<Entity<*>>) {
+                    produceAsync(ownerType.kotlinType as KClass<Entity<*>>) {
                         Draft.set(this, ownerType.idProp.immutableProp, ctx.owner.entity.id)
                     }
                 )
@@ -440,7 +440,7 @@ internal class R2dbcSaver(
                 }
                 for (detachedTarget in ctx.detachedTargets) {
                     detachedTarget.type = MutationType.UPDATE
-                    detachedTarget.entity = produce(targetType.kotlinType as KClass<Entity<*>>, detachedTarget.entity) {
+                    detachedTarget.entity = produceAsync(targetType.kotlinType as KClass<Entity<*>>, detachedTarget.entity) {
                         Draft.set(
                             this,
                             fkProp.immutableProp,
@@ -453,11 +453,11 @@ internal class R2dbcSaver(
         for (target in ctx.targets) {
 
             if (target.entity.id !in existingTargetIds) {
-                target.entity = produce(targetType.kotlinType as KClass<Entity<*>>, target.entity) {
+                target.entity = produceAsync(targetType.kotlinType as KClass<Entity<*>>, target.entity) {
                     Draft.set(
                         this,
                         fkProp.immutableProp,
-                        produce(ownerType.kotlinType as KClass<Entity<*>>) {
+                        produceAsync(ownerType.kotlinType as KClass<Entity<*>>) {
                             Draft.set(this, ownerType.idProp.immutableProp, ctx.owner.entity.id)
                         }
                     )

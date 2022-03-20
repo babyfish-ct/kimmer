@@ -1,9 +1,7 @@
 package org.babyfish.kimmer.sql.mutation
 
 import org.babyfish.kimmer.sql.ExecutionException
-import org.babyfish.kimmer.sql.ast.concat
-import org.babyfish.kimmer.sql.ast.eq
-import org.babyfish.kimmer.sql.ast.value
+import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.common.AbstractMutationTest
 import org.babyfish.kimmer.sql.common.graphQLInActionId1
 import org.babyfish.kimmer.sql.common.graphQLInActionId2
@@ -31,6 +29,19 @@ class DMLTest: AbstractMutationTest() {
                 variables("*", "Dan")
             }
             rowCount(1)
+        }
+    }
+
+    @Test
+    fun testUpdateWithNullArgument() {
+        sqlClient.createUpdate(BookStore::class) {
+            set(table.website, nullValue(String::class))
+        }.executeAndExpectRowCount {
+            statement {
+                sql("update BOOK_STORE tb_1_ set WEBSITE = $1")
+                variables(DbNull(String::class))
+            }
+            rowCount(2)
         }
     }
 
