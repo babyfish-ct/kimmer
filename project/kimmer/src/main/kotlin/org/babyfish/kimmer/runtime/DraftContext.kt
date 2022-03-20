@@ -81,20 +81,30 @@ internal abstract class AbstractDraftContext: DraftContext {
         return spi.`{resolve}`() as T
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun <E : Immutable> resolve(list: List<E>?): List<E>? {
         if (list === null) {
             return null
         }
         val draft = list as? ListDraft<*> ?: listDraftMap[list]
-        if (draft === null) {
-            return list
+        return if (draft === null) {
+            var newList: MutableList<E>? = null
+            list.forEachIndexed { index, obj ->
+                val resolved = resolve(obj) as E
+                if (resolved !== obj && newList === null) {
+                    newList = list.subList(0, index).toMutableList()
+                }
+                newList?.add(resolved)
+            }
+            newList ?: list
+        } else {
+            if (draft.draftContext !== this) {
+                throw IllegalArgumentException(
+                    "Cannot resolve the draft list '${list}' because it belong to another draft context"
+                )
+            }
+            draft.resolve() as List<E>
         }
-        if (draft.draftContext !== this) {
-            throw IllegalArgumentException(
-                "Cannot resolve the draft list '${list}' because it belong to another draft context"
-            )
-        }
-        return draft.resolve() as List<E>
     }
 
     protected abstract fun createObjectDraft(obj: Immutable): Draft<*>

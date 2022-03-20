@@ -14,7 +14,26 @@ import kotlin.test.expect
 class KimmerTest {
 
     @Test
-    fun testSimple() {
+    fun testSimpleByDraftProp() {
+        val book = new(Book::class).by {
+            name = "book"
+            store = new(BookStore::class).by {
+                name = "store"
+            }
+            authors = listOf(
+                new(Author::class).by {
+                    name = "Jim"
+                },
+                new(Author::class).by {
+                    name = "Kate"
+                }
+            )
+        }
+        assertSimpleBook(book)
+    }
+
+    @Test
+    fun testSimpleByDraftFunction() {
         val book = new(Book::class).by {
             name = "book"
             store().name = "store"
@@ -24,6 +43,15 @@ class KimmerTest {
             authors().add.by {
                 name = "Kate"
             }
+        }
+        assertSimpleBook(book)
+    }
+
+    private fun assertSimpleBook(book: Book) {
+        expect(false) { book is Draft<*> }
+        expect(false) { book.store is Draft<*> }
+        expect(false) {
+            book.authors.any { it is Draft<*> }
         }
         val book2 = new(Book::class).by(book) {}
         val book3 = new(Book::class).by(book2) {
