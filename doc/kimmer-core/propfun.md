@@ -67,6 +67,21 @@ val book = new(Book::class).by {
 }
 ```
 
+### Syntactic sugar for draft function: "add.by"
+
+The above code can also be written like this
+```kt
+val book = new(Book::class).by {
+    authors().add.by { 
+        name = "Autor1"
+    }
+    authors().add.by { 
+        name = "Autor2"
+    }
+}
+```
+
+
 ---------------------------------
 
 [< Previous: Dynamics & unlodead properties](./dynamic.md) | [Back to document](./README.md) | [Next: Jackson >](./jackson.md)
