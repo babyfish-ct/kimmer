@@ -67,7 +67,7 @@ val book = new(Book::class).by {
 }
 ```
 
-### Syntactic sugar for draft function: "add.by"
+### Syntactic sugar for draft function: ".add.by"
 
 The above code can also be written like this
 ```kt
