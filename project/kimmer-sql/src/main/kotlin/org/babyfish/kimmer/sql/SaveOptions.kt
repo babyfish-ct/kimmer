@@ -15,17 +15,12 @@ interface AbstractSaveOptionsDSL<E: Entity<*>> {
 
     fun <X: Entity<*>> reference(
         prop: KProperty1<E, X?>,
-        block: AssociatedObjSaveOptionsDSL<X>.() -> Unit
+        block: AssociatedSaveOptionsDSL<X>.() -> Unit
     )
 
     fun <X: Entity<*>> list(
         prop: KProperty1<E, List<X>>,
-        block: AssociatedObjSaveOptionsDSL<X>.() -> Unit
-    )
-
-    fun <X: Entity<*>> connection(
-        prop: KProperty1<E, Connection<X>>,
-        block: AssociatedObjSaveOptionsDSL<X>.() -> Unit
+        block: AssociatedSaveOptionsDSL<X>.() -> Unit
     )
 }
 
@@ -36,7 +31,7 @@ interface SaveOptionsDSL<E: Entity<*>>: AbstractSaveOptionsDSL<E> {
     fun updateOnly()
 }
 
-interface AssociatedObjSaveOptionsDSL<E: Entity<*>>: AbstractSaveOptionsDSL<E> {
+interface AssociatedSaveOptionsDSL<E: Entity<*>>: AbstractSaveOptionsDSL<E> {
 
     fun createAttachedObjects()
 
@@ -48,7 +43,7 @@ internal class SaveOptionsDSLImpl<E: Entity<*>>(
     private var insertable: Boolean,
     private var updatable: Boolean,
     private var deletable: Boolean
-) : SaveOptionsDSL<E>, AssociatedObjSaveOptionsDSL<E> {
+) : SaveOptionsDSL<E>, AssociatedSaveOptionsDSL<E> {
 
     private var _keyProps: Set<EntityProp> = emptySet()
 
@@ -84,7 +79,7 @@ internal class SaveOptionsDSLImpl<E: Entity<*>>(
 
     override fun <X : Entity<*>> reference(
         prop: KProperty1<E, X?>,
-        block: AssociatedObjSaveOptionsDSL<X>.() -> Unit
+        block: AssociatedSaveOptionsDSL<X>.() -> Unit
     ) {
         val entityProp = entityType.props[prop.name]
         if (entityProp?.isReference != true) {
@@ -95,21 +90,10 @@ internal class SaveOptionsDSLImpl<E: Entity<*>>(
 
     override fun <X : Entity<*>> list(
         prop: KProperty1<E, List<X>>,
-        block: AssociatedObjSaveOptionsDSL<X>.() -> Unit
+        block: AssociatedSaveOptionsDSL<X>.() -> Unit
     ) {
         val entityProp = entityType.props[prop.name]
         if (entityProp?.isList != true) {
-            throw IllegalArgumentException("Illegal reference property '${entityProp}'")
-        }
-        addChildOptions(entityProp, block)
-    }
-
-    override fun <X : Entity<*>> connection(
-        prop: KProperty1<E, Connection<X>>,
-        block: AssociatedObjSaveOptionsDSL<X>.() -> Unit
-    ) {
-        val entityProp = entityType.props[prop.name]
-        if (entityProp?.isConnection != true) {
             throw IllegalArgumentException("Illegal reference property '${entityProp}'")
         }
         addChildOptions(entityProp, block)
@@ -139,7 +123,7 @@ internal class SaveOptionsDSLImpl<E: Entity<*>>(
 
     private fun <X: Entity<*>> addChildOptions(
         entityProp: EntityProp,
-        block: AssociatedObjSaveOptionsDSL<X>.() -> Unit
+        block: AssociatedSaveOptionsDSL<X>.() -> Unit
     ) {
         if (childOptions.containsKey(entityProp.name)) {
             throw IllegalArgumentException("Child save options of association '${entityProp}' has been configured")

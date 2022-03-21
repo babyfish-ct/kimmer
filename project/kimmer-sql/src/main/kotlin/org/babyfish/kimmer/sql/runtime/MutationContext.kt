@@ -7,11 +7,13 @@ import org.babyfish.kimmer.produce
 import org.babyfish.kimmer.sql.*
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
 @JsonIncludeProperties(value = [
     "totalAffectedRowCount",
     "type",
+    "row",
     "affectedRowCount",
     "associations"
 ])
@@ -19,7 +21,7 @@ internal open class MutationContext private constructor(
     private var _entity: Entity<*>?,
     private val _entityId: Any?,
     val mutationOptions: MutationOptions
-) : RootMutationResult {
+) : EntityMutationResult {
 
     constructor(entity: Entity<*>, mutationOptions: MutationOptions)
         : this(entity, null, mutationOptions)
@@ -38,13 +40,17 @@ internal open class MutationContext private constructor(
             _entity = value
         }
 
+    val row: String
+        get() = (_entity ?: error("Cannot get row because entity has not been not initialized"))
+            .toString()
+
     val isEntityInitialized: Boolean
         get() = _entity !== null
 
     override var type: MutationType = MutationType.NONE
 
     private val _associationMap: MutableMap<String, AssociationContext> =
-        mutableMapOf()
+        ConcurrentHashMap()
 
     override val affectedRowCount: Int
         get() = if (type == MutationType.NONE) 0 else 1
@@ -307,6 +313,7 @@ internal open class MutationContext private constructor(
         @JsonIncludeProperties(value = [
             "totalAffectedRowCount",
             "type",
+            "row",
             "affectedRowCount",
             "associations",
             "middleTableChanged"

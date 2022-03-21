@@ -1,10 +1,9 @@
 package org.babyfish.kimmer.sql.common
 
 import io.r2dbc.spi.ConnectionFactory
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.runBlocking
-import org.babyfish.kimmer.sql.RootMutationResult
+import org.babyfish.kimmer.sql.EntityMutationResult
 import org.babyfish.kimmer.sql.ast.Executable
 import javax.sql.DataSource
 import kotlin.reflect.KClass
@@ -48,7 +47,7 @@ abstract class AbstractMutationTest : AbstractTest() {
         }
     }
 
-    protected fun Executable<RootMutationResult>.executeAndExpectResult(
+    protected fun Executable<EntityMutationResult>.executeAndExpectResult(
         dataSource: DataSource? = null,
         connectionFactory: ConnectionFactory? = null,
         testWay: TestWay = TestWay.BOTH,
@@ -64,7 +63,7 @@ abstract class AbstractMutationTest : AbstractTest() {
                 val (results, throwable) = try {
                     listOf(execute(this)) to null
                 } catch (ex: Throwable) {
-                    emptyList<RootMutationResult>() to ex
+                    emptyList<EntityMutationResult>() to ex
                 }
                 assert(throwable, results, block)
             }
@@ -84,7 +83,7 @@ abstract class AbstractMutationTest : AbstractTest() {
                     val (results, throwable) = try {
                         listOf(execute(this)) to null
                     } catch (ex: Throwable) {
-                        emptyList<RootMutationResult>() to ex
+                        emptyList<EntityMutationResult>() to ex
                     }
                     assert(throwable, results, block)
                 }
@@ -92,7 +91,7 @@ abstract class AbstractMutationTest : AbstractTest() {
         }
     }
 
-    protected fun Executable<List<RootMutationResult>>.executeAndExpectResults(
+    protected fun Executable<List<EntityMutationResult>>.executeAndExpectResults(
         dataSource: DataSource? = null,
         connectionFactory: ConnectionFactory? = null,
         testWay: TestWay = TestWay.BOTH,
@@ -104,7 +103,7 @@ abstract class AbstractMutationTest : AbstractTest() {
                 val (results, throwable) = try {
                     execute(this) to null
                 } catch (ex: Throwable) {
-                    emptyList<RootMutationResult>() to ex
+                    emptyList<EntityMutationResult>() to ex
                 }
                 assert(throwable, results, block)
             }
@@ -119,7 +118,7 @@ abstract class AbstractMutationTest : AbstractTest() {
                     val (results, throwable) = try {
                         execute(this) to null
                     } catch (ex: Throwable) {
-                        emptyList<RootMutationResult>() to ex
+                        emptyList<EntityMutationResult>() to ex
                     }
                     assert(throwable, results, block)
                 }
@@ -139,7 +138,7 @@ abstract class AbstractMutationTest : AbstractTest() {
 
     private fun assert(
         throwable: Throwable?,
-        results: List<RootMutationResult>,
+        results: List<EntityMutationResult>,
         block: ExpectDSLWithResult.() -> Unit
     ) {
         val dsl = ExpectDSLWithResult(executions, throwable, results)
@@ -201,7 +200,7 @@ abstract class AbstractMutationTest : AbstractTest() {
     protected class ExpectDSLWithResult(
         executions: List<Execution>,
         throwable: Throwable?,
-        private val results: List<RootMutationResult>
+        private val results: List<EntityMutationResult>
     ): ExpectDSL(executions, throwable) {
 
         private var resultCount = 0

@@ -14,7 +14,7 @@ internal class EntitiesImpl(
     override fun <E : Entity<*>> saveCommand(
         entity: E,
         block: (SaveOptionsDSL<E>.() -> Unit)?
-    ): Executable<RootMutationResult> {
+    ): Executable<EntityMutationResult> {
         val type = ImmutableType.fromInstance(entity).kotlinType
         val entityType = sqlClient.entityTypeMap[type]
             ?: throw IllegalArgumentException("${type.qualifiedName} is entity type of current sql client")
@@ -30,7 +30,7 @@ internal class EntitiesImpl(
     override fun <E : Entity<*>> saveCommand(
         entities: List<E>,
         block: (SaveOptionsDSL<E>.() -> Unit)?
-    ): Executable<List<RootMutationResult>> {
+    ): Executable<List<EntityMutationResult>> {
         if (entities.isEmpty()) {
             return CompositeSaveCommand(emptyList())
         }
@@ -58,12 +58,12 @@ internal class EntitiesImpl(
     override fun <E : Entity<ID>, ID : Comparable<ID>> deleteCommand(
         type: KClass<E>,
         id: ID
-    ): Executable<RootMutationResult> =
+    ): Executable<EntityMutationResult> =
         SimpleDeleteCommand(DeleteCommand(sqlClient, type, listOf(id)))
 
     override fun <E : Entity<ID>, ID : Comparable<ID>> deleteCommand(
         type: KClass<E>,
         ids: Collection<ID>
-    ): Executable<List<RootMutationResult>> =
+    ): Executable<List<EntityMutationResult>> =
         DeleteCommand(sqlClient, type, ids)
 }

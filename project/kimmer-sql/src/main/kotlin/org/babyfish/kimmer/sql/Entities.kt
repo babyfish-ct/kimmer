@@ -1,8 +1,6 @@
 package org.babyfish.kimmer.sql
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import org.babyfish.kimmer.sql.ast.Executable
-import org.babyfish.kimmer.sql.meta.EntityProp
 import kotlin.reflect.KClass
 
 interface Entities {
@@ -10,29 +8,29 @@ interface Entities {
     fun <E: Entity<*>> saveCommand(
         entity: E,
         block: (SaveOptionsDSL<E>.() -> Unit)? = null
-    ): Executable<RootMutationResult>
+    ): Executable<EntityMutationResult>
 
     fun <E: Entity<*>> saveCommand(
         entities: List<E>,
         block: (SaveOptionsDSL<E>.() -> Unit)? = null
-    ): Executable<List<RootMutationResult>>
+    ): Executable<List<EntityMutationResult>>
 
     fun <E: Entity<ID>, ID: Comparable<ID>> deleteCommand(
         type: KClass<E>,
         id: ID
-    ): Executable<RootMutationResult>
+    ): Executable<EntityMutationResult>
 
     fun <E: Entity<ID>, ID: Comparable<ID>> deleteCommand(
         type: KClass<E>,
         ids: Collection<ID>
-    ): Executable<List<RootMutationResult>>
+    ): Executable<List<EntityMutationResult>>
 }
 
 interface MutationResult {
     val totalAffectedRowCount: Int
 }
 
-interface RootMutationResult : MutationResult {
+interface EntityMutationResult : MutationResult {
     val entity: Entity<*>
     val type: MutationType
     val affectedRowCount: Int
@@ -48,7 +46,7 @@ interface AssociationMutationResult : MutationResult {
     val detachedTargets: List<AssociatedTargetMutationResult>
 }
 
-interface AssociatedTargetMutationResult: RootMutationResult {
+interface AssociatedTargetMutationResult: EntityMutationResult {
     val middleTableChanged: Boolean
 }
 

@@ -1,7 +1,7 @@
 package org.babyfish.kimmer.sql.impl
 
 import org.babyfish.kimmer.sql.Entity
-import org.babyfish.kimmer.sql.RootMutationResult
+import org.babyfish.kimmer.sql.EntityMutationResult
 import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.ast.Executable
 import org.babyfish.kimmer.sql.runtime.JdbcDeleter
@@ -13,7 +13,7 @@ internal class DeleteCommand(
     private val sqlClient: SqlClient,
     type: KClass<out Entity<*>>,
     private val ids: Collection<Any>
-): Executable<List<RootMutationResult>> {
+): Executable<List<EntityMutationResult>> {
 
     private val mutationOptions =
         MutationOptions(
@@ -28,9 +28,9 @@ internal class DeleteCommand(
             mutableMapOf()
         )
 
-    override fun execute(con: java.sql.Connection): List<RootMutationResult> =
+    override fun execute(con: java.sql.Connection): List<EntityMutationResult> =
         JdbcDeleter(sqlClient, con).delete(ids, mutationOptions)
 
-    override suspend fun execute(con: io.r2dbc.spi.Connection): List<RootMutationResult> =
+    override suspend fun execute(con: io.r2dbc.spi.Connection): List<EntityMutationResult> =
         R2dbcDeleter(sqlClient, con).delete(ids, mutationOptions)
 }
