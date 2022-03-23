@@ -2,6 +2,15 @@ package org.babyfish.kimmer.runtime
 
 import org.babyfish.kimmer.Draft
 import org.babyfish.kimmer.Immutable
+import org.babyfish.kimmer.graphql.Connection
+import org.babyfish.kimmer.graphql.impl.*
+import org.babyfish.kimmer.graphql.impl.AsyncConnectionDraftImpl
+import org.babyfish.kimmer.graphql.impl.ConnectionImplementor
+import org.babyfish.kimmer.graphql.impl.EdgeImplementor
+import org.babyfish.kimmer.graphql.impl.SyncConnectionDraftImpl
+import org.babyfish.kimmer.graphql.impl.SyncEdgeDraftImpl
+import org.babyfish.kimmer.graphql.meta.ConnectionEdgeType
+import org.babyfish.kimmer.graphql.meta.ConnectionType
 import org.babyfish.kimmer.meta.ImmutableType
 import org.babyfish.kimmer.runtime.list.ListDraft
 import org.babyfish.kimmer.runtime.list.LockedListDraft
@@ -19,7 +28,7 @@ internal interface DraftContext {
 
     fun <T: Immutable> resolve(obj: T?): T?
 
-    fun <E: Immutable> resolve(obj: List<E>?): List<E>?
+    fun <E: Immutable> resolve(list: List<E>?): List<E>?
 }
 
 internal abstract class AbstractDraftContext: DraftContext {
@@ -34,6 +43,7 @@ internal abstract class AbstractDraftContext: DraftContext {
         return toDraft(raw)!!
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T: Immutable> toDraft(obj: T?): Draft<T>? {
         if (obj === null) {
             return null
@@ -49,6 +59,7 @@ internal abstract class AbstractDraftContext: DraftContext {
         } as Draft<T>
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun <E: Immutable> toDraft(list: List<E>?): MutableList<E>? {
         if (list === null) {
             return null
@@ -64,6 +75,7 @@ internal abstract class AbstractDraftContext: DraftContext {
         } as MutableList<E>
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T : Immutable> resolve(obj: T?): T? {
         if (obj === null) {
             return null
@@ -114,22 +126,56 @@ internal abstract class AbstractDraftContext: DraftContext {
 
 internal class SyncDraftContext: AbstractDraftContext() {
 
+    @Suppress("UNCHECKED_CAST")
     override fun createObjectDraft(obj: Immutable): Draft<*> =
-        Factory
-            .of(ImmutableType.fromInstance(obj).kotlinType.java as Class<Immutable>)
-            .createDraft(this, obj)
+        when (Immutable.type(obj).kotlinType) {
+            Connection::class ->
+                SyncConnectionDraftImpl(
+                    this,
+                    Immutable.type(obj) as ConnectionType,
+                    obj as ConnectionImplementor<*>
+                )
+            Connection.Edge::class ->
+                SyncEdgeDraftImpl(
+                    this,
+                    Immutable.type(obj) as ConnectionEdgeType,
+                    obj as EdgeImplementor<*>
+                )
+            else ->
+                Factory
+                    .of(ImmutableType.fromInstance(obj).kotlinType.java as Class<Immutable>)
+                    .createDraft(this, obj)
+        }
 
+    @Suppress("UNCHECKED_CAST")
     override fun createListDraft(list: List<*>): ListDraft<*> =
         SimpleListDraft(this, list as List<Immutable>)
 }
 
 internal class AsyncDraftContext: AbstractDraftContext() {
 
+    @Suppress("UNCHECKED_CAST")
     override fun createObjectDraft(obj: Immutable): Draft<*> =
-        Factory
-            .of(ImmutableType.fromInstance(obj).kotlinType.java as Class<Immutable>)
-            .createDraft(this, obj)
+        when (Immutable.type(obj).kotlinType) {
+            Connection::class ->
+                AsyncConnectionDraftImpl(
+                    this,
+                    Immutable.type(obj) as ConnectionType,
+                    obj as ConnectionImplementor<*>
+                )
+            Connection.Edge::class ->
+                AsyncEdgeDraftImpl(
+                    this,
+                    Immutable.type(obj) as ConnectionEdgeType,
+                    obj as EdgeImplementor<*>
+                )
+            else ->
+                Factory
+                    .of(ImmutableType.fromInstance(obj).kotlinType.java as Class<Immutable>)
+                    .createDraft(this, obj)
+        }
 
+    @Suppress("UNCHECKED_CAST")
     override fun createListDraft(list: List<*>): ListDraft<*> {
         return LockedListDraft(this, list as List<Immutable>)
     }

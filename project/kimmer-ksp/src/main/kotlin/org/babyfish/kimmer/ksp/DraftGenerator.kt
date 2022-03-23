@@ -47,13 +47,21 @@ class DraftGenerator(
                     )
                     for (classDeclaration in modelClassDeclarations) {
                         addType(classDeclaration)
+                        val asyncValues = listOf(false, true)
+                        val drafts = listOf(false, true)
+                        val edges = listOf(false, true)
                         if (!classDeclaration.isImmutableAbstract) {
-                            addNewFun(classDeclaration, isAsync = false, forDraft = false)
-                            addNewFun(classDeclaration, isAsync = true, forDraft = false)
-                            addNewFun(classDeclaration, isAsync = false, forDraft = true)
-                            addNewFun(classDeclaration, isAsync = true, forDraft = true)
-                            addAddFun(classDeclaration, isAsync = false)
-                            addAddFun(classDeclaration, isAsync = true)
+                            for (draft in drafts) {
+                                for (async in asyncValues) {
+                                    addNewFun(classDeclaration, async, draft)
+                                }
+                            }
+                            for (edge in edges) {
+                                for (async in asyncValues) {
+                                    addAddFun(classDeclaration, async, edge)
+                                }
+                            }
+                            addNodeFun(classDeclaration)
                         }
                     }
                 }.build()
@@ -174,8 +182,16 @@ class DraftGenerator(
         isAsync: Boolean,
         forDraft: Boolean
     ) {
-        val mode = if (isAsync) "Async" else "Sync"
-        val draftName = if (forDraft) "Draft" else ""
+        val asyncMode = if (isAsync) "Async" else "Sync"
+        val optionalAsyncName = if (isAsync) "Async" else ""
+        val optionalDraftName = if (forDraft) "Draft" else ""
+        val creatorClassName =
+            ClassName(KIMMER_PACKAGE,"$asyncMode${optionalDraftName}Creator").parameterizedBy(
+            declaration.asClassName()
+        )
+        val baseClassName = declaration.asClassName()
+        val draftClassName = declaration.asClassNameByArray { arrayOf("${it}Draft", asyncMode) }
+        val produceName = "produce$optionalDraftName$optionalAsyncName"
         addFunction(
             FunSpec
                 .builder("by")
@@ -183,18 +199,12 @@ class DraftGenerator(
                     if (isAsync) {
                         modifiers += KModifier.SUSPEND
                     }
-                    modifiers += KModifier.INLINE
-                    receiver(
-                        ClassName(KIMMER_PACKAGE, "${mode}${draftName}Creator")
-                            .parameterizedBy(
-                                declaration.asClassName()
-                            )
-                    )
+                    receiver(creatorClassName)
                     addParameter(
                         ParameterSpec
                             .builder(
                                 "base",
-                                declaration.asClassName().copy(nullable = true)
+                                baseClassName.copy(nullable = true)
                             )
                             .apply {
                                 defaultValue("null")
@@ -204,35 +214,26 @@ class DraftGenerator(
                     addParameter(
                         "block",
                         LambdaTypeName.get(
-                            declaration
-                                .asClassName { "${it}Draft.$mode" },
+                            draftClassName,
                             emptyList(),
                             ClassName("kotlin", "Unit")
-                        ).copy(suspending = isAsync),
-                        KModifier.NOINLINE
+                        ).copy(suspending = isAsync)
                     )
                     if (forDraft) {
-                        returns(
-                            ClassName(
-                                declaration.packageName.asString(),
-                                "${declaration.simpleName.asString()}Draft",
-                                mode
-                            )
-                        )
+                        returns(draftClassName)
                     } else {
-                        returns(declaration.asClassName())
+                        returns(baseClassName)
                     }
                     val simpleName = declaration.simpleName.asString()
-                    val suffix = if (isAsync) "Async" else ""
-                    if (forDraft) {
+                    if (!forDraft) {
                         addCode(
-                            "return %T(type, base, block)",
-                            ClassName(KIMMER_PACKAGE, "produceDraft$suffix")
+                            "return %T(type, base) { (this as ${simpleName}Draft.$asyncMode).block() }",
+                            ClassName(KIMMER_PACKAGE, produceName)
                         )
                     } else {
                         addCode(
-                            "return %T(type, base) { (this as ${simpleName}Draft.$mode).block() }",
-                            ClassName(KIMMER_PACKAGE, "produce$suffix")
+                            "return %T(type, base, block)",
+                            ClassName(KIMMER_PACKAGE, produceName)
                         )
                     }
                 }
@@ -242,35 +243,60 @@ class DraftGenerator(
 
     private fun FileSpec.Builder.addAddFun(
         declaration: KSClassDeclaration,
-        isAsync: Boolean
+        isAsync: Boolean,
+        forEdge: Boolean
     ) {
-        val mode = if (isAsync) "Async" else "Sync"
-        val suffix = if (isAsync) "Async" else ""
+        val asyncMode = if (isAsync) "Async" else "Sync"
+        val optionalAsyncName = if (isAsync) "Async" else ""
+        val baseClassName = if (forEdge) {
+            ClassName("$KIMMER_PACKAGE.graphql", "Connection", "Edge")
+                .parameterizedBy(declaration.asClassName())
+        } else {
+            declaration.asClassName()
+        }
+        val produceClassName = if (forEdge) {
+            ClassName("$KIMMER_PACKAGE.graphql", "produceEdgeDraft$optionalAsyncName")
+        } else {
+            ClassName(KIMMER_PACKAGE, "produceDraft$optionalAsyncName")
+        }
+        val receiverClassName = if (forEdge) {
+            ClassName(KIMMER_PACKAGE, "${asyncMode}EdgeDraftListAdder")
+                .parameterizedBy(declaration.asClassName())
+        } else {
+            ClassName(KIMMER_PACKAGE, "${asyncMode}DraftListAdder")
+                .parameterizedBy(
+                    declaration
+                        .asClassName { "$it$DRAFT_SUFFIX" }
+                        .parameterizedBy(
+                            WildcardTypeName.producerOf(
+                                declaration.asClassName()
+                            )
+                        )
+                )
+        }
+        val draftClassName = if (forEdge) {
+            ClassName(
+                "$KIMMER_PACKAGE.graphql",
+                "ConnectionDraft",
+                "EdgeDraft",
+                asyncMode
+            ).parameterizedBy(declaration.asClassName())
+        } else {
+            declaration.asClassNameByArray { arrayOf("${it}Draft", asyncMode) }
+        }
         addFunction(
             FunSpec
                 .builder("by")
                 .apply {
-                    modifiers += KModifier.INLINE
                     if (isAsync) {
                         modifiers += KModifier.SUSPEND
                     }
-                    receiver(
-                        ClassName(KIMMER_PACKAGE, "DraftList${mode}Adder")
-                            .parameterizedBy(
-                                declaration
-                                    .asClassName { "$it$DRAFT_SUFFIX" }
-                                    .parameterizedBy(
-                                        WildcardTypeName.producerOf(
-                                            declaration.asClassName()
-                                        )
-                                    )
-                            )
-                    )
+                    receiver(receiverClassName)
                     addParameter(
                         ParameterSpec
                             .builder(
                                 "base",
-                                declaration.asClassName().copy(nullable = true)
+                                baseClassName.copy(nullable = true)
                             )
                             .apply {
                                 defaultValue("null")
@@ -280,20 +306,67 @@ class DraftGenerator(
                     addParameter(
                         "block",
                         LambdaTypeName.get(
-                            declaration
-                                .asClassName { "${it}Draft.$mode" },
+                            draftClassName,
                             emptyList(),
                             ClassName("kotlin", "Unit")
-                        ).copy(suspending = isAsync),
-                        KModifier.NOINLINE
+                        ).copy(suspending = isAsync)
                     )
                     addCode(
                         "list.add(%T(%T::class, base, block))",
-                        ClassName(KIMMER_PACKAGE, "produceDraft$suffix"),
+                        produceClassName,
                         declaration.asClassName()
                     )
                 }
                 .build()
+        )
+    }
+
+    private fun FileSpec.Builder.addNodeFun(
+        declaration: KSClassDeclaration
+    ) {
+        val untypedEdgeDraftClassName =
+            ClassName("$KIMMER_PACKAGE.graphql", "ConnectionDraft", "EdgeDraft")
+        val nodeDraftClassName =
+            declaration
+                .asClassName { "${it}Draft" }
+                .parameterizedBy(
+                    WildcardTypeName.producerOf(
+                        declaration.asClassName()
+                    )
+                )
+        val propFieldName = "${
+            declaration.qualifiedName!!.asString().replace('.', '_')
+        }_EdgeNodeProp"
+        addFunction(
+            FunSpec.builder("node")
+                .apply {
+                    receiver(
+                        untypedEdgeDraftClassName
+                            .parameterizedBy(
+                                declaration.asClassName()
+                            )
+                    )
+                    returns(nodeDraftClassName)
+                    addCode(
+                        "return %T.getOrCreate(this, $propFieldName) as %T",
+                        ClassName(KIMMER_PACKAGE, "Draft"),
+                        nodeDraftClassName
+                    )
+                }
+                .build()
+        )
+        addProperty(
+            PropertySpec.builder(
+                propFieldName,
+                ClassName("$KIMMER_PACKAGE.meta", "ImmutableProp")
+            ).apply {
+                modifiers += KModifier.PRIVATE
+                initializer(
+                    "%T.of(%T::class).nodeProp",
+                    ClassName("$KIMMER_PACKAGE.graphql.meta", "ConnectionEdgeType"),
+                    declaration.asClassName()
+                )
+            }.build()
         )
     }
 }

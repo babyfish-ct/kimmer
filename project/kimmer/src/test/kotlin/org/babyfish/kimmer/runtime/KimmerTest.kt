@@ -5,6 +5,7 @@ import kotlinx.coroutines.*
 import org.babyfish.kimmer.*
 import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.jackson.immutableObjectMapper
+import org.babyfish.kimmer.model.*
 import org.babyfish.kimmer.new
 import org.babyfish.kimmer.newAsync
 import kotlin.test.Test

@@ -9,8 +9,6 @@ import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.meta.EntityType
 import org.babyfish.kimmer.sql.meta.ScalarProvider
-import java.math.BigDecimal
-import java.math.BigInteger
 import java.sql.ResultSet
 import kotlin.reflect.KClass
 

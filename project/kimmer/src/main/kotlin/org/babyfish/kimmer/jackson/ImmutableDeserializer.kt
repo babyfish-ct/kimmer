@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import org.babyfish.kimmer.Draft
 import org.babyfish.kimmer.Immutable
+import org.babyfish.kimmer.graphql.Connection
 import org.babyfish.kimmer.meta.ImmutableType
 import org.babyfish.kimmer.produce
 
@@ -19,6 +20,9 @@ class ImmutableDeserializer(type: Class<out Immutable>): StdDeserializer<Immutab
     ): Immutable {
 
         val rawClass = handledType()
+        if (rawClass === Connection::class.java) {
+            return ConnectionDeserializer().deserialize(jp, ctx)
+        }
         val type = ImmutableType.fromAnyType(rawClass)
             ?: throw JsonMappingException(jp, "Cannot deserialize the object whose type is '${rawClass.name}'")
 

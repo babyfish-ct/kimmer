@@ -4,6 +4,7 @@ import org.babyfish.kimmer.AsyncDraft
 import org.babyfish.kimmer.Draft
 import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.SyncDraft
+import org.babyfish.kimmer.graphql.Connection
 import org.babyfish.kimmer.runtime.ImmutableSpi
 import java.util.*
 import java.util.concurrent.locks.ReentrantReadWriteLock
@@ -69,6 +70,12 @@ interface ImmutableType {
         @JvmStatic
         fun fromAnyType(type: Class<*>): ImmutableType? {
             if (Immutable::class.java.isAssignableFrom(type)) {
+                if (Connection::class.java.isAssignableFrom(type)) {
+                    throw IllegalArgumentException("fromAnyType does not accept connection type")
+                }
+                if (Connection.Edge::class.java.isAssignableFrom(type)) {
+                    throw IllegalArgumentException("fromAnyType does not accept edge type")
+                }
                 if (type.isInterface && !Draft::class.java.isAssignableFrom(type)) {
                     return of(type as Class<out Immutable>)
                 }

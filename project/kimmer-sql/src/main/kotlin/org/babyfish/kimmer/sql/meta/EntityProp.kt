@@ -22,6 +22,8 @@ interface EntityProp {
 
     val isVersion: Boolean
 
+    val isTransient: Boolean
+
     val returnType: KClass<*>
 
     /** Be different with [returnType].java */

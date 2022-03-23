@@ -18,6 +18,8 @@ open class EntityPropImpl(
     kotlinProp: KProperty1<*, *>
 ): EntityProp {
 
+    private var _isTransient: Boolean = false
+
     private var _mappedBy: Any? = null
 
     private var _opposite: EntityProp? = null
@@ -37,6 +39,9 @@ open class EntityPropImpl(
 
     override val isVersion: Boolean
         get() = this === declaringType.versionProp
+
+    override val isTransient: Boolean
+        get() = _isTransient
 
     override val targetType: EntityType?
         get() = _targetType
@@ -74,7 +79,20 @@ open class EntityPropImpl(
     override val opposite: EntityProp?
         get() = _opposite
 
+    internal fun setTransient() {
+        if (_mappedBy !== null || _storage !== null || immutableProp.targetType !== null) {
+            error("Internal bug: Can not setTransient")
+        }
+        _isTransient = true
+    }
+
     internal fun setMappedByName(name: String) {
+        if (_isTransient) {
+            throw MappingException(
+                "Cannot set mappedBy of '${kotlinProp}' " +
+                    "because it's transient"
+            )
+        }
         if (_mappedBy !== null) {
             throw MappingException(
                 "Cannot set mappedBy of '${kotlinProp}' " +
@@ -85,6 +103,12 @@ open class EntityPropImpl(
     }
 
     internal fun setStorage(storage: Storage) {
+        if (_isTransient) {
+            throw MappingException(
+                "Cannot set storagge of '${kotlinProp}' " +
+                    "because it's transient"
+            )
+        }
         if (_mappedBy !== null) {
             throw MappingException("Cannot configure storage for the inverse association '$kotlinProp'")
         }

@@ -1,7 +1,7 @@
 package org.babyfish.kimmer.meta
 
 import org.babyfish.kimmer.*
-import org.babyfish.kimmer.meta.ImmutableType
+import org.babyfish.kimmer.model.*
 import kotlin.test.Test
 import kotlin.test.expect
 

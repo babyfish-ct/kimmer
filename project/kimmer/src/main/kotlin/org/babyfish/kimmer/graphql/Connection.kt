@@ -1,8 +1,8 @@
 package org.babyfish.kimmer.graphql
 
-import org.babyfish.kimmer.Immutable
+import org.babyfish.kimmer.*
 
-interface Connection<N>: Immutable {
+interface Connection<N: Immutable>: Immutable {
 
     val totalCount: Int
 
@@ -10,7 +10,7 @@ interface Connection<N>: Immutable {
 
     val pageInfo: PageInfo
 
-    interface Edge<N>: Immutable {
+    interface Edge<N: Immutable>: Immutable {
         val node: N
         val cursor: String
     }
@@ -22,3 +22,29 @@ interface Connection<N>: Immutable {
         val endCursor: String
     }
 }
+
+@Suppress("UNCHECKED_CAST")
+fun SyncCreator<Connection.PageInfo>.by(
+    base: Connection.PageInfo? = null,
+    block: ConnectionDraft.PageInfoDraft.() -> Unit
+): Connection.PageInfo =
+    produce(type, base, block as (Draft<Connection.PageInfo>) -> Unit)
+
+fun SyncDraftCreator<Connection.PageInfo>.by(
+    base: Connection.PageInfo? = null,
+    block: ConnectionDraft.PageInfoDraft.() -> Unit
+): ConnectionDraft.PageInfoDraft =
+    produceDraft(type, base, block)
+
+@Suppress("UNCHECKED_CAST")
+suspend fun AsyncCreator<Connection.PageInfo>.by(
+    base: Connection.PageInfo? = null,
+    block: suspend ConnectionDraft.PageInfoDraft.() -> Unit
+): Connection.PageInfo =
+    produceAsync(type, base, block as (Draft<Connection.PageInfo>) -> Unit)
+
+suspend fun AsyncDraftCreator<Connection.PageInfo>.by(
+    base: Connection.PageInfo? = null,
+    block: suspend ConnectionDraft.PageInfoDraft.() -> Unit
+): ConnectionDraft.PageInfoDraft =
+    produceDraftAsync(type, base, block)

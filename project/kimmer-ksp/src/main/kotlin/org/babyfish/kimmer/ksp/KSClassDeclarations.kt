@@ -15,6 +15,11 @@ fun KSClassDeclaration.asClassName(simpleNameMapper: ((String) -> String)? = nul
     return ClassName(packageName.asString(), simpleNameMapper(simpleName))
 }
 
+fun KSClassDeclaration.asClassNameByArray(simpleNameMapper: (String) -> Array<String>): ClassName {
+    val simpleName = simpleName.asString()
+    return ClassName(packageName.asString(), *simpleNameMapper(simpleName))
+}
+
 val KSClassDeclaration.isImmutableAbstract: Boolean
     get() = this.annotations.any {
         it.annotationType.resolve().declaration.qualifiedName?.asString() ==

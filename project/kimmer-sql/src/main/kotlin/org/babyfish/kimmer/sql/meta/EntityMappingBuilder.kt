@@ -32,9 +32,21 @@ interface EntityMappingBuilder {
         storage: Storage? = null
     ): EntityPropImpl
 
-    fun inverseProp(prop: KProperty1<out Entity<*>, *>, mappedBy: KProperty1<out Entity<*>, *>): EntityPropImpl
+    fun inverseProp(
+        prop: KProperty1<out Entity<*>, *>,
+        mappedBy: KProperty1<out Entity<*>, *>
+    ): EntityPropImpl
 
-    fun storage(prop: KProperty1<out Entity<*>, *>, storage: Storage)
+    fun transientProp(
+        prop: KProperty1<out Entity<*>, *>
+    )
 
-    fun scalarProvider(scalarProvider: ScalarProvider<*, *>)
+    fun storage(
+        prop: KProperty1<out Entity<*>, *>,
+        storage: Storage
+    )
+
+    fun scalarProvider(
+        scalarProvider: ScalarProvider<*, *>
+    )
 }

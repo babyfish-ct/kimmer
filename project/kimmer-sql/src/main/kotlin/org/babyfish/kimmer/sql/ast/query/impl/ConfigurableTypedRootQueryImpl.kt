@@ -100,6 +100,9 @@ internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
 
     @Suppress("UNCHECKED_CAST")
     override fun execute(con: java.sql.Connection): List<R> {
+        if (data.limit == 0) {
+            return emptyList()
+        }
         val sqlClient = baseQuery.sqlClient
         val (sql, variables) = preExecute(JdbcSqlBuilder(sqlClient))
         return JdbcSelector(sqlClient, data.selections).select(con, sql, variables) as List<R>
@@ -107,6 +110,9 @@ internal class ConfigurableTypedRootQueryImpl<E, ID, R>(
 
     @Suppress("UNCHECKED_CAST")
     override suspend fun execute(con: io.r2dbc.spi.Connection): List<R> {
+        if (data.limit == 0) {
+            return emptyList()
+        }
         val sqlClient = baseQuery.sqlClient
         val (sql, variables) = preExecute(R2dbcSqlBuilder(sqlClient))
         return R2dbcSelector(sqlClient, data.selections).select(con, sql, variables) as List<R>

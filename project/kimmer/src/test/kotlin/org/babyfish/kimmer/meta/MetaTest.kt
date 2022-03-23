@@ -1,7 +1,6 @@
 package org.babyfish.kimmer.meta
 
-import org.babyfish.kimmer.Book
-import org.babyfish.kimmer.meta.ImmutableType
+import org.babyfish.kimmer.model.Book
 import kotlin.test.Test
 
 class MetaTest {

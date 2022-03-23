@@ -28,10 +28,12 @@ internal interface Factory<T: Immutable> {
 
     companion object {
 
+        @Suppress("UNCHECKED_CAST")
         @JvmStatic
         fun <T: Immutable> of(type: KClass<T>): Factory<T> =
             factoryOf(type.java) as Factory<T>
 
+        @Suppress("UNCHECKED_CAST")
         @JvmStatic
         fun <T: Immutable> of(type: Class<T>): Factory<T> =
             factoryOf(type) as Factory<T>
@@ -170,10 +172,3 @@ private fun ClassVisitor.writeCreateDraft(
         visitInsn(Opcodes.ARETURN)
     }
 }
-
-private fun prefix(async: Boolean): String =
-    if (async) {
-        "Async"
-    } else {
-        "Sync"
-    }

@@ -21,6 +21,10 @@ interface Immutable {
 
     companion object {
 
+        @JvmStatic
+        fun type(instance: Immutable) =
+            (instance as ImmutableSpi).`{type}`()
+
         /**
          * Check if a property of an object has already been loaded.
          *

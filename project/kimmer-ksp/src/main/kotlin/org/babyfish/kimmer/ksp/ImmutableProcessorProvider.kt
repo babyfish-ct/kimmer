@@ -19,7 +19,7 @@ class ImmutableProcessorProvider: SymbolProcessorProvider {
 
         val draft = environment.parseBoolean(ENV_OPTION_DRAFT) ?: true
         val table = environment.parseBoolean(ENV_OPTION_TABLE) ?: false
-        val collectionJoinOnlyForSubQuery = environment.parseBoolean(ENV_OPTION_TABLE_COLLECTION_JOIN) ?: false
+        val tableCollectionJoinOnlyForSubQuery = environment.parseBoolean(ENV_OPTION_TABLE_COLLECTION_JOIN) ?: false
         if (!draft && !table) {
             throw GeneratorException(
                 "Both 'immutable.draft' and 'immutable.table' of ksp options are false, " +
@@ -29,7 +29,7 @@ class ImmutableProcessorProvider: SymbolProcessorProvider {
         return ImmutableProcessor(
             draft,
             table,
-            collectionJoinOnlyForSubQuery,
+            tableCollectionJoinOnlyForSubQuery,
             environment.codeGenerator,
             environment.logger
         )
@@ -50,4 +50,8 @@ private const val ENV_OPTION_PREFIX = "kimmer."
 private const val ENV_OPTION_DRAFT = "${ENV_OPTION_PREFIX}draft"
 private const val ENV_OPTION_TABLE = "${ENV_OPTION_PREFIX}table"
 private const val ENV_OPTION_TABLE_COLLECTION_JOIN = "${ENV_OPTION_PREFIX}table.collection-join-only-for-sub-query"
-private val ENV_OPTION_KEYS = setOf(ENV_OPTION_DRAFT, ENV_OPTION_TABLE, ENV_OPTION_TABLE_COLLECTION_JOIN)
+private val ENV_OPTION_KEYS = setOf(
+    ENV_OPTION_DRAFT,
+    ENV_OPTION_TABLE,
+    ENV_OPTION_TABLE_COLLECTION_JOIN
+)

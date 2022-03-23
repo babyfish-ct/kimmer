@@ -2,6 +2,7 @@ package org.babyfish.kimmer.meta
 
 import org.babyfish.kimmer.*
 import org.babyfish.kimmer.graphql.Connection
+import org.babyfish.kimmer.graphql.ConnectionDraft
 import org.babyfish.kimmer.sql.Entity
 import java.util.*
 import kotlin.reflect.*
@@ -41,13 +42,13 @@ internal class Parser internal constructor(
         val secondaryResolvedTypes = mutableSetOf<TypeImpl>()
         var size = 0
         while (tmpMap.size > size) {
-           size = tmpMap.size
-           val m = tmpMap.toMap()
-           for (type in m.values) {
-               if (secondaryResolvedTypes.add(type)) {
-                   type.secondaryResolve(this)
-               }
-           }
+            size = tmpMap.size
+            val m = tmpMap.toMap()
+            for (type in m.values) {
+                if (secondaryResolvedTypes.add(type)) {
+                    type.secondaryResolve(this)
+                }
+            }
         }
         return tmpMap
     }
@@ -155,22 +156,30 @@ internal class TypeImpl(
     }
 
     override val draftInfo: DraftInfo? by lazy {
-        getAbstractDraftType(this)?.let {
-            val syncDraftType =
-                getFinalDraftType(it, SyncDraft::class.java) as Class<out SyncDraft<*>>?
-            val asyncDraftType =
-                getFinalDraftType(it, AsyncDraft::class.java) as Class<out AsyncDraft<*>>?
-            if (!isAbstract) {
-                syncDraftType
-                    ?: error("No nested interface 'sync' for non-abstract immutable type '${it::class.qualifiedName}'")
-                asyncDraftType
-                    ?: error("No nested interface 'async' for non-abstract immutable type '${it::class.qualifiedName}'")
-            }
+        if (kotlinType == Connection.PageInfo::class) {
             DraftInfo(
-                it,
-                syncDraftType,
-                asyncDraftType
+                ConnectionDraft.PageInfoDraft::class.java,
+                ConnectionDraft.PageInfoDraft.Sync::class.java,
+                ConnectionDraft.PageInfoDraft.Async::class.java
             )
+        } else {
+            getAbstractDraftType(this)?.let {
+                val syncDraftType =
+                    getFinalDraftType(it, SyncDraft::class.java) as Class<out SyncDraft<*>>?
+                val asyncDraftType =
+                    getFinalDraftType(it, AsyncDraft::class.java) as Class<out AsyncDraft<*>>?
+                if (!isAbstract) {
+                    syncDraftType
+                        ?: error("No nested interface 'sync' for non-abstract immutable type '${it::class.qualifiedName}'")
+                    asyncDraftType
+                        ?: error("No nested interface 'async' for non-abstract immutable type '${it::class.qualifiedName}'")
+                }
+                DraftInfo(
+                    it,
+                    syncDraftType,
+                    asyncDraftType
+                )
+            }
         }
     }
 

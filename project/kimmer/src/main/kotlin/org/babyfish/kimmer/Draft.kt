@@ -1,8 +1,8 @@
 package org.babyfish.kimmer
 
+import org.babyfish.kimmer.graphql.*
 import org.babyfish.kimmer.meta.ImmutableProp
 import org.babyfish.kimmer.runtime.DraftSpi
-import org.babyfish.kimmer.sql.Entity
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
@@ -58,7 +58,9 @@ interface SyncDraft<out T: Immutable>: Draft<T> {
     fun <X: Immutable> new(type: KClass<X>): SyncDraftCreator<X> =
         SyncDraftCreator(type)
 
-    val <X: Immutable> MutableList<X>.add: DraftListSyncAdder<X>
+    val <X: Immutable> MutableList<X>.add: SyncDraftListAdder<X>
+
+    val <X: Immutable> MutableList<ConnectionDraft.EdgeDraft<X>>.add: SyncEdgeDraftListAdder<X>
 }
 
 interface AsyncDraft<out T: Immutable>: Draft<T> {
@@ -66,15 +68,27 @@ interface AsyncDraft<out T: Immutable>: Draft<T> {
     fun <X: Immutable> newAsync(type: KClass<X>) =
         AsyncDraftCreator(type)
 
-    val <X: Immutable> MutableList<X>.add: DraftListAsyncAdder<X>
+    val <X: Immutable> MutableList<X>.add: AsyncDraftListAdder<X>
+
+    val <X: Immutable> MutableList<ConnectionDraft.EdgeDraft<X>>.add: AsyncEdgeDraftListAdder<X>
 }
 
 @JvmInline
-value class DraftListSyncAdder<E: Immutable>(
+value class SyncDraftListAdder<E: Immutable>(
     val list: MutableList<E>
 )
 
 @JvmInline
-value class DraftListAsyncAdder<E: Immutable>(
+value class SyncEdgeDraftListAdder<E: Immutable>(
+    val list: MutableList<ConnectionDraft.EdgeDraft<E>>
+)
+
+@JvmInline
+value class AsyncDraftListAdder<E: Immutable>(
     val list: MutableList<E>
+)
+
+@JvmInline
+value class AsyncEdgeDraftListAdder<E: Immutable>(
+    val list: MutableList<ConnectionDraft.EdgeDraft<E>>
 )
