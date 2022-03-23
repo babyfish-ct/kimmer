@@ -122,14 +122,14 @@ class ConnectionTest {
         runBlocking {
             val connection = produceConnectionAsync(Book::class) {
                 edges = listOf(
-                    produceEdge(Book::class) {
-                        node = new(Book::class).by {
+                    produceEdgeAsync(Book::class) {
+                        node = newAsync(Book::class).by {
                             name = "A"
                         }
                         cursor = "start"
                     },
-                    produceEdge(Book::class) {
-                        node = new(Book::class).by {
+                    produceEdgeAsync(Book::class) {
+                        node = newAsync(Book::class).by {
                             name = "B"
                         }
                         cursor = "end"
