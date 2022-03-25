@@ -39,7 +39,7 @@ interface EntityMappingBuilder {
 
     fun transientProp(
         prop: KProperty1<out Entity<*>, *>
-    )
+    ): EntityPropImpl
 
     fun storage(
         prop: KProperty1<out Entity<*>, *>,

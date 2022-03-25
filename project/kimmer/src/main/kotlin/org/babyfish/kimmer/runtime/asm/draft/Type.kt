@@ -44,7 +44,7 @@ internal fun ClassVisitor.writeType(args: GeneratorArgs) {
     for (prop in args.immutableType.props.values) {
         writeGetter(prop, args)
         writeSetter(prop, args)
-        if (prop.targetType !== null) {
+        if (prop.isAssociation || prop.isScalarList) {
             writeCreator(prop, args)
         }
     }

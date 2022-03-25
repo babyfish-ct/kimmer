@@ -51,7 +51,7 @@ internal fun ClassVisitor.writeDynamicCreator(args: GeneratorArgs) {
                 )
                 visitBox(prop.javaReturnType)
             } else {
-                val draftDesc = if (prop.isList) {
+                val draftDesc = if (prop.isList || prop.isScalarList) {
                     "Ljava/util/List;"
                 } else {
                     prop.targetType?.draftInfo?.abstractType?.let {

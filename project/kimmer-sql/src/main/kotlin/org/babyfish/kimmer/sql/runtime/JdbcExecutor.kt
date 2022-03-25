@@ -15,7 +15,7 @@ interface JdbcExecutor {
     fun <R> execute(
         con: Connection,
         sql: String,
-        variables: List<Any>,
+        variables: Collection<Any>,
         block: PreparedStatement.() -> R
     ): R
 }
@@ -25,13 +25,12 @@ object DefaultJdbcExecutor: JdbcExecutor {
     override fun <R> execute(
         con: Connection,
         sql: String,
-        variables: List<Any>,
+        variables: Collection<Any>,
         block: PreparedStatement.() -> R
     ): R =
         try {
             con.prepareStatement(sql).use { stmt ->
-                for (index in variables.indices) {
-                    val variable = variables[index]
+                variables.forEachIndexed { index, variable ->
                     if (variable is DbNull) {
                         stmt.setNull(index + 1, toJdbcType(variable.type))
                     } else {

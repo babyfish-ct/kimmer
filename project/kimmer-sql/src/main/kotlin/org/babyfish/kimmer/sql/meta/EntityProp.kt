@@ -1,7 +1,6 @@
 package org.babyfish.kimmer.sql.meta
 
 import org.babyfish.kimmer.meta.ImmutableProp
-import org.babyfish.kimmer.sql.meta.config.IdGenerator
 import org.babyfish.kimmer.sql.meta.config.Storage
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -34,6 +33,8 @@ interface EntityProp {
     val isList: Boolean
 
     val isConnection: Boolean
+
+    val isAssociation: Boolean
 
     val isNullable: Boolean
 

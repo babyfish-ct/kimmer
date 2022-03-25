@@ -143,14 +143,14 @@ abstract class AbstractTest {
         override fun <R> execute(
             con: java.sql.Connection,
             sql: String,
-            variables: List<Any>,
+            variables: Collection<Any>,
             block: PreparedStatement.() -> R
         ): R {
             var index = 0
             val formattedSql = sql.replace(JDBC_PARAMETER_REGEX) {
                 "$${++index}" // replace jdbc '?' to '$1', '$2', ..., '$N'
             }
-            _executions += Execution(formattedSql, variables)
+            _executions += Execution(formattedSql, variables.toList())
             return DefaultJdbcExecutor.execute(con, sql, variables, block)
         }
     }
@@ -160,14 +160,14 @@ abstract class AbstractTest {
         override suspend fun <R> execute(
             con: io.r2dbc.spi.Connection,
             sql: String,
-            variables: List<Any>,
+            variables: Collection<Any>,
             block: suspend Result.() -> R
         ): R {
             var index = 0
             val formattedSql = sql.replace(JDBC_PARAMETER_REGEX) {
                 "$${++index}" // replace jdbc '?' to '$1', '$2', ..., '$N'
             }
-            _executions += Execution(formattedSql, variables)
+            _executions += Execution(formattedSql, variables.toList())
             return DefaultR2dbcExecutor.execute(con, sql, variables, block)
         }
     }

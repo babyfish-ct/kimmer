@@ -41,7 +41,14 @@ internal class ConnectionPageInfoPropImpl(
     override val isConnection: Boolean
         get() = false
 
-    override val isTargetNullable: Boolean = false
+    override val isScalarList: Boolean
+        get() = false
+
+    override val elementType: KClass<*>
+        get() = Connection.PageInfo::class
+
+    override val isElementNullable: Boolean
+        get() = false
 
     override fun toString(): String =
         kotlinProp.toString()

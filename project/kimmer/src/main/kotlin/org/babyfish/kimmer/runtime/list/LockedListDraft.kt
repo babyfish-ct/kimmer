@@ -4,7 +4,7 @@ import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.runtime.AsyncDraftContext
 import org.babyfish.kimmer.runtime.DraftContext
 
-internal class LockedListDraft<E: Immutable>(
+internal class LockedListDraft<E>(
     draftContext: AsyncDraftContext,
     base: List<E>
 ): LockedList<E?>(

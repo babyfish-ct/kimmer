@@ -34,10 +34,16 @@ internal class ScalarPropImpl(
     override val isConnection: Boolean
         get() = false
 
+    override val isScalarList: Boolean
+        get() = false
+
+    override val elementType: KClass<*>
+        get() = returnType
+
     override val targetType: ImmutableType?
         get() = null
 
-    override val isTargetNullable: Boolean
+    override val isElementNullable: Boolean
         get() = false
 
     override fun toString(): String =

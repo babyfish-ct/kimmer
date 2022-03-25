@@ -165,7 +165,8 @@ internal fun ClassVisitor.writeEquals(type: ImmutableType) {
         }
 
         visitVarInsn(Opcodes.ALOAD, 1)
-        visitCondNotMatched(Opcodes.IFNONNULL) {
+        visitTypeInsn(Opcodes.INSTANCEOF, spiInternalName)
+        visitCondNotMatched(Opcodes.IFNE) {
             visitInsn(Opcodes.ICONST_0)
             visitInsn(Opcodes.IRETURN)
         }

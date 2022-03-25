@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 open class EntityPropImpl(
-    final override val declaringType: EntityType,
+    private val _declaringType: EntityType,
     kotlinProp: KProperty1<*, *>
 ): EntityProp {
 
@@ -30,9 +30,20 @@ open class EntityPropImpl(
 
     private var _targetType: EntityType? = null
 
-    override val immutableProp: ImmutableProp =
-        declaringType.immutableType.props[kotlinProp.name]
-            ?: throw IllegalArgumentException("No prop '${kotlinProp.name}' of type '${declaringType.kotlinType.qualifiedName}'")
+    override val declaringType: EntityType
+        get() = _declaringType
+
+    override val immutableProp: ImmutableProp = _declaringType.immutableType.props[kotlinProp.name]
+        ?.also {
+            if (it.isScalarList) {
+                throw IllegalArgumentException(
+                    "Illegal property '${it}', entity does not support scalar list property"
+                )
+            }
+        }
+        ?: throw IllegalArgumentException(
+            "No property '${kotlinProp.name}' of type '${_declaringType.kotlinType.qualifiedName}'"
+        )
 
     override val isId: Boolean
         get() = kotlinProp.name == Entity<*>::id.name
@@ -67,11 +78,14 @@ open class EntityPropImpl(
     override val isConnection: Boolean
         get() = immutableProp.isConnection
 
+    override val isAssociation: Boolean
+        get() = immutableProp.isAssociation
+
     override val isNullable: Boolean
         get() = immutableProp.isNullable
 
     override val isTargetNullable: Boolean
-        get() = immutableProp.isTargetNullable
+        get() = immutableProp.isElementNullable
 
     override val mappedBy: EntityProp?
         get() = _mappedBy as EntityProp?
@@ -80,9 +94,6 @@ open class EntityPropImpl(
         get() = _opposite
 
     internal fun setTransient() {
-        if (_mappedBy !== null || _storage !== null || immutableProp.targetType !== null) {
-            error("Internal bug: Can not setTransient")
-        }
         _isTransient = true
     }
 
@@ -197,6 +208,7 @@ open class EntityPropImpl(
     private fun resolveDefaultColumn() {
         if (storage === null &&
             _mappedBy === null &&
+            !_isTransient &&
             !isList &&
             !isConnection
         ) {

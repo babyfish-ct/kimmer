@@ -6,13 +6,13 @@ import com.fasterxml.jackson.databind.type.SimpleType
 import org.babyfish.kimmer.meta.ImmutableProp
 
 internal val ImmutableProp.jacksonType: JavaType
-    get() = if (isList) {
+    get() = if (isList || isScalarList) {
         CollectionType.construct(
             List::class.java,
             null,
             null,
             null,
-            SimpleType.constructUnsafe(targetType!!.kotlinType.java)
+            SimpleType.constructUnsafe(elementType.java)
         )
     } else {
         SimpleType.constructUnsafe(javaReturnType)

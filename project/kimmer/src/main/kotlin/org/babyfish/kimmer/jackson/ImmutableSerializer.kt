@@ -42,9 +42,9 @@ class ImmutableSerializer(
         for (prop in immutableType.props.values) {
             if (Immutable.isLoaded(value, prop)) {
                 val value = Immutable.get(value, prop)
-                if (prop.targetType !== null && value !== null) {
+                if ((prop.isAssociation || prop.isScalarList) && value !== null) {
                     gen.writeFieldName(prop.name)
-                    val typeSer = if (!prop.isList && ImmutableType.fromAnyObject(value) !== immutableType) {
+                    val typeSer = if (!prop.isList && !prop.isScalarList && ImmutableType.fromAnyObject(value) !== immutableType) {
                         provider.findTypeSerializer(prop.jacksonType)
                     } else {
                         null

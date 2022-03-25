@@ -4,7 +4,7 @@ import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.runtime.DraftContext
 import kotlin.reflect.full.isSubclassOf
 
-internal class SimpleListDraft<E: Immutable>(
+internal class SimpleListDraft<E>(
     override val draftContext: DraftContext,
     base: List<E>
 ): ListProxy<E?>(
@@ -12,18 +12,24 @@ internal class SimpleListDraft<E: Immutable>(
     object: ListElementHandler<E?> {
 
         override fun input(element: E?) {
-            if (element !== null && !element::class.isSubclassOf(Immutable::class)) {
-                throw IllegalArgumentException("List element must be instance of '${Immutable::class.qualifiedName}'")
+            if (element === null) {
+                throw IllegalArgumentException("List element cannot be null")
             }
         }
 
-        override fun output(element: E?): E? {
-            return draftContext.toDraft(element) as E?
-        }
+        override fun output(element: E?): E? =
+            if (element is Immutable) {
+                draftContext.toDraft(element) as E?
+            } else {
+                element
+            }
 
-        override fun resolve(element: E?): E {
-            return draftContext.resolve(element)!!
-        }
+        override fun resolve(element: E?): E? =
+            if (element is Immutable) {
+                draftContext.resolve(element)
+            } else {
+                element
+            }
 
         override fun changed(a: E?, b: E?): Boolean {
             return a !== b

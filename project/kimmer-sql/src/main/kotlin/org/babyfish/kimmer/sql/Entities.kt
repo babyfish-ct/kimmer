@@ -31,11 +31,14 @@ interface MutationResult {
 }
 
 interface EntityMutationResult : MutationResult {
-    val entity: Entity<*>
+    fun <E: Entity<ID>, ID: Comparable<ID>> entity(): E
     val type: MutationType
     val affectedRowCount: Int
     val associations: Collection<AssociationMutationResult>
 }
+
+fun <E: Entity<ID>, ID: Comparable<ID>> List<EntityMutationResult>.entities(): List<E> =
+    map { it.entity() }
 
 interface AssociationMutationResult : MutationResult {
     val associationName: String

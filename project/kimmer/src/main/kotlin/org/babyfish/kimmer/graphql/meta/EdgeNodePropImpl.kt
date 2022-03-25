@@ -33,7 +33,7 @@ internal class EdgeNodePropImpl(
         get() = false
 
     override val isReference: Boolean
-        get() = false
+        get() = true
 
     override val isList: Boolean
         get() = false
@@ -41,7 +41,13 @@ internal class EdgeNodePropImpl(
     override val isConnection: Boolean
         get() = false
 
-    override val isTargetNullable: Boolean
+    override val isScalarList: Boolean
+        get() = false
+
+    override val elementType: KClass<*>
+        get() = declaringType.nodeType.kotlinType
+
+    override val isElementNullable: Boolean
         get() = false
 
     override fun toString(): String =

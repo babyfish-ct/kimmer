@@ -38,7 +38,7 @@ private fun ClassVisitor.writeProxyProp(
     val getter = prop.kotlinProp.getter.javaMethod!!
     val getterDesc = Type.getMethodDescriptor(getter)
     val setterDesc = "(${Type.getDescriptor(prop.javaReturnType)})V"
-    val signature = prop.targetType?.takeIf { prop.isList }?.let {
+    val signature = prop.targetType?.takeIf { prop.isList || prop.isScalarList }?.let {
         "Ljava/util/List<${Type.getDescriptor(it.kotlinType.java)}>;"
     }
     val getterSignature = signature?.let { "()$signature" }
@@ -96,18 +96,32 @@ private fun ClassVisitor.writeProxyProp(
         visitInsn(Opcodes.RETURN)
     }
 
-    prop.targetType?.let {
-        val targetDesc = it.draftInfo?.abstractType?.let { abstractDraftType ->
-            Type.getDescriptor(abstractDraftType)
-        } ?: Type.getDescriptor(it.kotlinType.java)
+    if (prop.isAssociation || prop.isScalarList) {
+        val targetDesc = prop
+            .targetType
+            ?.takeIf {
+                prop.isList || prop.isReference
+            }
+            ?.draftInfo
+            ?.abstractType
+            ?.let { abstractDraftType ->
+                Type.getDescriptor(abstractDraftType)
+            }
+            ?: Type.getDescriptor(prop.elementType.java)
 
-        val funDesc = if (prop.isList) {
+        val funDesc = if (prop.isConnection) {
+            "()$CONNECTION_DESCRIPTOR"
+        } else if (prop.isList || prop.isScalarList) {
             "()Ljava/util/List;"
         } else {
             "()$targetDesc"
         }
-        val funSignature = targetDesc?.takeIf { prop.isList }?.let {
-            "Ljava/util/List<$targetDesc>;"
+        val funSignature = if (prop.isConnection) {
+            "()L$CONNECTION_INTERNAL_NAME<$targetDesc>;"
+        } else if (prop.isList || prop.isScalarList) {
+            "()Ljava/util/List<$targetDesc>;"
+        } else {
+            null
         }
         writeMethod(
             Opcodes.ACC_PUBLIC,

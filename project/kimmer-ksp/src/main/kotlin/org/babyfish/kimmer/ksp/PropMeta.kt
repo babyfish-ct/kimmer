@@ -16,32 +16,46 @@ data class PropMeta(
     val isConnection: Boolean = false,
     val isList: Boolean = false,
     val isReference: Boolean = false,
-    val isTargetNullable: Boolean = false
+    val isScalarList: Boolean = false,
+    val isElementNullable: Boolean = false
 ) {
     val returnType: TypeName by lazy {
-        if (isList) {
-            ClassName("kotlin.collections", "List")
-                .parameterizedBy(
-                    targetDeclaration!!.asClassName()
-                )
-        } else {
-            scalarTypeName
+        when {
+            isConnection ->
+                ClassName("$KIMMER_PACKAGE.graphql", "Connection")
+                    .parameterizedBy(targetDeclaration!!.asClassName())
+            isList || isScalarList ->
+                ClassName("kotlin.collections", "List")
+                    .parameterizedBy(
+                        targetDeclaration!!.asClassName()
+                    )
+            else ->
+                scalarTypeName
         }
     }
 
     val draftFunReturnType: TypeName by lazy {
         targetDeclaration
             ?.run {
-                val draftTypeName = asClassName {
-                    "$it$DRAFT_SUFFIX"
-                }.parameterizedBy(
-                    WildcardTypeName.producerOf(asClassName())
-                )
-                if (isList) {
+                if (isScalarList) {
                     ClassName("kotlin.collections", "MutableList")
-                        .parameterizedBy(draftTypeName)
+                        .parameterizedBy(asClassName())
                 } else {
-                    draftTypeName
+                    val draftTypeName = asClassName {
+                        "$it$DRAFT_SUFFIX"
+                    }.parameterizedBy(
+                        WildcardTypeName.producerOf(asClassName())
+                    )
+                    when {
+                        isConnection ->
+                            ClassName("$KIMMER_PACKAGE.graphql", "Connection")
+                                .parameterizedBy(targetDeclaration!!.asClassName())
+                        isList ->
+                            ClassName("kotlin.collections", "MutableList")
+                                .parameterizedBy(draftTypeName)
+                        else ->
+                            draftTypeName
+                    }
                 }
             }
             ?: scalarTypeName
@@ -51,7 +65,7 @@ data class PropMeta(
         get() = (
             prop.type.resolve().declaration as? KSClassDeclaration
                 ?: throw GeneratorException("The property '${prop}' must returns class/interface type")
-            ).asClassName().copy(nullable = isTargetNullable)
+            ).asClassName().copy(nullable = isElementNullable)
 
     companion object {
         fun of(prop: KSPropertyDeclaration, sysTypes: SysTypes, mustBeEntity: Boolean = false): PropMeta {
@@ -61,11 +75,11 @@ data class PropMeta(
                 throw GeneratorException("The property '${prop.qualifiedName!!.asString()}' cannot be map")
             }
             val isConnection = sysTypes.connectionType.isAssignableFrom(nonNullType)
-            val isCollection = sysTypes.collectionType.isAssignableFrom(nonNullType)
-            if (isConnection && isCollection) {
+            val mayBeCollection = sysTypes.collectionType.isAssignableFrom(nonNullType)
+            if (isConnection && mayBeCollection) {
                 throw GeneratorException("The property '${prop.qualifiedName!!.asString()}' cannot be both connection and collection")
             }
-            val targetType = when {
+            val elementType = when {
                 isConnection -> {
                     if (nonNullType.declaration != sysTypes.connectionType.declaration) {
                         throw GeneratorException(
@@ -77,16 +91,17 @@ data class PropMeta(
                         "Cannot get connection node type from '${prop.qualifiedName!!.asString()}'"
                     )
                 }
-                isCollection -> {
+                mayBeCollection -> {
                     if (nonNullType.declaration != sysTypes.listType.declaration) {
                         throw GeneratorException(
                             "The property '${prop.qualifiedName!!.asString()}' " +
                                 "must be exactly equal to 'kotlin.collections.List'"
                         )
                     }
-                    nonNullType.arguments[0].type?.resolve() ?: throw GeneratorException(
-                        "Cannot get list element type from '${prop.qualifiedName!!.asString()}'"
-                    )
+                    nonNullType.arguments[0].type?.resolve()
+                        ?: throw GeneratorException(
+                            "Cannot get list element type from '${prop.qualifiedName!!.asString()}'"
+                        )
                 }
                 sysTypes.immutableType.isAssignableFrom(nonNullType) -> {
                     nonNullType
@@ -94,48 +109,46 @@ data class PropMeta(
                 else -> null
             } ?: return PropMeta(prop, nullableType.isMarkedNullable)
 
-            val targetDeclaration = targetType.declaration
-            val expectedTargetType = if (mustBeEntity) {
-                (sysTypes as TableSysTypes).entityType
-            } else {
-                sysTypes.immutableType
-            }
-            if (!expectedTargetType.isAssignableFrom(targetType) ||
-                targetDeclaration !is KSClassDeclaration ||
-                targetDeclaration.classKind != ClassKind.INTERFACE
-            ) {
-                throw GeneratorException(
-                    "The property '${prop.qualifiedName!!.asString()}' is not valid association, " +
-                        "its target type '${targetDeclaration.qualifiedName!!.asString()}' is not " +
-                        "interface extends '${expectedTargetType.declaration.qualifiedName?.asString()}'"
+            val isCollection = mayBeCollection && sysTypes.immutableType.isAssignableFrom(elementType)
+            val isScalarCollection = mayBeCollection && !isCollection
+            val elementDeclaration = elementType.declaration as? KSClassDeclaration
+                ?: throw GeneratorException(
+                    "The property '${prop.qualifiedName!!.asString()}' is not valid property, " +
+                        "its element type '${elementType.declaration.qualifiedName!!.asString()}' is not class "
                 )
+            if (!isScalarCollection) {
+                val expectedTargetType =
+                    if (mustBeEntity) {
+                        (sysTypes as TableSysTypes).entityType
+                    } else {
+                        sysTypes.immutableType
+                    }
+                if (!expectedTargetType.isAssignableFrom(elementType) ||
+                    elementDeclaration.classKind != ClassKind.INTERFACE
+                ) {
+                    throw GeneratorException(
+                        "The property '${prop.qualifiedName!!.asString()}' is not valid association, " +
+                            "its target type '${elementDeclaration.qualifiedName!!.asString()}' is not " +
+                            "interface extends '${expectedTargetType.declaration.qualifiedName?.asString()}'"
+                    )
+                }
             }
-            if (targetDeclaration.typeParameters.isNotEmpty()) {
+            if (elementDeclaration.typeParameters.isNotEmpty()) {
                 throw GeneratorException(
                     "The property '${prop.qualifiedName!!.asString()}' is not valid association, " +
-                        "its target type '${targetDeclaration.qualifiedName!!.asString()}' cannot " +
+                        "its target type '${elementDeclaration.qualifiedName!!.asString()}' cannot " +
                         "have type argument"
-                )
-            }
-            if (sysTypes.inputType.isAssignableFrom(targetType)) {
-                throw GeneratorException(
-                    "The property '${prop.qualifiedName!!.asString()}' is not valid association, " +
-                        "its target type '${targetDeclaration.qualifiedName!!.asString()}' cannot " +
-                        "be interface extends Input"
                 )
             }
             return PropMeta(
                 prop,
                 nullableType.isMarkedNullable,
-                targetDeclaration,
-                isConnection,
-                isCollection,
-                !isConnection && !isCollection,
-                if (isCollection) {
-                    targetType.isMarkedNullable
-                } else {
-                    !sysTypes.connectionType.isAssignableFrom(nonNullType) && nullableType.isMarkedNullable
-                }
+                elementDeclaration,
+                isConnection = isConnection,
+                isList = isCollection,
+                isReference = !isConnection && !mayBeCollection,
+                isScalarList = isScalarCollection,
+                elementType.isMarkedNullable
             )
         }
     }

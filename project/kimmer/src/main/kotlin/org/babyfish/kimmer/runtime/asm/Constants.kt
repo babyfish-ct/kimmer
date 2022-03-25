@@ -52,3 +52,5 @@ internal val COMPARABLE_DESCRIPTOR = Type.getDescriptor(Comparable::class.java)
 
 internal val CONNECTION_INTERNAL_NAME = Type.getInternalName(Connection::class.java)
 
+internal val CONNECTION_DESCRIPTOR = Type.getDescriptor(Connection::class.java)
+

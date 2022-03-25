@@ -26,7 +26,7 @@ object AppContext {
             override fun <R> execute(
                 con: Connection,
                 sql: String,
-                variables: List<Any>,
+                variables: Collection<Any>,
                 block: PreparedStatement.() -> R
             ): R {
                 // System.err prints red text in intellij, not white

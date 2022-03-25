@@ -69,11 +69,10 @@ internal class EntityMappingBuilderImpl(
 
     override fun transientProp(
         prop: KProperty1<out Entity<*>, *>
-    ) {
+    ) =
         createProp(prop).apply {
             setTransient()
         }
-    }
 
     override fun storage(prop: KProperty1<out Entity<*>, *>, storage: Storage) {
         getProp(prop).setStorage(storage)

@@ -155,6 +155,7 @@ internal class TypeImpl(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     override val draftInfo: DraftInfo? by lazy {
         if (kotlinType == Connection.PageInfo::class) {
             DraftInfo(
@@ -170,9 +171,9 @@ internal class TypeImpl(
                     getFinalDraftType(it, AsyncDraft::class.java) as Class<out AsyncDraft<*>>?
                 if (!isAbstract) {
                     syncDraftType
-                        ?: error("No nested interface 'sync' for non-abstract immutable type '${it::class.qualifiedName}'")
+                        ?: error("No nested interface 'sync' for non-abstract immutable type '${it.name}'")
                     asyncDraftType
-                        ?: error("No nested interface 'async' for non-abstract immutable type '${it::class.qualifiedName}'")
+                        ?: error("No nested interface 'async' for non-abstract immutable type '${it.name}'")
                 }
                 DraftInfo(
                     it,
@@ -213,9 +214,13 @@ private class PropImpl(
 
     override val isList: Boolean
 
+    override val elementType: KClass<*>
+
     override val isReference: Boolean
 
-    override val isTargetNullable: Boolean
+    override val isScalarList: Boolean
+
+    override val isElementNullable: Boolean
 
     private var _targetType: ImmutableType? = null
 
@@ -228,15 +233,58 @@ private class PropImpl(
             throw MetadataException("Illegal property '${kotlinProp}', array is not allowed")
         }
         isConnection = Connection::class.java.isAssignableFrom(javaReturnType)
-        isList = Collection::class.java.isAssignableFrom(javaReturnType)
+        var isCollection = Collection::class.java.isAssignableFrom(javaReturnType)
         isReference = !isConnection && Immutable::class.java.isAssignableFrom(javaReturnType)
-        if (isConnection && isList) {
-            throw MetadataException("Illegal property '${kotlinProp}', its return type cannot be both connection and list")
+        if (isConnection && isCollection) {
+            throw MetadataException(
+                "Illegal property '${kotlinProp}', its return type cannot be both connection and collection"
+            )
         }
-        isTargetNullable = if (isConnection || isList) {
+        elementType = when {
+            isConnection -> {
+                if (returnType != Connection::class) {
+                    throw MetadataException(
+                        "Illegal property '${kotlinProp}', the type of connection " +
+                            "must must be strictly equal to '${Connection::class.qualifiedName}'"
+                    )
+                }
+                val targetClassifier = kotlinProp.returnType.arguments[0].type?.classifier
+                if (targetClassifier !is KClass<*>) {
+                    throw MetadataException("Illegal property '${kotlinProp}', generic argument of connection is not class")
+                }
+                targetClassifier
+            }
+            isCollection -> {
+                if (returnType != List::class) {
+                    throw MetadataException(
+                        "Illegal property '${kotlinProp}', the type of list " +
+                            "must must be strictly equal to '${List::class.qualifiedName}'"
+                    )
+                }
+                val targetClassifier = kotlinProp.returnType.arguments[0].type?.classifier
+                if (targetClassifier !is KClass<*>) {
+                    throw MetadataException("Illegal property '${kotlinProp}', generic argument of list is not class")
+                }
+                targetClassifier
+            }
+            else ->
+                returnType
+        }
+        isList = isCollection && Immutable::class.java.isAssignableFrom(elementType.java)
+        isScalarList = isCollection && !isList
+        if (isScalarList && Entity::class.java.isAssignableFrom(declaringType.kotlinType.java)) {
+            throw MetadataException("Illegal property '${kotlinProp}', scalar list is not allowed for Entity interface")
+        }
+        isElementNullable = if (isConnection || isCollection) {
             kotlinProp.returnType.arguments[0].type?.isMarkedNullable ?: false
         } else {
             false
+        }
+        if (isConnection) {
+            throw MetadataException("Current version temporarily does not support connection prop '$kotlinProp'")
+        }
+        if (isScalarList) {
+            throw MetadataException("Current version temporarily does not support scalar list prop '$kotlinProp'")
         }
     }
 
@@ -251,52 +299,20 @@ private class PropImpl(
 
     @Suppress("UNCHECKED_CAST")
     fun resolve(parser: Parser) {
-        val cls = kotlinProp.returnType.classifier as KClass<*>
-        val targetJavaType = when {
-            isConnection -> {
-                if (cls.typeParameters.isNotEmpty()) {
-                    throw MetadataException(
-                        "Illegal property '${kotlinProp}', the type of connection " +
-                            "must must be strictly equal to '${Connection::class.qualifiedName}'"
-                    )
-                }
-                val targetClassifier = kotlinProp.returnType.arguments[0].type?.classifier
-                if (targetClassifier !is KClass<*>) {
-                    throw MetadataException("Illegal property '${kotlinProp}', generic argument of connection is not class")
-                }
-                targetClassifier.java
-            }
-            isList -> {
-                if (cls != List::class) {
-                    throw MetadataException(
-                        "Illegal property '${kotlinProp}', the type of connection " +
-                            "must must be strictly equal to '${List::class.qualifiedName}'"
-                    )
-                }
-                val targetClassifier = kotlinProp.returnType.arguments[0].type?.classifier
-                if (targetClassifier !is KClass<*>) {
-                    throw MetadataException("Illegal property '${kotlinProp}', generic argument of list is not class")
-                }
-                targetClassifier.java
-            }
-            isReference ->
-                cls.java
-            else -> null
-        }
-        if (targetJavaType !== null) {
+        if (isAssociation) {
             val expectedType =
                 if (Entity::class.java.isAssignableFrom(declaringType.kotlinType.java)) {
                     Entity::class.java
                 } else {
                     Immutable::class.java
                 }
-            if (!expectedType.isAssignableFrom(targetJavaType)) {
+            if (!expectedType.isAssignableFrom(elementType.java)) {
                 throw MetadataException(
                     "Illegal association property '${kotlinProp}', its target type " +
-                        "'${targetJavaType.name}' is not derived type of '${expectedType.name}'"
+                        "'${elementType.qualifiedName}' is not derived type of '${expectedType.name}'"
                 )
             }
-            _targetType = parser.get(targetJavaType as Class<out Immutable>)
+            _targetType = parser.get(elementType.java as Class<out Immutable>)
         }
     }
 

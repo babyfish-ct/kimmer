@@ -12,7 +12,7 @@ interface R2dbcExecutor {
     suspend fun <R> execute(
         con: Connection,
         sql: String,
-        variables: List<Any>,
+        variables: Collection<Any>,
         block: suspend Result.() -> R
     ): R
 }
@@ -22,12 +22,11 @@ object DefaultR2dbcExecutor: R2dbcExecutor {
     override suspend fun <R> execute(
         con: Connection,
         sql: String,
-        variables: List<Any>,
+        variables: Collection<Any>,
         block: suspend Result.() -> R
     ): R {
         val statement = con.createStatement(sql)
-        for (index in variables.indices) {
-            val variable = variables[index]
+        variables.forEachIndexed { index, variable ->
             if (variable is DbNull) {
                 statement.bindNull(index, variable.type.java)
             } else {

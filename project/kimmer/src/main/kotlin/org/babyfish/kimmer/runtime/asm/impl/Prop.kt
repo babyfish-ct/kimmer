@@ -13,7 +13,7 @@ internal fun ClassVisitor.writeProp(prop: ImmutableProp, ownerInternalName: Stri
     val desc = Type.getDescriptor(prop.javaReturnType)
     val loadedName = loadedName(prop)
     val signature = when { // Jackson need it
-        prop.isList -> "Ljava/util/List<${Type.getDescriptor(prop.javaReturnType)}>;"
+        prop.isList || prop.isScalarList -> "Ljava/util/List<${Type.getDescriptor(prop.javaReturnType)}>;"
         prop.isConnection -> "L$CONNECTION_INTERNAL_NAME<${Type.getDescriptor(prop.javaReturnType)}>;"
         else -> null
     }

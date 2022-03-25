@@ -2,6 +2,7 @@ package org.babyfish.kimmer.sql.ast.table.impl
 
 import org.babyfish.kimmer.graphql.Connection
 import org.babyfish.kimmer.sql.Entity
+import org.babyfish.kimmer.sql.ExecutionException
 import org.babyfish.kimmer.sql.MappingException
 import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.ContainsExpression
@@ -208,6 +209,9 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         inverse: Boolean
     ): NonNullTable<X, XID> {
 
+        if (entityProp.isTransient) {
+            throw ExecutionException("Cannot join to '$entityProp' because it's transient association")
+        }
         statement.validateMutable()
 
         val joinName = if (!inverse) {
@@ -353,23 +357,31 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         prop: EntityProp,
         xIds: Collection<Any>,
         inverse: Boolean
-    ): NonNullExpression<Boolean> =
-        if (prop.mappedBy !== null) {
+    ): NonNullExpression<Boolean> {
+        if (prop.isTransient) {
+            throw ExecutionException("Cannot invoke containsAny on '$prop' because it's transient association")
+        }
+        return if (prop.mappedBy !== null) {
             ContainsExpression(this, prop.mappedBy!!, false, xIds, !inverse)
         } else {
             ContainsExpression(this, prop, false, xIds, inverse)
         }
+    }
 
     private fun containsAll0(
         prop: EntityProp,
         xIds: Collection<Any>,
         inverse: Boolean
-    ): NonNullExpression<Boolean> =
-        if (prop.mappedBy !== null) {
+    ): NonNullExpression<Boolean> {
+        if (prop.isTransient) {
+            throw ExecutionException("Cannot invoke containsAll on '$prop' because it's transient association")
+        }
+        return if (prop.mappedBy !== null) {
             ContainsExpression(this, prop.mappedBy!!, true, xIds, !inverse)
         } else {
             ContainsExpression(this, prop, true, xIds, inverse)
         }
+    }
 
     override fun renderTo(builder: SqlBuilder) {
         builder.renderSelf()

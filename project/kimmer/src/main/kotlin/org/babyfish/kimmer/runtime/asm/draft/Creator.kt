@@ -11,7 +11,7 @@ internal fun ClassVisitor.writeCreator(prop: ImmutableProp, args: GeneratorArgs)
 
     val desc = Type.getDescriptor(prop.javaReturnType)
 
-    val draftDesc = if (prop.isList) {
+    val draftDesc = if (prop.isList || prop.isScalarList) {
         "Ljava/util/List;"
     } else {
         prop.targetType?.draftInfo?.abstractType?.let {
@@ -55,7 +55,7 @@ internal fun ClassVisitor.writeCreator(prop: ImmutableProp, args: GeneratorArgs)
         }
 
         visitSetter(modifiedLocal, prop, args) {
-            if (prop.isList) {
+            if (prop.isList || prop.isScalarList) {
                 visitTypeInsn(Opcodes.NEW, "java/util/ArrayList")
                 visitInsn(Opcodes.DUP)
                 visitMethodInsn(

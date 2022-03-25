@@ -41,7 +41,13 @@ internal class ConnectionEdgesPropImpl(
     override val isConnection: Boolean
         get() = false
 
-    override val isTargetNullable: Boolean = false
+    override val isScalarList: Boolean
+        get() = false
+
+    override val elementType: KClass<*>
+        get() = Connection.Edge::class
+
+    override val isElementNullable: Boolean = false
 
     override fun toString(): String =
         kotlinProp.toString()

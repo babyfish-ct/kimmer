@@ -34,7 +34,7 @@ internal open class MutationContext private constructor(
             ?: _entity?.id
             ?: error("Internal bug: neither entity nor entityId is initialized")
 
-    override var entity: Entity<*>
+    open var entity: Entity<*>
         get() = _entity ?: error("Internal bug: entity has not been initialized")
         set(value) {
             _entity = value
@@ -46,6 +46,9 @@ internal open class MutationContext private constructor(
 
     val isEntityInitialized: Boolean
         get() = _entity !== null
+
+    override fun <E : Entity<ID>, ID : Comparable<ID>> entity(): E =
+        entity as E
 
     override var type: MutationType = MutationType.NONE
 

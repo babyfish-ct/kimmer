@@ -26,14 +26,14 @@ internal fun MethodVisitor.visitToDraft(
         Opcodes.INVOKEINTERFACE,
         Type.getInternalName(DraftContext::class.java),
         "toDraft",
-        if (prop.isList) {
+        if (prop.isList || prop.isScalarList) {
             "(Ljava/util/List;)Ljava/util/List;"
         } else {
             "(${Type.getDescriptor(Immutable::class.java)})${Type.getDescriptor(Draft::class.java)}"
         },
         true
     )
-    if (!prop.isList) {
+    if (!prop.isList && !prop.isScalarList) {
         visitTypeInsn(
             Opcodes.CHECKCAST,
             Type.getInternalName(

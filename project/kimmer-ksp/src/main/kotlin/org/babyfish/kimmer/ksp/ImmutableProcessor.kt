@@ -28,24 +28,38 @@ class ImmutableProcessor(
         if (modelMap.isNotEmpty()) {
             for ((file, declarations) in modelMap) {
                 if (draft) {
-                    DraftGenerator(codeGenerator, sysTypes, file, declarations)
-                        .generate(resolver.getAllFiles().toList())
+                    val immutableDeclarations = declarations.filter {
+                        sysTypes.immutableType.isAssignableFrom(it.asStarProjectedType())
+                    }
+                    if (immutableDeclarations.size > 1) {
+                        throw GeneratorException(
+                            "When the ksp argument 'kimmer.draft' is true, " +
+                                "each source file can only declare one immutable interface inherits " +
+                                "'${sysTypes.immutableType.declaration.qualifiedName!!.asString()}'. " +
+                                "However, the source file '${file.filePath}' declares ${immutableDeclarations.size} entity types: " +
+                                immutableDeclarations.joinToString { "'${it.simpleName!!.asString()}'" }
+                        )
+                    }
+                    if (immutableDeclarations.isNotEmpty()) {
+                        DraftGenerator(codeGenerator, sysTypes, file, immutableDeclarations)
+                            .generate(resolver.getAllFiles().toList())
+                    }
                 }
                 if (table) {
                     val tableSysTypes = sysTypes as TableSysTypes
                     val entityDeclarations = declarations.filter {
                         tableSysTypes.entityType.isAssignableFrom(it.asStarProjectedType())
                     }
+                    if (entityDeclarations.size > 1) {
+                        throw GeneratorException(
+                            "When the ksp argument 'kimmer.table' is true, " +
+                                "each source file can only declare one entity interface inherits " +
+                                "'${tableSysTypes.entityType.declaration.qualifiedName!!.asString()}'. " +
+                                "However, the source file '${file.filePath}' declares ${entityDeclarations.size} entity types: " +
+                                entityDeclarations.joinToString { "'${it.simpleName!!.asString()}'" }
+                        )
+                    }
                     if (entityDeclarations.isNotEmpty()) {
-                        if (entityDeclarations.size > 1) {
-                            throw GeneratorException(
-                                "When the ksp argument 'kimmer.table' is true, " +
-                                    "each source file can only declare one entity interface inherits " +
-                                    "'${tableSysTypes.entityType.declaration.qualifiedName!!.asString()}'. " +
-                                    "However, the source file '${file.filePath}' declares ${entityDeclarations.size} entity types: " +
-                                    entityDeclarations.joinToString { "'${it.simpleName!!.asString()}'" }
-                            )
-                        }
                         TableGenerator(codeGenerator, tableSysTypes, file, entityDeclarations, tableCollectionJoinOnlyForSubQuery)
                             .generate(resolver.getAllFiles().toList())
                     }

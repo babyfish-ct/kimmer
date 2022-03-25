@@ -16,6 +16,12 @@ interface ImmutableProp {
 
     val isNullable: Boolean
 
+    val isScalarList: Boolean
+
+    val elementType: KClass<*>
+
+    val isElementNullable: Boolean
+
     val isAssociation: Boolean
 
     val isReference: Boolean
@@ -25,8 +31,6 @@ interface ImmutableProp {
     val isConnection: Boolean
 
     val targetType: ImmutableType?
-
-    val isTargetNullable: Boolean
 
     val name: String
         get() = kotlinProp.name
