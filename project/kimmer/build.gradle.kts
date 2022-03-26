@@ -24,6 +24,9 @@ dependencies {
     dokkaHtmlPlugin("org.jetbrains.dokka:dokka-base:1.6.0")
 }
 
+java.sourceCompatibility = JavaVersion.VERSION_1_8
+java.targetCompatibility = JavaVersion.VERSION_1_8
+
 kotlin {
     sourceSets.test {
         kotlin.srcDir("build/generated/ksp/test/kotlin")
