@@ -45,8 +45,9 @@ Why provide a new SQL DSL?
 5. [Subqueries](./subqueries.md)
 6. [Pagination](./pagination.md)
 7. Modify database(code ready, document pending) 
-8. [Out of scope](./out-of-scope.md)
-9. [Non good design to avoid intellij's bug](intellij-bug.md)
+8. Query & Modify middle table directly(code ready, document pending) 
+9. [Out of scope](./out-of-scope.md)
+10. [Non good design to avoid intellij's bug](intellij-bug.md)
 
 
 ## 3. Video(Chinese)
