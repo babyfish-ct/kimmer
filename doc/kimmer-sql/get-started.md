@@ -16,8 +16,8 @@
    b. Add this section into **dependencies{}**
    
       ```
-      implementation("org.babyfish.kimmer:kimmer-sql:0.3.1")
-      ksp("org.babyfish.kimmer:kimmer-ksp:0.3.1")
+      implementation("org.babyfish.kimmer:kimmer-sql:0.3.3")
+      ksp("org.babyfish.kimmer:kimmer-ksp:0.3.3")
       runtimeOnly("com.h2database:h2:2.1.210")
       ```
    
