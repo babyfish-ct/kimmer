@@ -185,17 +185,17 @@ where exists(
 )
 ```
 
-### 2.2 Untyped subquery
+### 2.2 Wild subquery
 
-Since *exists()* does not care about the return format of the subquery, *kimmer-sql* supports an *untypedSubQuery* function that allows developers to create an untyped subquery.
+Since *exists()* does not care about the return format of the subquery, *kimmer-sql* supports an *wildSubQuery* function that allows developers to create an wild subquery.
 
-- Developers do not need to specify select clauses for untyped subqueries
-- The only function of untyped subqueries is to work with *exists()*
+- Developers do not need to specify select clauses for wild subqueries
+- The only function of wild subqueries is to work with *exists()*
 
 ```kt
 sqlClient.createQuery(Book::class) {
     where {
-        exists(untypedSubQuery(Author::class) {
+        exists(wildSubQuery(Author::class) {
             where(
                 parentTable.id eq table.books.id,
                 table.firstName eq "Alex"
@@ -206,7 +206,7 @@ sqlClient.createQuery(Book::class) {
     select(table)
 }
 ```
-At the line of comment *α*, there is not *select clause* for untyped subquery.
+At the line of comment *α*, there is not *select clause* for wild subquery.
 
 ------------------
 [< Previous: Contains](./contains.md) | [Back to parent](./README.md) | [Next: Pagination >](./pagination.md)
