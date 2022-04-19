@@ -5,24 +5,23 @@ import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.Order
 import org.babyfish.kimmer.sql.spi.Renderable
 import org.babyfish.kimmer.sql.ast.SqlBuilder
-import org.babyfish.kimmer.sql.ast.query.MutableQuery
-import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
-import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
 import org.babyfish.kimmer.sql.ast.table.impl.TableAliasAllocator
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.ast.AstVisitor
+import org.babyfish.kimmer.sql.ast.query.*
 import org.babyfish.kimmer.sql.ast.table.Table
 import org.babyfish.kimmer.sql.impl.AbstractMutableStatement
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
+import org.babyfish.kimmer.sql.meta.spi.EntityPropImpl
 import java.lang.IllegalStateException
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
 
-internal abstract class AbstractMutableQueryImpl<E, ID>(
+internal abstract class AbstractMutableQueryImpl<E, ID> private constructor(
     tableAliasAllocator: TableAliasAllocator,
-    sqlClient: SqlClientImpl,
-    type: KClass<E>
+    sqlClient: SqlClientImpl
 ): AbstractMutableStatement(
     tableAliasAllocator,
     sqlClient
@@ -41,13 +40,54 @@ internal abstract class AbstractMutableQueryImpl<E, ID>(
 
     private var frozen = false
 
-    override val table: TableImpl<E, ID> = createTable0(type)
+    private lateinit var _table: TableImpl<E, ID>
 
-    private fun createTable0(type: KClass<E>): TableImpl<E, ID> =
-        createTable(
-            sqlClient.entityTypeMap[type]
-                ?: throw IllegalArgumentException("Cannot create query for unmapped type '${type.qualifiedName}'")
-        )
+    private lateinit var _subQueries: SubQueries<E, ID>
+
+    private lateinit var _wildSubQueries: WildSubQueries<E, ID>
+
+    override val table: TableImpl<E, ID>
+        get() = _table
+
+    constructor(
+        tableAliasAllocator: TableAliasAllocator,
+        sqlClient: SqlClientImpl,
+        type: KClass<E>
+    ): this(
+        tableAliasAllocator,
+        sqlClient
+    ) {
+        val entityType = sqlClient.entityTypeMap[type]
+            ?: throw IllegalArgumentException("Cannot create query base on unmapped type '$type'")
+        _table = createTable(entityType)
+    }
+
+    constructor(
+        tableAliasAllocator: TableAliasAllocator,
+        sqlClient: SqlClientImpl,
+        prop: KProperty1<*, *>
+    ): this(
+        tableAliasAllocator,
+        sqlClient
+    ) {
+        val ownerType = prop.parameters[0].type.classifier as KClass<*>?
+            ?: throw IllegalArgumentException(
+                "Cannot create association query because cannot extract owner type from '$prop'"
+            )
+        val ownerEntityType = sqlClient.entityTypeMap[ownerType]
+            ?: throw IllegalArgumentException(
+                "Cannot create association query base on unmapped type '$ownerType'"
+            )
+        val entityProp = ownerEntityType.props[prop.name]
+            ?: throw IllegalArgumentException(
+                "Cannot create association query because there is no entity property '${prop.name}' in the type '${ownerEntityType}'"
+            )
+        val associationEntityType = (entityProp as EntityPropImpl).associationEntityType
+            ?: throw IllegalArgumentException(
+                "Cannot create association query because '$prop' is not base on middle table"
+            )
+        _table = createTable(associationEntityType)
+    }
 
     protected open fun createTable(entityType: EntityType): TableImpl<E, ID> =
         TableImpl(this, entityType)
@@ -132,23 +172,13 @@ internal abstract class AbstractMutableQueryImpl<E, ID>(
         orders.clear()
     }
 
-    override fun <X, XID, R: Any> subQuery(
-        type: KClass<X>,
-        block: MutableSubQuery<E, ID, X, XID>.() -> TypedSubQuery<R>
-    ): TypedSubQuery<R>
-    where X: Entity<XID>, XID: Comparable<XID> =
-        SubMutableQueryImpl(this, type).run {
-            block()
-        }
+    override val subQueries: SubQueries<E, ID> by lazy {
+        SubQueriesImpl(this)
+    }
 
-    override fun <X, XID> untypedSubQuery(
-        type: KClass<X>,
-        block: MutableSubQuery<E, ID, X, XID>.() -> Unit
-    ): MutableSubQuery<E, ID, X, XID>
-    where X: Entity<XID>, XID: Comparable<XID> =
-        SubMutableQueryImpl(this, type).apply {
-            block()
-        }
+    override val wildSubQueries: WildSubQueries<E, ID> by lazy {
+        WildSubQueriesImpl(this)
+    }
 
     fun renderTo(builder: SqlBuilder, withoutSortingAndPaging: Boolean) {
         (table as Renderable).renderTo(builder)

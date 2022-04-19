@@ -7,8 +7,6 @@ import kotlin.reflect.KClass
 
 interface EntityType {
 
-    val name: String
-
     val immutableType: ImmutableType
 
     @Suppress("UNCHECKED_CAST")

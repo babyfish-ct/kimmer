@@ -6,9 +6,8 @@ import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.ast.Executable
 import org.babyfish.kimmer.sql.ast.MutableDelete
 import org.babyfish.kimmer.sql.ast.MutableUpdate
-import org.babyfish.kimmer.sql.ast.query.impl.RootMutableQueryImpl
-import org.babyfish.kimmer.sql.ast.query.MutableRootQuery
-import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedRootQuery
+import org.babyfish.kimmer.sql.ast.query.Queries
+import org.babyfish.kimmer.sql.ast.query.impl.QueriesImpl
 import org.babyfish.kimmer.sql.meta.EntityType
 import org.babyfish.kimmer.sql.meta.ScalarProvider
 import org.babyfish.kimmer.sql.runtime.Dialect
@@ -24,13 +23,7 @@ internal class SqlClientImpl(
     override val r2dbcExecutor: R2dbcExecutor
 ) : SqlClient {
 
-    override fun <E: Entity<ID>, ID: Comparable<ID>, R> createQuery(
-        type: KClass<E>,
-        block: MutableRootQuery<E, ID>.() -> ConfigurableTypedRootQuery<E, ID, R>
-    ): ConfigurableTypedRootQuery<E, ID, R> =
-        RootMutableQueryImpl(this, type).run {
-            block()
-        }
+    override val queries: Queries = QueriesImpl(this)
 
     override fun <E: Entity<ID>, ID: Comparable<ID>> createUpdate(
         type: KClass<E>,

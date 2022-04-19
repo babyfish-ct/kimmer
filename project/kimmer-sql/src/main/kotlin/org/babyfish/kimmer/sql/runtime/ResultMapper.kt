@@ -3,12 +3,16 @@ package org.babyfish.kimmer.sql.runtime
 import io.r2dbc.spi.Row
 import org.babyfish.kimmer.Draft
 import org.babyfish.kimmer.produce
+import org.babyfish.kimmer.produceDraft
+import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ExecutionException
 import org.babyfish.kimmer.sql.SqlClient
 import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.meta.EntityType
 import org.babyfish.kimmer.sql.meta.ScalarProvider
+import org.babyfish.kimmer.sql.meta.impl.AssociationEntityTypeImpl
+import org.babyfish.kimmer.sql.produceAssociation
 import java.sql.ResultSet
 import kotlin.reflect.KClass
 
@@ -42,7 +46,34 @@ internal abstract class ResultMapper(
                 error("Internal bug: Un-selectable expression has been selected")
         }
 
-    private fun map(entityType: EntityType): Any? {
+    private fun map(entityType: EntityType): Any? =
+        if (entityType is AssociationEntityTypeImpl) {
+            mapAssociation(entityType)
+        } else {
+            mapObject(entityType)
+        }
+
+    private fun mapAssociation(entityType: AssociationEntityTypeImpl): Any? {
+        val sourceType = entityType.sourceProp.targetType!!
+        val targetType = entityType.targetProp.targetType!!
+        val sourceId = read(sourceType.idProp.returnType)
+            ?: throw ExecutionException("source of '$entityType' cannot be null")
+        val targetId = read(targetType.idProp.returnType)
+            ?: throw ExecutionException("source of '$entityType' cannot be null")
+        return produceAssociation(
+            sourceType.kotlinType as KClass<Entity<FakeId>>,
+            targetType.kotlinType as KClass<Entity<FakeId>>
+        ) {
+            source = produceDraft(sourceType.kotlinType) {
+                Draft.set(this, sourceType.idProp.immutableProp, sourceId)
+            }
+            target = produceDraft(targetType.kotlinType) {
+                Draft.set(this, targetType.idProp.immutableProp, targetId)
+            }
+        }
+    }
+
+    private fun mapObject(entityType: EntityType): Any? {
         val id = read(entityType.idProp.returnType)
         if (id === null) {
             index += entityType.starProps.size - 1

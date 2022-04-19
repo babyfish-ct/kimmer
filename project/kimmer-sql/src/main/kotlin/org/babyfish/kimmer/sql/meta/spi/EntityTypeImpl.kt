@@ -3,6 +3,7 @@ package org.babyfish.kimmer.sql.meta.spi
 import org.babyfish.kimmer.meta.ImmutableType
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.MappingException
+import org.babyfish.kimmer.sql.meta.AssociationType
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
 import org.babyfish.kimmer.sql.meta.config.Column
@@ -21,6 +22,11 @@ open class EntityTypeImpl(
 ): EntityType {
 
     init {
+        if (immutableType is AssociationType) {
+            throw IllegalArgumentException(
+                "Cannot create entity type for association type '${immutableType}'"
+            )
+        }
         if (!Entity::class.java.isAssignableFrom(immutableType.kotlinType.java)) {
             throw IllegalArgumentException(
                 "Cannot create entity type of '${immutableType.kotlinType.qualifiedName}' " +
@@ -48,9 +54,6 @@ open class EntityTypeImpl(
     internal val mutableBackProps = mutableSetOf<EntityProp>()
 
     private var _expectedPhase = ResolvingPhase.SUPER_TYPE.ordinal
-
-    override val name: String
-        get() = immutableType.simpleName
 
     override val tableName: String
         get() = _tableName ?: databaseIdentifier(kotlinType.simpleName!!)

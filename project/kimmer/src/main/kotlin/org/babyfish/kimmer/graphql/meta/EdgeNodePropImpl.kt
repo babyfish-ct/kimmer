@@ -30,7 +30,7 @@ internal class EdgeNodePropImpl(
         get() = false
 
     override val isAssociation: Boolean
-        get() = false
+        get() = true
 
     override val isReference: Boolean
         get() = true

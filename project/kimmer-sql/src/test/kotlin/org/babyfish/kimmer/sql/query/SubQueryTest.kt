@@ -80,7 +80,7 @@ class SubQueryTest: AbstractQueryTest() {
     fun testExists() {
         sqlClient.createQuery(Book::class) {
             where {
-                exists(untypedSubQuery(Author::class) {
+                exists(wildSubQuery(Author::class) {
                     where(
                         parentTable.id eq table.books.id,
                         table.firstName eq "Alex"

@@ -12,15 +12,23 @@ import org.babyfish.kimmer.sql.ast.table.NonNullTable
 import org.babyfish.kimmer.sql.ast.table.impl.TableAliasAllocator
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
 
-internal class RootMutableQueryImpl<E, ID>(
-    sqlClient: SqlClientImpl,
-    type: KClass<E>
-): AbstractMutableQueryImpl<E, ID>(TableAliasAllocator(), sqlClient, type),
+internal class RootMutableQueryImpl<E, ID>: AbstractMutableQueryImpl<E, ID>,
     MutableRootQuery<E, ID>
     where E:
           Entity<ID>,
           ID: Comparable<ID> {
+
+    constructor(
+        sqlClient: SqlClientImpl,
+        type: KClass<E>
+    ): super(TableAliasAllocator(), sqlClient, type)
+
+    constructor(
+        sqlClient: SqlClientImpl,
+        prop: KProperty1<*, *>
+    ): super(TableAliasAllocator(), sqlClient, prop)
 
     override fun <X : Any> select(
         expression: NonNullExpression<X>

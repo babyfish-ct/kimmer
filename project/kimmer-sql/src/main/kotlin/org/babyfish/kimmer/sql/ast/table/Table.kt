@@ -2,7 +2,6 @@ package org.babyfish.kimmer.sql.ast.table
 
 import org.babyfish.kimmer.graphql.Connection
 import org.babyfish.kimmer.sql.Entity
-import org.babyfish.kimmer.sql.ast.Expression
 import org.babyfish.kimmer.sql.ast.NonNullExpression
 import org.babyfish.kimmer.sql.ast.PropExpression
 import kotlin.reflect.KProperty1

@@ -1,6 +1,7 @@
 package org.babyfish.kimmer.sql.ast.table.impl
 
 import org.babyfish.kimmer.graphql.Connection
+import org.babyfish.kimmer.sql.Association
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ExecutionException
 import org.babyfish.kimmer.sql.MappingException
@@ -19,6 +20,9 @@ import org.babyfish.kimmer.sql.meta.config.Formula
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import org.babyfish.kimmer.sql.ast.AstVisitor
 import org.babyfish.kimmer.sql.impl.AbstractMutableStatement
+import org.babyfish.kimmer.sql.meta.impl.AssociationEntityPropImpl
+import org.babyfish.kimmer.sql.meta.impl.AssociationEntityTypeImpl
+import java.lang.UnsupportedOperationException
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
@@ -38,6 +42,9 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     internal val childTableMap = mutableMapOf<String, TableImpl<*, *>>()
 
     init {
+        if (parent !== null && entityType is AssociationEntityTypeImpl) {
+            error("Internal bug: Bad constructor arguments for TableImpl")
+        }
         if ((parent === null) != (joinProp === null)) {
             error("Internal bug: Bad constructor arguments for TableImpl")
         }
@@ -68,8 +75,11 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
         )
 
     override val id: NonNullPropExpression<ID>
-        get() =
+        get() = if (entityType is AssociationEntityTypeImpl) {
+            throw UnsupportedOperationException("Cannot get id of association table $entityType")
+        } else {
             PropExpressionImpl(this, entityType.idProp)
+        }
 
     override fun <X : Any> get(prop: KProperty1<E, X>): NonNullPropExpression<X> =
         `get?`(prop) as NonNullPropExpression<X>
@@ -211,6 +221,11 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
 
         if (entityProp.isTransient) {
             throw ExecutionException("Cannot join to '$entityProp' because it's transient association")
+        }
+        if (inverse && entityProp is AssociationEntityPropImpl) {
+            throw ExecutionException(
+                "Cannot join to '$entityProp' by inverse mode because it's property of association entity"
+            )
         }
         statement.validateMutable()
 
@@ -428,6 +443,19 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
 
     private fun SqlBuilder.renderJoin(mode: RenderMode) {
 
+        if (joinProp is AssociationEntityPropImpl) {
+            joinImpl(
+                false,
+                parent!!.alias,
+                (joinProp.storage as Column).name,
+                entityType.tableName,
+                alias,
+                (entityType.idProp.storage as Column).name,
+                mode
+            )
+            return
+        }
+
         val parent = parent!!
         val isOuterJoin = _isOuterJoin
         val middleTable = joinProp!!.storage as? MiddleTable
@@ -454,6 +482,7 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 )
             }
         } else if (isUsedBy(this)) {
+            val parentIdStorage =
             joinImpl(
                 isOuterJoin,
                 parent.alias,

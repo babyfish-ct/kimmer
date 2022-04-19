@@ -17,15 +17,10 @@ import org.babyfish.kimmer.sql.ast.AstVisitor
 import org.babyfish.kimmer.sql.ast.table.impl.TableImpl
 import org.babyfish.kimmer.sql.meta.EntityType
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
 
-internal class SubMutableQueryImpl<P, PID, E, ID>(
-    private val parentQuery: AbstractMutableQueryImpl<P, PID>,
-    type: KClass<E>,
-): AbstractMutableQueryImpl<E, ID>(
-        parentQuery.tableAliasAllocator,
-        parentQuery.sqlClient,
-        type
-    ),
+internal class SubMutableQueryImpl<P, PID, E, ID> :
+    AbstractMutableQueryImpl<E, ID>,
     MutableSubQuery<P, PID, E, ID>,
     Renderable,
     Ast
@@ -34,6 +29,22 @@ internal class SubMutableQueryImpl<P, PID, E, ID>(
         PID: Comparable<PID>,
         E: Entity<ID>,
         ID: Comparable<ID> {
+
+    private lateinit var parentQuery: AbstractMutableQueryImpl<P, PID>
+
+    constructor(
+        parentQuery: AbstractMutableQueryImpl<P, PID>,
+        type: KClass<E>
+    ): super(parentQuery.tableAliasAllocator, parentQuery.sqlClient, type) {
+        this.parentQuery = parentQuery
+    }
+
+    constructor(
+        parentQuery: AbstractMutableQueryImpl<P, PID>,
+        prop: KProperty1<*, *>
+    ): super(parentQuery.tableAliasAllocator, parentQuery.sqlClient, prop) {
+        this.parentQuery = parentQuery
+    }
 
     override val table: SubQueryTableImpl<E, ID>
         get() = super.table as SubQueryTableImpl<E, ID>

@@ -10,6 +10,7 @@ import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.graphql.Connection
 import org.babyfish.kimmer.meta.ImmutableType
 import org.babyfish.kimmer.produce
+import org.babyfish.kimmer.sql.Association
 
 
 class ImmutableDeserializer(type: Class<out Immutable>): StdDeserializer<Immutable>(type) {
@@ -22,6 +23,9 @@ class ImmutableDeserializer(type: Class<out Immutable>): StdDeserializer<Immutab
         val rawClass = handledType()
         if (rawClass === Connection::class.java) {
             return ConnectionDeserializer().deserialize(jp, ctx)
+        }
+        if (rawClass === Association::class.java) {
+            return AssociationDeserializer().deserialize(jp, ctx)
         }
         val type = ImmutableType.fromAnyType(rawClass)
             ?: throw JsonMappingException(jp, "Cannot deserialize the object whose type is '${rawClass.name}'")

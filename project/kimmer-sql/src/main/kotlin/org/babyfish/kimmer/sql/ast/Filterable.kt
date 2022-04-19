@@ -2,7 +2,9 @@ package org.babyfish.kimmer.sql.ast
 
 import org.babyfish.kimmer.sql.Entity
 import org.babyfish.kimmer.sql.ast.query.MutableSubQuery
+import org.babyfish.kimmer.sql.ast.query.SubQueries
 import org.babyfish.kimmer.sql.ast.query.TypedSubQuery
+import org.babyfish.kimmer.sql.ast.query.WildSubQueries
 import org.babyfish.kimmer.sql.ast.table.NonNullTable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -33,13 +35,19 @@ interface Filterable<E: Entity<ID>, ID: Comparable<ID>> {
         type: KClass<X>,
         block: MutableSubQuery<E, ID, X, XID>.() -> TypedSubQuery<R>
     ): TypedSubQuery<R>
-    where X: Entity<XID>, XID: Comparable<XID>
+    where X: Entity<XID>, XID: Comparable<XID> =
+        subQueries.byType(type, block)
 
-    fun <X, XID> untypedSubQuery(
+    fun <X, XID> wildSubQuery(
         type: KClass<X>,
         block: MutableSubQuery<E, ID, X, XID>.() -> Unit
     ): MutableSubQuery<E, ID, X, XID>
-    where X: Entity<XID>, XID: Comparable<XID>
+    where X: Entity<XID>, XID: Comparable<XID> =
+        wildSubQueries.byType(type, block)
+
+    val subQueries: SubQueries<E, ID>
+
+    val wildSubQueries: WildSubQueries<E, ID>
 }
 
 enum class OrderMode {

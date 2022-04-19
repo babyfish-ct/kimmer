@@ -6,6 +6,7 @@ import org.babyfish.kimmer.runtime.asm.*
 import org.babyfish.kimmer.runtime.asm.DRAFT_SPI_INTERNAL_NAME
 import org.babyfish.kimmer.runtime.asm.visitLoad
 import org.babyfish.kimmer.runtime.asm.writeMethod
+import org.babyfish.kimmer.sql.Entity
 import org.springframework.asm.ClassVisitor
 import org.springframework.asm.MethodVisitor
 import org.springframework.asm.Opcodes
@@ -29,6 +30,8 @@ internal fun ClassVisitor.writeProxyMethods(args: GeneratorArgs) {
     writeProxyMethod(Any::hashCode.javaMethod!!, args)
     writeProxyMethod(Any::equals.javaMethod!!, args)
     writeProxyMethod(Any::toString.javaMethod!!, args)
+
+    writeSetIdByComparable(args)
 }
 
 private fun ClassVisitor.writeProxyProp(
@@ -212,6 +215,30 @@ private fun MethodVisitor.visitLock(
     ) {
         visitVarInsn(Opcodes.ALOAD, lockSlot)
         visitInsn(Opcodes.MONITOREXIT)
+    }
+}
+
+private fun ClassVisitor.writeSetIdByComparable(args: GeneratorArgs) {
+    if (!Entity::class.java.isAssignableFrom(args.immutableType.kotlinType.java)) {
+        return
+    }
+    writeMethod(
+        Opcodes.ACC_PUBLIC,
+        "setId",
+        "($COMPARABLE_DESCRIPTOR)V"
+    ) {
+        val type = args.immutableType.props["id"]?.javaReturnType
+        visitVarInsn(Opcodes.ALOAD, 0)
+        visitVarInsn(Opcodes.ALOAD, 1)
+        visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(type))
+        visitMethodInsn(
+            Opcodes.INVOKEVIRTUAL,
+            args.internalName,
+            "setId",
+            "(${Type.getDescriptor(type)})V",
+            false
+        )
+        visitInsn(Opcodes.RETURN)
     }
 }
 

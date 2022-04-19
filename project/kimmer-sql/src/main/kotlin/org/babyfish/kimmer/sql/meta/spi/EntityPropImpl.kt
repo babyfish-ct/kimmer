@@ -7,6 +7,7 @@ import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.EntityType
 import org.babyfish.kimmer.sql.meta.ScalarProvider
 import org.babyfish.kimmer.sql.meta.config.*
+import org.babyfish.kimmer.sql.meta.impl.AssociationEntityTypeImpl
 import org.babyfish.kimmer.sql.meta.impl.EntityMappingBuilderImpl
 import org.babyfish.kimmer.sql.meta.impl.ResolvingPhase
 import org.babyfish.kimmer.sql.spi.databaseIdentifier
@@ -226,4 +227,18 @@ open class EntityPropImpl(
 
     override fun toString(): String =
         kotlinProp.toString()
+
+    internal val associationEntityType: AssociationEntityTypeImpl? by lazy {
+        _storage
+            ?.takeIf { it is MiddleTable }
+            ?.let {
+                AssociationEntityTypeImpl(this)
+            }
+            ?: mappedBy
+                ?.storage
+                ?.takeIf { it is MiddleTable }
+                ?.let {
+                    AssociationEntityTypeImpl(this)
+                }
+    }
 }

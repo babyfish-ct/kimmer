@@ -5,6 +5,7 @@ import org.babyfish.kimmer.sql.ast.MutableDelete
 import org.babyfish.kimmer.sql.ast.MutableUpdate
 import org.babyfish.kimmer.sql.ast.query.MutableRootQuery
 import org.babyfish.kimmer.sql.ast.query.ConfigurableTypedRootQuery
+import org.babyfish.kimmer.sql.ast.query.Queries
 import org.babyfish.kimmer.sql.meta.EntityType
 import org.babyfish.kimmer.sql.meta.ScalarProvider
 import org.babyfish.kimmer.sql.runtime.Dialect
@@ -27,7 +28,8 @@ interface SqlClient {
     fun <E: Entity<ID>, ID: Comparable<ID>, R> createQuery(
         type: KClass<E>,
         block: MutableRootQuery<E, ID>.() -> ConfigurableTypedRootQuery<E, ID, R>
-    ): ConfigurableTypedRootQuery<E, ID, R>
+    ): ConfigurableTypedRootQuery<E, ID, R> =
+        queries.byType(type, block)
 
     fun <E : Entity<ID>, ID : Comparable<ID>> createUpdate(
         type: KClass<E>,
@@ -38,6 +40,8 @@ interface SqlClient {
         type: KClass<E>,
         block: MutableDelete<E, ID>.() -> Unit
     ): Executable<Int>
+
+    val queries: Queries
 
     val entities: Entities
 
