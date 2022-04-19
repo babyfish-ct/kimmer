@@ -36,7 +36,7 @@ internal class AssociationEntityPropImpl(
         get() = immutableProp.javaReturnType
 
     override val isReference: Boolean
-        get() = storage !== null
+        get() = targetType !== null
 
     override val isList: Boolean
         get() = false

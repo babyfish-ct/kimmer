@@ -45,5 +45,7 @@ interface SqlClient {
 
     val entities: Entities
 
+    val associations: Associations
+
     //val trigger: Trigger
 }

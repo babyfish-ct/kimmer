@@ -2,22 +2,22 @@ package org.babyfish.kimmer.sql.runtime
 
 import org.babyfish.kimmer.Draft
 import org.babyfish.kimmer.produce
-import org.babyfish.kimmer.sql.Entity
-import org.babyfish.kimmer.sql.ExecutionException
-import org.babyfish.kimmer.sql.MutationType
-import org.babyfish.kimmer.sql.SqlClient
+import org.babyfish.kimmer.sql.*
+import org.babyfish.kimmer.sql.ast.*
 import org.babyfish.kimmer.sql.ast.JdbcSqlBuilder
-import org.babyfish.kimmer.sql.ast.valueIn
+import org.babyfish.kimmer.sql.ast.query.impl.RootMutableQueryImpl
+import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import org.babyfish.kimmer.sql.meta.EntityProp
 import org.babyfish.kimmer.sql.meta.config.Column
 import org.babyfish.kimmer.sql.meta.config.MiddleTable
 import org.babyfish.kimmer.sql.meta.config.OnDeleteAction
+import org.babyfish.kimmer.sql.meta.impl.AssociationEntityTypeImpl
 import java.sql.Connection
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 internal class JdbcDeleter(
-    private val sqlClient: SqlClient,
+    private val sqlClient: SqlClientImpl,
     private val con: Connection
 ) {
     fun delete(
@@ -34,13 +34,103 @@ internal class JdbcDeleter(
         return contexts
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun delete(
         contexts: Collection<MutationContext>
     ) {
-        if (contexts.isEmpty()) {
-            return
+        if (contexts.isNotEmpty()) {
+            val mutationOptions = contexts.first().mutationOptions
+            if (mutationOptions.entityType is AssociationEntityTypeImpl) {
+                deleteAssociationEntities(contexts)
+            } else {
+                deleteObjectEntities(contexts)
+            }
         }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun deleteAssociationEntities(
+        contexts: Collection<MutationContext>
+    ) {
+        val mutationOptions = contexts.first().mutationOptions
+        val entityType = mutationOptions.entityType as AssociationEntityTypeImpl
+        contexts
+            .filter { !it.isEntityInitialized }
+            .takeIf { it.isNotEmpty() }
+            ?.let { noEntityContexts ->
+                val associations = RootMutableQueryImpl<Entity<FakeId>, FakeId>(
+                    sqlClient,
+                    entityType
+                ).run {
+                    val sourceExpr = table.joinReference(
+                        entityType.sourceProp.immutableProp.kotlinProp as KProperty1<Entity<FakeId>, Entity<FakeId>>
+                    )
+                    val targetExpr = table.joinReference(
+                        entityType.targetProp.immutableProp.kotlinProp as KProperty1<Entity<FakeId>, Entity<FakeId>>
+                    )
+                    where(
+                        tuple {
+                            sourceExpr.id as Expression<Any> then
+                                targetExpr.id as Expression<Any>
+                        } valueIn (noEntityContexts.map { it.entityId as Pair<Any, Any> })
+                    )
+                    select(table)
+                }.execute(con) as List<Association<*, *, *, *>>
+                val entityMap = associations.associateBy {
+                    it.source.id to it.target.id
+                }
+                for (ctx in noEntityContexts) {
+                    val entity = entityMap[ctx.entityId]
+                    if (entity !== null) {
+                        ctx.entity = entity
+                    }
+                }
+            }
+        contexts
+            .filter { it.isEntityInitialized }
+            .takeIf { it.isNotEmpty() }
+            ?.let { entityContexts ->
+                val (sql, variables) = JdbcSqlBuilder(sqlClient).apply {
+                    sql("delete from ")
+                    sql(entityType.tableName)
+                    sql(" where (")
+                    sql((entityType.sourceProp.storage as Column).name)
+                    sql(", ")
+                    sql((entityType.targetProp.storage as Column).name)
+                    sql(") in (")
+                    entityContexts.forEachIndexed { index, ctx ->
+                        if (index != 0) {
+                            sql(", ")
+                        }
+                        variable(ctx.entityId)
+                    }
+                    sql(")")
+                }.build()
+                sqlClient.jdbcExecutor.execute(con, sql, variables) {
+                    executeUpdate()
+                }
+                entityContexts.forEach {
+                    it.type = MutationType.DELETE
+                }
+            }
+        contexts
+            .filter { !it.isEntityInitialized }
+            .forEach {
+                val (sourceId, targetId) = it.entityId as Pair<Comparable<*>, Comparable<*>>
+                it.entity = Association.of(
+                    produce(entityType.sourceProp.returnType as KClass<Entity<*>>) {
+                        Draft.set(this, Entity<*>::id, sourceId)
+                    },
+                    produce(entityType.targetProp.returnType as KClass<Entity<*>>) {
+                        Draft.set(this, Entity<*>::id, targetId)
+                    }
+                )
+            }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun deleteObjectEntities(
+        contexts: Collection<MutationContext>
+    ) {
         val mutationOptions = contexts.first().mutationOptions
         val entityType = mutationOptions.entityType
         contexts

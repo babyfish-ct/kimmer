@@ -7,7 +7,7 @@ import org.babyfish.kimmer.sql.runtime.MutationOptions
 import org.babyfish.kimmer.sql.runtime.R2dbcSaver
 
 internal class SaveCommand(
-    private val sqlClient: SqlClient,
+    private val sqlClient: SqlClientImpl,
     private val entity: Entity<*>,
     private val mutationOptions: MutationOptions
 ): Executable<EntityMutationResult> {

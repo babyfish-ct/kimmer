@@ -11,10 +11,18 @@ import org.babyfish.kimmer.sql.ast.table.Table
 import org.babyfish.kimmer.sql.ast.table.NonNullTable
 import org.babyfish.kimmer.sql.ast.table.impl.TableAliasAllocator
 import org.babyfish.kimmer.sql.impl.SqlClientImpl
+import org.babyfish.kimmer.sql.meta.EntityType
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
-internal class RootMutableQueryImpl<E, ID>: AbstractMutableQueryImpl<E, ID>,
+internal class RootMutableQueryImpl<E, ID>(
+    sqlClient: SqlClientImpl,
+    entityType: EntityType
+): AbstractMutableQueryImpl<E, ID>(
+    TableAliasAllocator(),
+    sqlClient,
+    entityType
+),
     MutableRootQuery<E, ID>
     where E:
           Entity<ID>,
@@ -23,12 +31,12 @@ internal class RootMutableQueryImpl<E, ID>: AbstractMutableQueryImpl<E, ID>,
     constructor(
         sqlClient: SqlClientImpl,
         type: KClass<E>
-    ): super(TableAliasAllocator(), sqlClient, type)
+    ): this(sqlClient, sqlClient.entityTypeOf(type))
 
     constructor(
         sqlClient: SqlClientImpl,
         prop: KProperty1<*, *>
-    ): super(TableAliasAllocator(), sqlClient, prop)
+    ): this(sqlClient, sqlClient.associationEntityTypeOf(prop))
 
     override fun <X : Any> select(
         expression: NonNullExpression<X>

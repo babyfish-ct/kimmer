@@ -5,16 +5,22 @@ import org.babyfish.kimmer.Draft
 import org.babyfish.kimmer.Immutable
 import org.babyfish.kimmer.produceAsync
 import org.babyfish.kimmer.sql.*
+import org.babyfish.kimmer.sql.ast.Expression
 import org.babyfish.kimmer.sql.ast.R2dbcSqlBuilder
+import org.babyfish.kimmer.sql.ast.constant
 import org.babyfish.kimmer.sql.ast.eq
+import org.babyfish.kimmer.sql.ast.query.impl.QueriesImpl
+import org.babyfish.kimmer.sql.ast.query.impl.RootMutableQueryImpl
+import org.babyfish.kimmer.sql.impl.SqlClientImpl
 import org.babyfish.kimmer.sql.meta.config.*
+import org.babyfish.kimmer.sql.meta.impl.AssociationEntityTypeImpl
 import io.r2dbc.spi.Connection
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 internal class R2dbcSaver(
-    private val sqlClient: SqlClient,
+    private val sqlClient: SqlClientImpl,
     private val con: Connection
 ) {
     suspend fun save(entity: Entity<*>, mutationOptions: MutationOptions): MutationContext {
@@ -41,12 +47,34 @@ internal class R2dbcSaver(
 
         val entity = ctx.entity
         val saveOptions = ctx.mutationOptions
+        val entityType = saveOptions.entityType
 
         if (!saveOptions.updatable) {
             insert(ctx)
+        } else if (entityType is AssociationEntityTypeImpl) {
+            val exists = RootMutableQueryImpl<Entity<FakeId>, FakeId>(
+                sqlClient,
+                saveOptions.entityType
+            ).run {
+                val sourceExpr = table.joinReference(
+                    entityType.sourceProp.immutableProp.kotlinProp as KProperty1<Entity<FakeId>, Entity<FakeId>>
+                )
+                val targetExpr = table.joinReference(
+                    entityType.targetProp.immutableProp.kotlinProp as KProperty1<Entity<FakeId>, Entity<FakeId>>
+                )
+                val association = entity as Association<*, *, *, *>
+                where(
+                    sourceExpr.id as Expression<Any> eq association.source.id,
+                    targetExpr.id as Expression<Any> eq association.target.id
+                )
+                select(constant(1))
+            }.execute(con).isNotEmpty()
+            if (!exists) {
+                insert(ctx)
+            }
         } else {
-            val type = saveOptions.entityType.kotlinType as KClass<Entity<FakeId>>
-            val idProp = saveOptions.entityType.idProp.immutableProp
+            val type = entityType.kotlinType as KClass<Entity<FakeId>>
+            val idProp = entityType.idProp.immutableProp
             if (Immutable.isLoaded(entity, idProp)) {
                 val id = Immutable.get(entity, idProp)!!
                 if (!saveOptions.insertable) {

@@ -10,23 +10,30 @@ import org.babyfish.kimmer.sql.runtime.R2dbcDeleter
 import kotlin.reflect.KClass
 
 internal class DeleteCommand(
-    private val sqlClient: SqlClient,
-    type: KClass<out Entity<*>>,
-    private val ids: Collection<Any>
+    private val sqlClient: SqlClientImpl,
+    private val ids: Collection<Any>,
+    private val mutationOptions: MutationOptions
 ): Executable<List<EntityMutationResult>> {
 
-    private val mutationOptions =
+    constructor(
+        sqlClient: SqlClientImpl,
+        type: KClass<out Entity<*>>,
+        ids: Collection<Any>
+    ): this(
+        sqlClient,
+        ids,
         MutationOptions(
             sqlClient.entityTypeMap[type] ?:
-                throw IllegalArgumentException(
-                    "'${type.qualifiedName}' is not mapped entity type of current sqlClient"
-                ),
+            throw IllegalArgumentException(
+                "'${type.qualifiedName}' is not mapped entity type of current sqlClient"
+            ),
             insertable = false,
             updatable = false,
             deletable = false,
             null,
             mutableMapOf()
         )
+    )
 
     override fun execute(con: java.sql.Connection): List<EntityMutationResult> =
         JdbcDeleter(sqlClient, con).delete(ids, mutationOptions)

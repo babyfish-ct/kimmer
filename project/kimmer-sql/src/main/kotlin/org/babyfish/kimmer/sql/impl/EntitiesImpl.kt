@@ -8,7 +8,7 @@ import org.babyfish.kimmer.sql.ast.Executable
 import kotlin.reflect.KClass
 
 internal class EntitiesImpl(
-    private val sqlClient: SqlClient
+    private val sqlClient: SqlClientImpl
 ): Entities {
 
     override fun <E : Entity<*>> saveCommand(
@@ -17,7 +17,7 @@ internal class EntitiesImpl(
     ): Executable<EntityMutationResult> {
         val type = ImmutableType.fromInstance(entity).kotlinType
         val entityType = sqlClient.entityTypeMap[type]
-            ?: throw IllegalArgumentException("${type.qualifiedName} is entity type of current sql client")
+            ?: throw IllegalArgumentException("${type.qualifiedName} is not entity type of current sql client")
         val saveOptions = SaveOptionsDSLImpl<E>(entityType, insertable = true, updatable = true, deletable = false).run {
             if (block !== null) {
                 block()

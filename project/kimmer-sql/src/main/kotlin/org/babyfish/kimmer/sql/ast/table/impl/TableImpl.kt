@@ -444,15 +444,17 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
     private fun SqlBuilder.renderJoin(mode: RenderMode) {
 
         if (joinProp is AssociationEntityPropImpl) {
-            joinImpl(
-                false,
-                parent!!.alias,
-                (joinProp.storage as Column).name,
-                entityType.tableName,
-                alias,
-                (entityType.idProp.storage as Column).name,
-                mode
-            )
+            if (isUsedBy(this)) {
+                joinImpl(
+                    false,
+                    parent!!.alias,
+                    (joinProp.storage as Column).name,
+                    entityType.tableName,
+                    alias,
+                    (entityType.idProp.storage as Column).name,
+                    mode
+                )
+            }
             return
         }
 
@@ -482,7 +484,6 @@ internal open class TableImpl<E: Entity<ID>, ID: Comparable<ID>>(
                 )
             }
         } else if (isUsedBy(this)) {
-            val parentIdStorage =
             joinImpl(
                 isOuterJoin,
                 parent.alias,
