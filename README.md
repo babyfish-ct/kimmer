@@ -19,3 +19,8 @@
       As dynamic as possible, make complex problems easy to solve. Not only dynamic where predicates, but also dynamic table joins. Support Automatic SQL optimization too.
    
    [Click here](./doc/kimmer-sql/README.md) to view more
+   
+-----
+
+# Other projects: 
+[graphql-provider](https://github.com/babyfish-ct/graphql-provider): A GRM *(GraphQL Relation Mapping)* base on kimmer-sql, it allowes user to create graphql services base on RDBMS as fast as possible.
