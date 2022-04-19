@@ -8,7 +8,7 @@ version = "0.3.3"
 
 repositories {
     mavenCentral()
-}333
+}
 
 dependencies {
     implementation(kotlin("stdlib"))
