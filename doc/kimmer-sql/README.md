@@ -14,7 +14,7 @@ There are currently many solutions for accessing RDMBS
 
 Why provide a new SQL DSL? 
 
-Because they can't meet the design requirements of the high level framework[graphql-provider](https://github.com/babyfish-ct/graphql-provider).
+> Because they can't meet the design requirements of the high level framework [graphql-provider](https://github.com/babyfish-ct/graphql-provider).
 
 1. **Dynamic table joins**
 
