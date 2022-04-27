@@ -12,7 +12,9 @@ There are currently many solutions for accessing RDMBS
 4. Exposed
 5. Ktorm
 
-Why provide a new SQL DSL?
+Why provide a new SQL DSL? 
+
+Because they can't meet the design requirements of the high level framework[graphql-provider](https://github.com/babyfish-ct/graphql-provider).
 
 1. **Dynamic table joins**
 
